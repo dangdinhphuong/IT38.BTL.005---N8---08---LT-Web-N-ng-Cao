@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Danh Mục - Admin Couppa</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+  <div class="admin-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Couppa Admin
+      </div>
+
+      <nav class="admin-menu">
+        <a href="dashboard.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </a>
+        <a href="products.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+          Quản Lý Sản Phẩm
+        </a>
+        <a href="categories.html" class="admin-menu-item active">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+          Quản Lý Danh Mục
+        </a>
+        <a href="users.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+          Quản Lý Người Dùng
+        </a>
+        <a href="reports.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Báo Cáo Thống Kê
+        </a>
+      </nav>
+
+      <div style="margin-top: auto; padding: var(--space-4); border-top: 1px solid #1E293B;">
+        <a href="../index.html" class="btn btn-outline btn-block btn-sm" style="color: #94A3B8; border-color: #334155;">&larr; Xem Website Public</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="admin-main">
+      
+      <header class="admin-topbar">
+        <h3>Quản Lý Danh Mục Sản Phẩm</h3>
+        <button onclick="openCategoryModal()" class="btn btn-primary">
+          + Thêm Danh Mục Mới
+        </button>
+      </header>
+
+      <main class="admin-content">
+        
+        <div class="data-table-container">
+          <div class="table-toolbar">
+            <input type="text" id="cat-search" class="form-input" placeholder="Tìm theo tên danh mục..." style="width: 280px;">
+            <span class="caption" id="cat-count">Tổng số: 5 danh mục</span>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tên Danh Mục</th>
+                <th>Slug (URL)</th>
+                <th>Số Sản Phẩm Linked</th>
+                <th>Trạng Thái</th>
+                <th style="text-align: right;">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="category-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ADD / EDIT CATEGORY MODAL -->
+  <div id="category-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="cat-modal-title">Thêm Danh Mục Mới</h3>
+        <button onclick="CouppaApp.closeModal('category-modal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="category-form" onsubmit="saveCategory(event)">
+        <div class="modal-body">
+          <input type="hidden" id="cat-id">
+
+          <div class="form-group">
+            <label class="form-label" for="cat-name">Tên Danh Mục <span class="required">*</span></label>
+            <input type="text" id="cat-name" class="form-input" placeholder="Ví dụ: Thiết bị thông minh" required oninput="generateSlug(this.value)">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cat-slug">Slug URL <span class="required">*</span></label>
+            <input type="text" id="cat-slug" class="form-input" placeholder="thiet-bi-thong-minh" required>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="cat-active" checked> Đang hoạt động (Active)
+            </label>
+            <span class="form-hint" style="margin-top: 4px; display: block;">Danh mục Inactive sẽ bị ẩn trên trang Public (BR-15).</span>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" onclick="CouppaApp.closeModal('category-modal')" class="btn btn-outline">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Danh Mục</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/apiClient.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const me = await ApiClient.get('/users/me');
+        if (me.role !== 'Admin') throw new Error('not admin');
+      } catch (err) {
+        CouppaApp.showToast('Cần quyền Admin!', 'error');
+        setTimeout(() => window.location.href = '../login.html', 1000);
+        return;
+      }
+
+      renderCategoryTable();
+      document.getElementById('cat-search').addEventListener('input', renderCategoryTable);
+    });
+
+    async function renderCategoryTable() {
+      const search = document.getElementById('cat-search').value.trim();
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+
+      let result;
+      try {
+        result = await ApiClient.get(`/admin/categories?${params.toString()}`);
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+        return;
+      }
+
+      document.getElementById('cat-count').textContent = `Tổng số: ${result.totalItems} danh mục`;
+
+      const tbody = document.getElementById('category-table-body');
+      tbody.innerHTML = result.items.map(c => `
+          <tr>
+            <td>${c.id}</td>
+            <td style="font-weight: 600;">${CouppaApp.escapeHtml(c.name)}</td>
+            <td><code>${CouppaApp.escapeHtml(c.slug)}</code></td>
+            <td>
+              <span class="badge badge-info">Xem chi tiết SP</span>
+            </td>
+            <td>
+              <button onclick="toggleCategoryStatus(${c.id}, ${c.isActive})" class="badge ${c.isActive ? 'badge-success' : 'badge-danger'}" style="border: none; cursor: pointer;">
+                ${c.isActive ? 'Active' : 'Inactive'}
+              </button>
+            </td>
+            <td style="text-align: right;">
+              <button onclick="editCategory(${c.id})" class="btn btn-outline btn-sm" style="margin-right: 4px;">Sửa</button>
+              <button onclick="deleteCategory(${c.id})" class="btn btn-outline btn-sm" style="color: var(--color-error); border-color: var(--color-error-light);">Xóa</button>
+            </td>
+          </tr>
+        `).join('');
+    }
+
+    function generateSlug(text) {
+      const slug = text.toLowerCase()
+        .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a")
+        .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e")
+        .replace(/ì|í|ị|ỉ|ĩ/g, "i")
+        .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o")
+        .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u")
+        .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y")
+        .replace(/đ/g, "d")
+        .replace(/[^a-z0-9 -]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+      document.getElementById('cat-slug').value = slug;
+    }
+
+    function openCategoryModal(cat = null) {
+      document.getElementById('cat-id').value = cat ? cat.id : '';
+      document.getElementById('cat-name').value = cat ? cat.name : '';
+      document.getElementById('cat-slug').value = cat ? cat.slug : '';
+      document.getElementById('cat-active').checked = cat ? cat.isActive : true;
+
+      document.getElementById('cat-modal-title').textContent = cat ? 'Chỉnh Sửa Danh Mục' : 'Thêm Danh Mục Mới';
+      CouppaApp.openModal('category-modal');
+    }
+
+    async function editCategory(id) {
+      try {
+        const cat = await ApiClient.get(`/admin/categories/${id}`);
+        openCategoryModal(cat);
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+
+    // Đổi trạng thái dùng API riêng PATCH .../status (ChangeCategoryStatusRequest) - tách biệt
+    // khỏi Create/Update (CreateCategoryRequest/UpdateCategoryRequest không có field IsActive).
+    async function toggleCategoryStatus(id, currentActive) {
+      try {
+        const updated = await ApiClient.patch(`/admin/categories/${id}/status`, { isActive: !currentActive });
+        CouppaApp.showToast(`Đã đổi trạng thái danh mục sang ${updated.isActive ? 'Active' : 'Inactive'}`, 'info');
+        renderCategoryTable();
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+
+    async function deleteCategory(id) {
+      if (!confirm('Bạn có chắc chắn muốn xóa danh mục này?')) return;
+
+      try {
+        await ApiClient.del(`/admin/categories/${id}`);
+        CouppaApp.showToast('Xóa danh mục thành công!', 'success');
+        renderCategoryTable();
+      } catch (err) {
+        // 409 (BR-03): còn sản phẩm liên kết - dùng đúng error.details.productCount từ server
+        // thay vì tự đếm client-side (tránh sai lệch do dữ liệu trang hiện tại không đầy đủ).
+        if (err && err.name === 'ApiError' && err.code === 'CATEGORY_HAS_PRODUCTS') {
+          const count = err.details && err.details.productCount;
+          CouppaApp.showToast(`KHÔNG THỂ XÓA (BR-03): Danh mục này đang có ${count} sản phẩm liên kết! Vui lòng chuyển sản phẩm sang danh mục khác trước.`, 'error');
+        } else {
+          CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+        }
+      }
+    }
+
+    async function saveCategory(e) {
+      e.preventDefault();
+      const id = document.getElementById('cat-id').value;
+      const name = document.getElementById('cat-name').value.trim();
+      const slug = document.getElementById('cat-slug').value.trim();
+
+      const payload = { name, slug, description: null };
+
+      try {
+        if (id) {
+          await ApiClient.put(`/admin/categories/${id}`, payload);
+          CouppaApp.showToast('Cập nhật danh mục thành công!', 'success');
+        } else {
+          await ApiClient.post('/admin/categories', payload);
+          CouppaApp.showToast('Thêm danh mục mới thành công!', 'success');
+        }
+        CouppaApp.closeModal('category-modal');
+        renderCategoryTable();
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+  </script>
+</body>
+</html>

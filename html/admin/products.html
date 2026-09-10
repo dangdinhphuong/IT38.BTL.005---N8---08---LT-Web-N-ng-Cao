@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Sản Phẩm - Admin Couppa</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+  <div class="admin-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Couppa Admin
+      </div>
+
+      <nav class="admin-menu">
+        <a href="dashboard.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </a>
+        <a href="products.html" class="admin-menu-item active">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+          Quản Lý Sản Phẩm
+        </a>
+        <a href="categories.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+          Quản Lý Danh Mục
+        </a>
+        <a href="users.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+          Quản Lý Người Dùng
+        </a>
+        <a href="reports.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Báo Cáo Thống Kê
+        </a>
+      </nav>
+
+      <div style="margin-top: auto; padding: var(--space-4); border-top: 1px solid #1E293B;">
+        <a href="../index.html" class="btn btn-outline btn-block btn-sm" style="color: #94A3B8; border-color: #334155;">&larr; Xem Website Public</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="admin-main">
+      
+      <header class="admin-topbar">
+        <h3>Danh Sách Quản Lý Sản Phẩm</h3>
+        <button onclick="openProductModal()" class="btn btn-primary">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          + Thêm Sản Phẩm Mới
+        </button>
+      </header>
+
+      <main class="admin-content">
+        
+        <div class="data-table-container">
+          <div class="table-toolbar">
+            <div class="flex gap-4 items-center">
+              <input type="text" id="admin-prod-search" class="form-input" placeholder="Tìm theo SKU hoặc tên..." style="width: 260px;">
+              <select id="admin-prod-cat-filter" class="form-select" style="width: 200px;">
+                <option value="all">Tất cả danh mục</option>
+              </select>
+            </div>
+            <span class="caption" id="table-count">Tổng số: 6 sản phẩm</span>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ảnh</th>
+                <th>Mã SKU</th>
+                <th>Tên Sản Phẩm</th>
+                <th>Danh Mục</th>
+                <th>Giá Bán (VNĐ)</th>
+                <th>Tồn Kho</th>
+                <th>Trạng Thái</th>
+                <th style="text-align: right;">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="products-table-body">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+
+          <div class="pagination">
+            <span>Hiển thị trang 1 / 1</span>
+            <div class="page-btn-group">
+              <button class="page-btn" disabled>&laquo;</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn" disabled>&raquo;</button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ADD / EDIT PRODUCT MODAL DIALOG -->
+  <div id="product-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 id="modal-title">Thêm Sản Phẩm Mới</h3>
+        <button onclick="CouppaApp.closeModal('product-modal')" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--color-text-muted);">&times;</button>
+      </div>
+
+      <form id="product-form" onsubmit="saveProduct(event)">
+        <div class="modal-body">
+          <input type="hidden" id="prod-id">
+
+          <div class="grid grid-cols-2" style="gap: var(--space-4);">
+            <div class="form-group">
+              <label class="form-label" for="prod-sku">Mã Sản Phẩm (SKU) <span class="required">*</span></label>
+              <input type="text" id="prod-sku" class="form-input" placeholder="SP-007" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prod-category">Danh Mục <span class="required">*</span></label>
+              <select id="prod-category" class="form-select" required>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prod-name">Tên Sản Phẩm <span class="required">*</span></label>
+            <input type="text" id="prod-name" class="form-input" placeholder="Nhập tên sản phẩm đầy đủ" required>
+          </div>
+
+          <div class="grid grid-cols-2" style="gap: var(--space-4);">
+            <div class="form-group">
+              <label class="form-label" for="prod-price">Giá Bán (VNĐ) <span class="required">*</span></label>
+              <input type="number" id="prod-price" class="form-input" min="0" placeholder="0" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prod-stock">Số Lượng Tồn Kho <span class="required">*</span></label>
+              <input type="number" id="prod-stock" class="form-input" min="0" placeholder="0" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prod-img">URL Hình Ảnh</label>
+            <input type="url" id="prod-img" class="form-input" placeholder="https://images.unsplash.com/...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prod-short-desc">Mô Tả Ngắn</label>
+            <input type="text" id="prod-short-desc" class="form-input" placeholder="Mô tả tóm tắt tính năng">
+          </div>
+
+          <div class="grid grid-cols-2" style="gap: var(--space-4); margin-top: var(--space-2);">
+            <label class="checkbox-label">
+              <input type="checkbox" id="prod-active" checked> Đang kinh doanh (Active)
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="prod-featured"> Sản phẩm nổi bật (Featured)
+            </label>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" onclick="CouppaApp.closeModal('product-modal')" class="btn btn-outline">Hủy Bỏ</button>
+          <button type="submit" class="btn btn-primary">Lưu Sản Phẩm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/apiClient.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    let allCategories = [];
+    let currentPage = 1;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const me = await ApiClient.get('/users/me');
+        if (me.role !== 'Admin') throw new Error('not admin');
+      } catch (err) {
+        CouppaApp.showToast('Cần quyền Admin!', 'error');
+        setTimeout(() => window.location.href = '../login.html', 1000);
+        return;
+      }
+
+      await populateCategorySelects();
+      await renderProductsTable();
+
+      document.getElementById('admin-prod-search').addEventListener('input', () => { currentPage = 1; renderProductsTable(); });
+      document.getElementById('admin-prod-cat-filter').addEventListener('change', () => { currentPage = 1; renderProductsTable(); });
+    });
+
+    async function populateCategorySelects() {
+      try {
+        const result = await ApiClient.get('/admin/categories?pageSize=100');
+        allCategories = result.items;
+      } catch (err) {
+        allCategories = [];
+      }
+      const filterSelect = document.getElementById('admin-prod-cat-filter');
+      const formSelect = document.getElementById('prod-category');
+
+      filterSelect.innerHTML = '<option value="all">Tất cả danh mục</option>' + allCategories.map(c => `<option value="${c.id}">${CouppaApp.escapeHtml(c.name)}</option>`).join('');
+      formSelect.innerHTML = allCategories.map(c => `<option value="${c.id}">${CouppaApp.escapeHtml(c.name)}</option>`).join('');
+    }
+
+    async function renderProductsTable() {
+      const search = document.getElementById('admin-prod-search').value.trim();
+      const catId = document.getElementById('admin-prod-cat-filter').value;
+
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      if (catId !== 'all') params.set('category', catId);
+      params.set('page', currentPage);
+
+      let result;
+      try {
+        result = await ApiClient.get(`/admin/products?${params.toString()}`);
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+        return;
+      }
+
+      document.getElementById('table-count').textContent = `Tổng số: ${result.totalItems} sản phẩm`;
+
+      const tbody = document.getElementById('products-table-body');
+      tbody.innerHTML = result.items.map(p => `
+        <tr>
+          <td>
+            <img src="${CouppaApp.escapeHtml(p.primaryImageUrl || '')}" style="width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-md);">
+          </td>
+          <td><code>${CouppaApp.escapeHtml(p.sku)}</code></td>
+          <td style="font-weight: 600;">${CouppaApp.escapeHtml(p.name)}</td>
+          <td>${CouppaApp.escapeHtml(p.categoryName || '')}</td>
+          <td style="font-weight: 700; color: var(--color-primary);">${CouppaApp.formatCurrency(p.price)}</td>
+          <td>${p.stockQuantity}</td>
+          <td>
+            <button onclick="toggleProductStatus(${p.id}, ${p.isActive})" class="badge ${p.isActive ? 'badge-success' : 'badge-danger'}" style="border: none; cursor: pointer;">
+              ${p.isActive ? 'Active' : 'Inactive'}
+            </button>
+          </td>
+          <td style="text-align: right;">
+            <button onclick="editProduct(${p.id})" class="btn btn-outline btn-sm" style="margin-right: 4px;">Sửa</button>
+            <button onclick="deleteProduct(${p.id})" class="btn btn-outline btn-sm" style="color: var(--color-error); border-color: var(--color-error-light);">Xóa</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function fillProductForm(prod) {
+      document.getElementById('prod-id').value = prod ? prod.id : '';
+      document.getElementById('prod-sku').value = prod ? prod.sku : '';
+      document.getElementById('prod-name').value = prod ? prod.name : '';
+      document.getElementById('prod-price').value = prod ? prod.price : '';
+      document.getElementById('prod-stock').value = prod ? prod.stockQuantity : 10;
+      document.getElementById('prod-category').value = prod ? prod.categoryId : (allCategories[0] ? allCategories[0].id : '');
+      document.getElementById('prod-img').value = prod ? (prod.images && prod.images[0] ? prod.images[0].imageUrl : '') : '';
+      document.getElementById('prod-short-desc').value = prod ? (prod.shortDescription || '') : '';
+      document.getElementById('prod-active').checked = prod ? prod.isActive : true;
+      document.getElementById('prod-featured').checked = prod ? prod.isFeatured : false;
+
+      document.getElementById('modal-title').textContent = prod ? 'Chỉnh Sửa Sản Phẩm' : 'Thêm Sản Phẩm Mới';
+    }
+
+    function openProductModal() {
+      fillProductForm(null);
+      CouppaApp.openModal('product-modal');
+    }
+
+    async function editProduct(id) {
+      try {
+        const prod = await ApiClient.get(`/admin/products/${id}`);
+        fillProductForm(prod);
+        CouppaApp.openModal('product-modal');
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+
+    // Đổi trạng thái Active/Inactive dùng API riêng PATCH .../status (ChangeProductStatusRequest),
+    // tách biệt khỏi Create/Update - CreateProductRequest/UpdateProductRequest không có field IsActive.
+    async function toggleProductStatus(id, currentActive) {
+      try {
+        const updated = await ApiClient.patch(`/admin/products/${id}/status`, { isActive: !currentActive });
+        CouppaApp.showToast(`Đã chuyển trạng thái sản phẩm sang ${updated.isActive ? 'Active' : 'Inactive'}`, 'info');
+        renderProductsTable();
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+
+    async function deleteProduct(id) {
+      if (confirm('Bạn có chắc chắn muốn xóa (Soft delete) sản phẩm này không?')) {
+        try {
+          await ApiClient.del(`/admin/products/${id}`);
+          CouppaApp.showToast('Đã xóa sản phẩm thành công!', 'success');
+          renderProductsTable();
+        } catch (err) {
+          CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+        }
+      }
+    }
+
+    async function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prod-id').value;
+      const sku = document.getElementById('prod-sku').value.trim();
+      const name = document.getElementById('prod-name').value.trim();
+      const price = parseFloat(document.getElementById('prod-price').value) || 0;
+      const stockQuantity = parseInt(document.getElementById('prod-stock').value) || 0;
+      const categoryId = parseInt(document.getElementById('prod-category').value);
+      const imageUrl = document.getElementById('prod-img').value.trim();
+      const shortDescription = document.getElementById('prod-short-desc').value.trim();
+      const isFeatured = document.getElementById('prod-featured').checked;
+
+      // ImageUrls là mảng string trong request (CreateProductRequest/UpdateProductRequest),
+      // form chỉ có 1 input URL đơn nên bọc thành mảng 1 phần tử (rỗng nếu chưa nhập).
+      const payload = {
+        sku, name, categoryId, price, stockQuantity, isFeatured,
+        shortDescription: shortDescription || null,
+        imageUrls: imageUrl ? [imageUrl] : []
+      };
+
+      try {
+        if (id) {
+          await ApiClient.put(`/admin/products/${id}`, payload);
+          CouppaApp.showToast('Đã cập nhật sản phẩm thành công!', 'success');
+        } else {
+          await ApiClient.post('/admin/products', payload);
+          CouppaApp.showToast('Thêm sản phẩm mới thành công!', 'success');
+        }
+        CouppaApp.closeModal('product-modal');
+        renderProductsTable();
+      } catch (err) {
+        // 409: SKU trùng (BR-05) - để server xác nhận thay vì tự check client-side trên
+        // danh sách trang hiện tại (có thể sai lệch do phân trang/lọc).
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+  </script>
+</body>
+</html>

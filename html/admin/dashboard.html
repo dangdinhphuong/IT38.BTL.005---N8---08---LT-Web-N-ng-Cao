@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Couppa</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+  <div class="admin-wrapper">
+    
+    <!-- ADMIN SIDEBAR -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Couppa Admin
+      </div>
+
+      <nav class="admin-menu">
+        <a href="dashboard.html" class="admin-menu-item active">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </a>
+        <a href="products.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+          Quản Lý Sản Phẩm
+        </a>
+        <a href="categories.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+          Quản Lý Danh Mục
+        </a>
+        <a href="users.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 00-3-3.87"></path><path d="M16 3.13a4 4 0 010 7.75"></path></svg>
+          Quản Lý Người Dùng
+        </a>
+        <a href="reports.html" class="admin-menu-item">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Báo Cáo Thống Kê
+        </a>
+      </nav>
+
+      <div style="margin-top: auto; padding: var(--space-4); border-top: 1px solid #1E293B;">
+        <a href="../index.html" class="btn btn-outline btn-block btn-sm" style="color: #94A3B8; border-color: #334155;">
+          &larr; Xem Website Public
+        </a>
+      </div>
+    </aside>
+
+    <!-- ADMIN MAIN SECTION -->
+    <div class="admin-main">
+      
+      <!-- TOPBAR -->
+      <header class="admin-topbar">
+        <h3 style="margin: 0;">Tổng Quan System Dashboard</h3>
+        
+        <div class="flex items-center gap-4">
+          <span class="badge badge-info" style="padding: 6px 12px;">Role: Admin</span>
+          <a href="../profile.html" class="btn btn-outline btn-sm">Admin Account</a>
+          <button onclick="CouppaApp.logout()" class="btn btn-outline btn-sm" style="color: var(--color-error);">Đăng Xuất</button>
+        </div>
+      </header>
+
+      <!-- CONTENT -->
+      <main class="admin-content">
+        
+        <!-- KPI STAT CARDS -->
+        <div class="stat-grid">
+          
+          <div class="stat-card">
+            <div>
+              <div class="stat-title">Tổng Số Sản Phẩm</div>
+              <div class="stat-val" id="dash-total-products">0</div>
+            </div>
+            <div class="stat-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div>
+              <div class="stat-title">Danh Mục Đang Active</div>
+              <div class="stat-val" id="dash-total-categories">0</div>
+            </div>
+            <div class="stat-icon" style="background-color: var(--color-secondary-light); color: var(--color-secondary);">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div>
+              <div class="stat-title">Tổng Người Dùng</div>
+              <div class="stat-val" id="dash-total-users">0</div>
+            </div>
+            <div class="stat-icon" style="background-color: #DBEAFE; color: #2563EB;">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div>
+              <div class="stat-title">Sản Phẩm Hết Hàng</div>
+              <div class="stat-val" id="dash-out-of-stock" style="color: var(--color-error);">0</div>
+            </div>
+            <div class="stat-icon" style="background-color: var(--color-error-light); color: var(--color-error);">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CHARTS & RECENT PRODUCTS -->
+        <div class="grid grid-cols-2" style="gap: var(--space-8); margin-bottom: var(--space-8);">
+          
+          <div class="card" style="padding: var(--space-6); background: white;">
+            <h4 style="margin-bottom: var(--space-4);">Sản Phẩm Theo Danh Mục</h4>
+            <div id="chart-bars-container" style="display: flex; flex-direction: column; gap: var(--space-3);">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <div class="card" style="padding: var(--space-6); background: white;">
+            <h4 style="margin-bottom: var(--space-4);">Trạng Thái Caching (IMemoryCache)</h4>
+            <ul style="display: flex; flex-direction: column; gap: var(--space-3); font-size: 0.875rem;">
+              <li class="flex justify-between items-center" style="border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">
+                <span>Cache Key: <code>categories:active</code></span>
+                <span class="badge badge-success">Hit (TTL 15 phút)</span>
+              </li>
+              <li class="flex justify-between items-center" style="border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">
+                <span>Cache Key: <code>products:featured</code></span>
+                <span class="badge badge-success">Hit (TTL 10 phút)</span>
+              </li>
+              <li class="flex justify-between items-center" style="border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">
+                <span>Cache Key: <code>admin:dashboard:summary</code></span>
+                <span class="badge badge-success">Hit (TTL 5 phút)</span>
+              </li>
+            </ul>
+            <p class="caption" style="margin-top: var(--space-4);">
+              Dữ liệu Dashboard được tính toán và lưu cache server-side theo chuẩn <code>IMemoryCache</code> trong SRS (NFR-CACHE-01).
+            </p>
+          </div>
+
+        </div>
+
+        <!-- RECENT PRODUCTS TABLE -->
+        <div class="data-table-container">
+          <div class="table-toolbar">
+            <h4>Sản Phẩm Mới Thêm Gần Đây</h4>
+            <a href="products.html" class="btn btn-outline btn-sm">Xem tất cả sản phẩm &rarr;</a>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mã SKU</th>
+                <th>Tên Sản Phẩm</th>
+                <th>Danh Mục</th>
+                <th>Giá Bán</th>
+                <th>Tồn Kho</th>
+                <th>Trạng Thái</th>
+              </tr>
+            </thead>
+            <tbody id="recent-products-tbody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </main>
+
+    </div>
+  </div>
+
+  <script src="../js/apiClient.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      let me;
+      try {
+        me = await ApiClient.get('/users/me');
+      } catch (err) {
+        CouppaApp.showToast('Yêu cầu quyền Admin để truy cập Dashboard!', 'error');
+        setTimeout(() => window.location.href = '../login.html', 1000);
+        return;
+      }
+      if (me.role !== 'Admin') {
+        CouppaApp.showToast('Yêu cầu quyền Admin để truy cập Dashboard!', 'error');
+        setTimeout(() => window.location.href = '../login.html', 1000);
+        return;
+      }
+
+      let summary;
+      try {
+        summary = await ApiClient.get('/admin/dashboard/summary');
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+        return;
+      }
+
+      document.getElementById('dash-total-products').textContent = summary.totalProducts;
+      document.getElementById('dash-total-categories').textContent = summary.totalCategories;
+      document.getElementById('dash-total-users').textContent = summary.totalUsers;
+      document.getElementById('dash-out-of-stock').textContent = summary.outOfStockProducts;
+
+      const chartContainer = document.getElementById('chart-bars-container');
+      const catCounts = summary.productsByCategory; // [{categoryName, count}]
+
+      const maxCount = Math.max(...catCounts.map(c => c.count), 1);
+      chartContainer.innerHTML = catCounts.map(c => {
+        const percent = Math.round((c.count / maxCount) * 100);
+        return `
+          <div>
+            <div class="flex justify-between" style="font-size: 0.8125rem; font-weight: 500; margin-bottom: 4px;">
+              <span>${CouppaApp.escapeHtml(c.categoryName)}</span>
+              <strong>${c.count} sản phẩm</strong>
+            </div>
+            <div style="height: 10px; background: #E2E8F0; border-radius: var(--radius-full); overflow: hidden;">
+              <div style="width: ${percent}%; height: 100%; background: var(--color-primary); border-radius: var(--radius-full);"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // DashboardSummaryResponse.recentProducts chỉ có {id, name, createdAt} - không đủ field
+      // (sku/categoryName/price/stockQuantity/isActive) cho bảng gốc, nên rút gọn bảng còn
+      // Tên Sản Phẩm + Ngày Tạo thay vì hiển thị placeholder sai dữ liệu.
+      const tbody = document.getElementById('recent-products-tbody');
+      const theadRow = tbody.closest('table').querySelector('thead tr');
+      theadRow.innerHTML = '<th>Tên Sản Phẩm</th><th>Ngày Tạo</th>';
+      tbody.innerHTML = summary.recentProducts.map(p => `
+        <tr>
+          <td style="font-weight: 600;">${CouppaApp.escapeHtml(p.name)}</td>
+          <td>${new Date(p.createdAt).toLocaleString('vi-VN')}</td>
+        </tr>
+      `).join('');
+    });
+  </script>
+</body>
+</html>

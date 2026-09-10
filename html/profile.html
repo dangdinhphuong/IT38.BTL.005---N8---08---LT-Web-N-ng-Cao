@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thông Tin Cá Nhân - Couppa</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- MASTER SITE HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Couppa
+      </a>
+
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Trang chủ</a>
+        <a href="products.html" class="nav-link">Sản phẩm</a>
+        <a href="products.html?category=dien-thoai-tablet" class="nav-link">Điện thoại</a>
+        <a href="products.html?category=laptop-tin-hoc" class="nav-link">Laptop</a>
+        <a href="products.html?category=phu-kien" class="nav-link">Phụ kiện</a>
+      </nav>
+
+      <div class="header-search">
+        <svg class="header-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Tìm kiếm sản phẩm..." onkeydown="if(event.key==='Enter') window.location.href='products.html?search='+encodeURIComponent(this.value)">
+      </div>
+
+      <div class="header-actions">
+        <a href="cart.html" class="icon-btn" title="Giỏ hàng">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path></svg>
+          <span class="cart-badge">0</span>
+        </a>
+        <div id="header-auth-area"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="container" style="max-width: 900px;">
+      
+      <h1 style="margin-bottom: var(--space-6);">Hồ Sơ Cá Nhân</h1>
+
+      <div class="grid grid-cols-3" style="gap: var(--space-8); align-items: start;">
+        
+        <!-- PROFILE SUMMARY CARD -->
+        <div class="card" style="padding: var(--space-6); background: white; text-align: center;">
+          <div style="width: 80px; height: 80px; border-radius: var(--radius-full); background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4); font-size: 2rem; font-weight: 700;" id="user-avatar">
+            U
+          </div>
+          <h3 id="profile-name-title">Tên Người Dùng</h3>
+          <p class="caption" id="profile-email-sub" style="margin-bottom: var(--space-3);">email@domain.com</p>
+          
+          <span id="profile-role-badge" class="badge badge-info">Role: User</span>
+
+          <div style="border-top: 1px solid var(--color-border); margin-top: var(--space-6); padding-top: var(--space-4);">
+            <button onclick="CouppaApp.logout()" class="btn btn-outline btn-block btn-sm" style="color: var(--color-error); border-color: var(--color-error-light);">
+              Đăng Xuất Tài Khoản
+            </button>
+          </div>
+        </div>
+
+        <!-- PROFILE EDIT & CHANGE PASSWORD FORMS -->
+        <div style="grid-column: span 2; display: flex; flex-direction: column; gap: var(--space-8);">
+          
+          <!-- UPDATE INFO FORM -->
+          <div class="card" style="padding: var(--space-6); background: white;">
+            <h3 style="margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">Cập Nhật Thông Tin</h3>
+            
+            <form onsubmit="handleProfileUpdate(event)">
+              <div class="form-group">
+                <label class="form-label">Địa chỉ Email (Không thể thay đổi)</label>
+                <input type="email" id="profile-email" class="form-input" disabled style="background: var(--color-bg);">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="profile-name">Họ và Tên <span class="required">*</span></label>
+                <input type="text" id="profile-name" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="profile-phone">Số điện thoại</label>
+                <input type="tel" id="profile-phone" class="form-input" placeholder="0901234567">
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="margin-top: var(--space-2);">Lưu Thay Đổi</button>
+            </form>
+          </div>
+
+          <!-- CHANGE PASSWORD FORM -->
+          <div class="card" style="padding: var(--space-6); background: white;">
+            <h3 style="margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">Đổi Mật Khẩu</h3>
+            
+            <form onsubmit="handleChangePassword(event)">
+              <div class="form-group">
+                <label class="form-label" for="old-pass">Mật khẩu hiện tại <span class="required">*</span></label>
+                <input type="password" id="old-pass" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="new-pass">Mật khẩu mới <span class="required">*</span></label>
+                <input type="password" id="new-pass" class="form-input" required>
+                <span class="form-hint">Yêu cầu tối thiểu 8 ký tự, ít nhất 1 chữ hoa và 1 chữ số.</span>
+              </div>
+
+              <button type="submit" class="btn btn-secondary" style="margin-top: var(--space-2);">Cập Nhật Mật Khẩu</button>
+            </form>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MASTER SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">Couppa</div>
+          <p style="margin-bottom: var(--space-4);">Hệ thống giới thiệu sản phẩm và giỏ hàng đơn giản, tối ưu trải nghiệm người dùng và hiệu năng vận hành.</p>
+          <p class="caption">&copy; 2026 Couppa Inc. All rights reserved.</p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Khám Phá</div>
+          <div class="footer-links">
+            <a href="index.html">Trang chủ</a>
+            <a href="products.html">Sản phẩm</a>
+            <a href="cart.html">Giỏ hàng</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Tài Khoản</div>
+          <div class="footer-links">
+            <a href="login.html">Đăng nhập</a>
+            <a href="register.html">Đăng ký</a>
+            <a href="profile.html">Thông tin cá nhân</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Quản Trị</div>
+          <div class="footer-links">
+            <a href="admin/dashboard.html">Admin Dashboard</a>
+            <a href="admin/products.html">Quản lý sản phẩm</a>
+            <a href="admin/reports.html">Báo cáo thống kê</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>Đồ án tốt nghiệp Đề tài 8 — Website Giới Thiệu Sản Phẩm và Giỏ Hàng Đơn Giản</span>
+        <span>Kiến trúc: ASP.NET Core Web API + PostgreSQL + Cookie Auth</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/apiClient.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      let user;
+      try {
+        user = await ApiClient.get('/users/me');
+      } catch (err) {
+        // 401: chưa đăng nhập - redirect về login thay vì hiển thị trang trống.
+        CouppaApp.showToast('Vui lòng đăng nhập để xem thông tin cá nhân', 'warning');
+        setTimeout(() => window.location.href = 'login.html', 1000);
+        return;
+      }
+
+      document.getElementById('user-avatar').textContent = user.fullName.charAt(0).toUpperCase();
+      document.getElementById('profile-name-title').textContent = user.fullName;
+      document.getElementById('profile-email-sub').textContent = user.email;
+      document.getElementById('profile-email').value = user.email;
+      document.getElementById('profile-name').value = user.fullName;
+      document.getElementById('profile-phone').value = user.phone || '';
+
+      const badge = document.getElementById('profile-role-badge');
+      badge.textContent = `Role: ${user.role}`;
+      if (user.role === 'Admin') badge.className = 'badge badge-info';
+    });
+
+    async function handleProfileUpdate(e) {
+      e.preventDefault();
+      const newName = document.getElementById('profile-name').value.trim();
+      const newPhone = document.getElementById('profile-phone').value.trim();
+
+      try {
+        const updated = await ApiClient.put('/users/me', { fullName: newName, phone: newPhone });
+        document.getElementById('profile-name-title').textContent = updated.fullName;
+        document.getElementById('user-avatar').textContent = updated.fullName.charAt(0).toUpperCase();
+        CouppaApp.showToast('Cập nhật thông tin cá nhân thành công!', 'success');
+        CouppaApp.renderHeaderAuth();
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      const oldPass = document.getElementById('old-pass').value;
+      const newPass = document.getElementById('new-pass').value;
+
+      if (newPass.length < 8 || !/[A-Z]/.test(newPass) || !/[0-9]/.test(newPass)) {
+        CouppaApp.showToast('Mật khẩu mới không đủ độ phức tạp (BR-06)!', 'error');
+        return;
+      }
+
+      try {
+        // Gọi API thật (code cũ chỉ show toast giả, không hề gọi gì và không đọc old-pass).
+        await ApiClient.post('/users/me/change-password', { oldPassword: oldPass, newPassword: newPass });
+        CouppaApp.showToast('Đổi mật khẩu thành công!', 'success');
+        document.getElementById('old-pass').value = '';
+        document.getElementById('new-pass').value = '';
+      } catch (err) {
+        // 401: sai mật khẩu cũ. 422: mật khẩu mới không đạt policy server-side.
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+  </script>
+</body>
+</html>

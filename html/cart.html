@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giỏ Hàng Của Bạn - Couppa</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- MASTER SITE HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Couppa
+      </a>
+
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Trang chủ</a>
+        <a href="products.html" class="nav-link">Sản phẩm</a>
+        <a href="products.html?category=dien-thoai-tablet" class="nav-link">Điện thoại</a>
+        <a href="products.html?category=laptop-tin-hoc" class="nav-link">Laptop</a>
+        <a href="products.html?category=phu-kien" class="nav-link">Phụ kiện</a>
+      </nav>
+
+      <div class="header-search">
+        <svg class="header-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Tìm kiếm sản phẩm..." onkeydown="if(event.key==='Enter') window.location.href='products.html?search='+encodeURIComponent(this.value)">
+      </div>
+
+      <div class="header-actions">
+        <a href="cart.html" class="icon-btn" title="Giỏ hàng">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path></svg>
+          <span class="cart-badge">0</span>
+        </a>
+        <div id="header-auth-area"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="container">
+      
+      <div class="flex justify-between items-center" style="margin-bottom: var(--space-6);">
+        <h1>Giỏ Hàng Của Bạn</h1>
+        <button id="clear-cart-btn" onclick="clearCart()" class="btn btn-outline btn-sm" style="color: var(--color-error); border-color: var(--color-error-light);">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          Xóa Toàn Bộ Giỏ Hàng
+        </button>
+      </div>
+
+      <!-- CART CONTENT LAYOUT (Table + Summary) -->
+      <div id="cart-content-layout" class="cart-layout">
+        
+        <!-- CART ITEMS TABLE -->
+        <div class="card" style="background: white;">
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th>Sản Phẩm</th>
+                <th>Đơn Giá</th>
+                <th>Số Lượng</th>
+                <th>Tạm Tính</th>
+                <th style="text-align: right;">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="cart-table-body">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CART SUMMARY CARD -->
+        <div class="cart-summary-card">
+          <h3 style="margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3);">Tóm Tắt Đơn Hàng</h3>
+
+          <div class="summary-row">
+            <span>Tổng số lượng sản phẩm:</span>
+            <strong id="summary-total-qty">0</strong>
+          </div>
+          <div class="summary-row">
+            <span>Tạm tính giỏ hàng:</span>
+            <strong id="summary-subtotal">0 VNĐ</strong>
+          </div>
+          <div class="summary-row">
+            <span>Phí vận chuyển:</span>
+            <span style="color: var(--color-success); font-weight: 600;">Miễn phí</span>
+          </div>
+
+          <div class="summary-row total">
+            <span>Tổng Thành Tiền:</span>
+            <span id="summary-grand-total" style="color: var(--color-primary);">0 VNĐ</span>
+          </div>
+
+          <div style="margin-top: var(--space-6);">
+            <a href="products.html" class="btn btn-primary btn-block btn-lg">
+              Tiếp Tục Mua Sắm
+            </a>
+            <p class="caption" style="text-align: center; margin-top: var(--space-3);">
+              (Hệ thống giới thiệu sản phẩm & giỏ hàng — Không có thanh toán online)
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- EMPTY CART STATE -->
+      <div id="empty-cart-state" class="empty-state" style="display: none; background: white; border-radius: var(--radius-xl); border: 1px solid var(--color-border); padding: var(--space-16) var(--space-6);">
+        <div class="empty-state-icon">
+          <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path></svg>
+        </div>
+        <h2 class="empty-state-title">Giỏ Hàng Đang Trống</h2>
+        <p class="empty-state-desc">Bạn chưa thêm sản phẩm nào vào giỏ hàng. Hãy khám phá danh mục và chọn sản phẩm yêu thích ngay!</p>
+        <a href="products.html" class="btn btn-primary btn-lg">Khám Phá Sản Phẩm</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MASTER SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">Couppa</div>
+          <p style="margin-bottom: var(--space-4);">Hệ thống giới thiệu sản phẩm và giỏ hàng đơn giản, tối ưu trải nghiệm người dùng và hiệu năng vận hành.</p>
+          <p class="caption">&copy; 2026 Couppa Inc. All rights reserved.</p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Khám Phá</div>
+          <div class="footer-links">
+            <a href="index.html">Trang chủ</a>
+            <a href="products.html">Sản phẩm</a>
+            <a href="cart.html">Giỏ hàng</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Tài Khoản</div>
+          <div class="footer-links">
+            <a href="login.html">Đăng nhập</a>
+            <a href="register.html">Đăng ký</a>
+            <a href="profile.html">Thông tin cá nhân</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Quản Trị</div>
+          <div class="footer-links">
+            <a href="admin/dashboard.html">Admin Dashboard</a>
+            <a href="admin/products.html">Quản lý sản phẩm</a>
+            <a href="admin/reports.html">Báo cáo thống kê</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>Đồ án tốt nghiệp Đề tài 8 — Website Giới Thiệu Sản Phẩm và Giỏ Hàng Đơn Giản</span>
+        <span>Kiến trúc: ASP.NET Core Web API + PostgreSQL + Cookie Auth</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/apiClient.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    async function renderCartPage() {
+      const layout = document.getElementById('cart-content-layout');
+      const emptyState = document.getElementById('empty-cart-state');
+      const clearBtn = document.getElementById('clear-cart-btn');
+
+      let cart;
+      try {
+        cart = await ApiClient.get('/cart');
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+        return;
+      }
+
+      const items = cart.items || [];
+
+      if (items.length === 0) {
+        layout.style.display = 'none';
+        clearBtn.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      layout.style.display = 'grid';
+      clearBtn.style.display = 'inline-flex';
+      emptyState.style.display = 'none';
+
+      const tbody = document.getElementById('cart-table-body');
+      // CartItemResponse.id là ID CỦA DÒNG TRONG GIỎ (cart item id), khác với item.productId
+      // (id sản phẩm gốc). Route PUT/DELETE /api/cart/items/{id} bắt buộc dùng cart item id -
+      // dùng nhầm productId sẽ update/xóa sai dòng hoặc 404.
+      tbody.innerHTML = items.map(item => {
+        // isAvailable (không phải isActive) - BR-11: false khi sản phẩm gốc đã bị xóa/Inactive.
+        // Item vẫn hiển thị trong giỏ nhưng bị loại khỏi totalQuantity/subtotal của CartResponse
+        // và không cho phép tăng/giảm số lượng.
+        const unavailable = !item.isAvailable;
+        return `
+          <tr>
+            <td>
+              <div class="cart-item-info">
+                <img src="${CouppaApp.escapeHtml(item.productImageUrl || '')}" alt="${CouppaApp.escapeHtml(item.productName)}" class="cart-item-img">
+                <div>
+                  <a href="product-detail.html?id=${item.productId}" style="font-weight: 600; color: var(--color-text-main);">${CouppaApp.escapeHtml(item.productName)}</a>
+                  ${unavailable ? '<div><span class="badge badge-danger">Không khả dụng</span></div>' : ''}
+                </div>
+              </div>
+            </td>
+            <td style="font-weight: 600;">${CouppaApp.formatCurrency(item.price)}</td>
+            <td>
+              <div class="quantity-control">
+                <button class="quantity-btn" ${unavailable ? 'disabled' : ''} onclick="updateItemQty(${item.id}, ${item.quantity - 1})">-</button>
+                <input type="number" class="quantity-input" value="${item.quantity}" readonly>
+                <button class="quantity-btn" ${unavailable ? 'disabled' : ''} onclick="updateItemQty(${item.id}, ${item.quantity + 1})">+</button>
+              </div>
+            </td>
+            <td style="font-weight: 700; color: var(--color-primary);">${CouppaApp.formatCurrency(item.subtotal)}</td>
+            <td style="text-align: right;">
+              <button onclick="removeItem(${item.id})" class="btn btn-outline btn-sm" style="color: var(--color-error); border: none;" title="Xóa">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('summary-total-qty').textContent = cart.totalQuantity;
+      document.getElementById('summary-subtotal').textContent = CouppaApp.formatCurrency(cart.subtotal);
+      document.getElementById('summary-grand-total').textContent = CouppaApp.formatCurrency(cart.subtotal);
+    }
+
+    async function updateItemQty(cartItemId, newQty) {
+      if (newQty <= 0) {
+        removeItem(cartItemId);
+        return;
+      }
+      try {
+        await ApiClient.put(`/cart/items/${cartItemId}`, { quantity: newQty });
+        await CouppaApp.updateCartBadge();
+        await renderCartPage();
+      } catch (err) {
+        // 409: số lượng yêu cầu vượt tồn kho hiện tại (BE tự kiểm tra, không cần FE đoán trước).
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+
+    async function removeItem(cartItemId) {
+      try {
+        await ApiClient.del(`/cart/items/${cartItemId}`);
+        await CouppaApp.updateCartBadge();
+        CouppaApp.showToast('Đã xóa sản phẩm khỏi giỏ hàng', 'info');
+        await renderCartPage();
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+
+    async function clearCart() {
+      if (confirm('Bạn có chắc chắn muốn xóa toàn bộ giỏ hàng không?')) {
+        try {
+          await ApiClient.del('/cart');
+          await CouppaApp.updateCartBadge();
+          CouppaApp.showToast('Đã xóa toàn bộ giỏ hàng', 'info');
+          await renderCartPage();
+        } catch (err) {
+          CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+        }
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', renderCartPage);
+  </script>
+</body>
+</html>

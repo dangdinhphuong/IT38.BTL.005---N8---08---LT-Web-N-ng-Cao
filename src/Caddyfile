@@ -1,0 +1,13 @@
+{
+	auto_https disable_redirects
+}
+
+https://localhost:5001 {
+	tls internal
+	reverse_proxy api:8080
+}
+
+https://localhost:5500 {
+	tls internal
+	reverse_proxy web:80
+}

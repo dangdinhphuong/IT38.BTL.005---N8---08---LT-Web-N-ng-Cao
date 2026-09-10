@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh Sách Sản Phẩm - Couppa</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- MASTER SITE HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Couppa
+      </a>
+
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Trang chủ</a>
+        <a href="products.html" class="nav-link active">Sản phẩm</a>
+        <a href="products.html?category=dien-thoai-tablet" class="nav-link">Điện thoại</a>
+        <a href="products.html?category=laptop-tin-hoc" class="nav-link">Laptop</a>
+        <a href="products.html?category=phu-kien" class="nav-link">Phụ kiện</a>
+      </nav>
+
+      <div class="header-search">
+        <svg class="header-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="listing-search-input" placeholder="Tìm kiếm sản phẩm...">
+      </div>
+
+      <div class="header-actions">
+        <a href="cart.html" class="icon-btn" title="Giỏ hàng">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path></svg>
+          <span class="cart-badge">0</span>
+        </a>
+        <div id="header-auth-area"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- BREADCRUMB -->
+      <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: var(--space-4);">
+        <a href="index.html">Trang chủ</a> &nbsp;/&nbsp; <span style="color: var(--color-text-main);">Danh sách sản phẩm</span>
+      </div>
+
+      <div class="flex justify-between items-center" style="margin-bottom: var(--space-6);">
+        <h1 id="page-heading">Tất Cả Sản Phẩm</h1>
+        <div class="flex items-center gap-4">
+          <span class="caption" id="results-count">Hiển thị 6 sản phẩm</span>
+          <select id="sort-select" class="form-select" style="width: auto; padding-right: 32px;">
+            <option value="newest">Mới nhất</option>
+            <option value="price_asc">Giá: Thấp đến Cao</option>
+            <option value="price_desc">Giá: Cao đến Thấp</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- LAYOUT GRID: SIDEBAR FILTER + PRODUCT GRID -->
+      <div style="display: grid; grid-template-columns: 260px 1fr; gap: var(--space-8); align-items: start;">
+        
+        <!-- FILTER SIDEBAR -->
+        <aside class="card" style="padding: var(--space-6); background: white;">
+          <h3 style="margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">Bộ Lọc Tìm Kiếm</h3>
+
+          <!-- Category Filter -->
+          <div class="form-group">
+            <label class="form-label">Danh Mục</label>
+            <div id="category-filter-list" style="display: flex; flex-direction: column; gap: var(--space-2);">
+              <label class="checkbox-label">
+                <input type="radio" name="category" value="all" checked> Tất cả danh mục
+              </label>
+            </div>
+          </div>
+
+          <!-- Price Range Filter -->
+          <div class="form-group" style="margin-top: var(--space-6);">
+            <label class="form-label">Khoảng Giá (VNĐ)</label>
+            <div class="flex gap-2">
+              <input type="number" id="min-price" class="form-input" placeholder="Từ">
+              <input type="number" id="max-price" class="form-input" placeholder="Đến">
+            </div>
+          </div>
+
+          <button id="apply-filter-btn" class="btn btn-primary btn-block" style="margin-top: var(--space-4);">Áp Dụng Lọc</button>
+          <button id="reset-filter-btn" class="btn btn-outline btn-block btn-sm" style="margin-top: var(--space-2);">Xóa bộ lọc</button>
+        </aside>
+
+        <!-- PRODUCT LIST GRID -->
+        <div>
+          <div id="products-grid" class="grid grid-cols-3">
+            <!-- Product cards dynamically loaded -->
+          </div>
+
+          <!-- EMPTY STATE CONTAINER -->
+          <div id="empty-state-container" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">
+              <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <h3 class="empty-state-title">Không Tìm Thấy Sản Phẩm</h3>
+            <p class="empty-state-desc">Rất tiếc, không có sản phẩm nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm của bạn.</p>
+            <button onclick="resetFilters()" class="btn btn-primary">Xóa Bộ Lọc & Tìm Lại</button>
+          </div>
+
+          <!-- PAGINATION -->
+          <div class="pagination" style="margin-top: var(--space-8); background: white; border-radius: var(--radius-lg);">
+            <span>Trang 1 / 1</span>
+            <div class="page-btn-group">
+              <button class="page-btn" disabled>&laquo;</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn" disabled>&raquo;</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MASTER SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">Couppa</div>
+          <p style="margin-bottom: var(--space-4);">Hệ thống giới thiệu sản phẩm và giỏ hàng đơn giản, tối ưu trải nghiệm người dùng và hiệu năng vận hành.</p>
+          <p class="caption">&copy; 2026 Couppa Inc. All rights reserved.</p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Khám Phá</div>
+          <div class="footer-links">
+            <a href="index.html">Trang chủ</a>
+            <a href="products.html">Sản phẩm</a>
+            <a href="cart.html">Giỏ hàng</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Tài Khoản</div>
+          <div class="footer-links">
+            <a href="login.html">Đăng nhập</a>
+            <a href="register.html">Đăng ký</a>
+            <a href="profile.html">Thông tin cá nhân</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Quản Trị</div>
+          <div class="footer-links">
+            <a href="admin/dashboard.html">Admin Dashboard</a>
+            <a href="admin/products.html">Quản lý sản phẩm</a>
+            <a href="admin/reports.html">Báo cáo thống kê</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>Đồ án tốt nghiệp Đề tài 8 — Website Giới Thiệu Sản Phẩm và Giỏ Hàng Đơn Giản</span>
+        <span>Kiến trúc: ASP.NET Core Web API + PostgreSQL + Cookie Auth</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/apiClient.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    let allCategories = []; // [{id, name, slug, isActive}] - dùng để map slug (URL) -> categoryId (API)
+    let currentFilter = {
+      search: '',
+      category: 'all', // slug ('all' hoặc slug danh mục)
+      minPrice: null,
+      maxPrice: null,
+      sort: 'newest',
+      page: 1
+    };
+    let searchDebounceTimer = null;
+
+    function renderCategoryFilters() {
+      const list = document.getElementById('category-filter-list');
+      const html = allCategories.map(c => `
+        <label class="checkbox-label">
+          <input type="radio" name="category" value="${CouppaApp.escapeHtml(c.slug)}"> ${CouppaApp.escapeHtml(c.name)}
+        </label>
+      `).join('');
+
+      list.innerHTML = `
+        <label class="checkbox-label">
+          <input type="radio" name="category" value="all" checked> Tất cả danh mục
+        </label>
+      ` + html;
+
+      document.querySelectorAll('input[name="category"]').forEach(r => {
+        r.addEventListener('change', (e) => {
+          currentFilter.category = e.target.value;
+          currentFilter.page = 1;
+          fetchAndRenderProducts();
+        });
+      });
+    }
+
+    function renderPagination(page, totalPages) {
+      const container = document.querySelector('.pagination');
+      if (!container) return;
+      if (totalPages <= 0) totalPages = 1;
+      container.querySelector('span').textContent = `Trang ${page} / ${totalPages}`;
+      const group = container.querySelector('.page-btn-group');
+      const prevDisabled = page <= 1 ? 'disabled' : '';
+      const nextDisabled = page >= totalPages ? 'disabled' : '';
+      group.innerHTML = `
+        <button class="page-btn" ${prevDisabled} onclick="goToPage(${page - 1})">&laquo;</button>
+        <button class="page-btn active">${page}</button>
+        <button class="page-btn" ${nextDisabled} onclick="goToPage(${page + 1})">&raquo;</button>
+      `;
+    }
+
+    function goToPage(page) {
+      currentFilter.page = page;
+      fetchAndRenderProducts();
+    }
+
+    async function fetchAndRenderProducts() {
+      const grid = document.getElementById('products-grid');
+      const emptyState = document.getElementById('empty-state-container');
+
+      const params = new URLSearchParams();
+      if (currentFilter.search) params.set('search', currentFilter.search);
+      if (currentFilter.category !== 'all') {
+        const catObj = allCategories.find(c => c.slug === currentFilter.category);
+        if (catObj) params.set('category', catObj.id);
+      }
+      if (currentFilter.minPrice) params.set('minPrice', currentFilter.minPrice);
+      if (currentFilter.maxPrice) params.set('maxPrice', currentFilter.maxPrice);
+      if (currentFilter.sort) params.set('sort', currentFilter.sort);
+      params.set('page', currentFilter.page);
+
+      try {
+        const result = await ApiClient.get(`/products?${params.toString()}`);
+        document.getElementById('results-count').textContent = `Hiển thị ${result.items.length} / ${result.totalItems} sản phẩm`;
+
+        if (result.items.length === 0) {
+          grid.style.display = 'none';
+          emptyState.style.display = 'block';
+        } else {
+          grid.style.display = 'grid';
+          emptyState.style.display = 'none';
+
+          grid.innerHTML = result.items.map(p => {
+            const outOfStock = p.stockQuantity <= 0 || !p.isAvailableForCart;
+            return `
+            <div class="card product-card">
+              <div class="product-card-img-wrapper">
+                <img src="${CouppaApp.escapeHtml(p.primaryImageUrl || '')}" alt="${CouppaApp.escapeHtml(p.name)}" class="product-card-img">
+                ${outOfStock ? '<span class="product-card-badge out-of-stock">Hết hàng</span>' : ''}
+              </div>
+              <div class="product-card-content">
+                <span class="product-category">${CouppaApp.escapeHtml(p.categoryName || '')}</span>
+                <a href="product-detail.html?id=${p.id}" class="product-title">${CouppaApp.escapeHtml(p.name)}</a>
+                <div class="product-price-row">
+                  <div>
+                    <div class="product-price">${CouppaApp.formatCurrency(p.price)}</div>
+                    <div class="stock-status ${p.stockQuantity > 0 ? 'in-stock' : 'out-of-stock'}">
+                      ${p.stockQuantity > 0 ? `Tồn kho: ${p.stockQuantity}` : 'Hết hàng'}
+                    </div>
+                  </div>
+                  <button onclick="CouppaApp.addToCart(${p.id})" class="btn btn-primary btn-sm" ${outOfStock ? 'disabled' : ''}>
+                    + Giỏ
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+          }).join('');
+        }
+
+        renderPagination(result.page, result.totalPages);
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    }
+
+    function resetFilters() {
+      currentFilter = { search: '', category: 'all', minPrice: null, maxPrice: null, sort: 'newest', page: 1 };
+      document.getElementById('listing-search-input').value = '';
+      document.getElementById('min-price').value = '';
+      document.getElementById('max-price').value = '';
+      document.getElementById('sort-select').value = 'newest';
+      document.querySelector('input[name="category"][value="all"]').checked = true;
+      fetchAndRenderProducts();
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        allCategories = await ApiClient.get('/categories');
+      } catch (err) {
+        allCategories = [];
+      }
+      renderCategoryFilters();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('search')) {
+        currentFilter.search = urlParams.get('search');
+        document.getElementById('listing-search-input').value = currentFilter.search;
+      }
+      if (urlParams.has('category')) {
+        currentFilter.category = urlParams.get('category');
+        const radio = document.querySelector(`input[name="category"][value="${currentFilter.category}"]`);
+        if (radio) radio.checked = true;
+      }
+
+      fetchAndRenderProducts();
+
+      document.getElementById('listing-search-input').addEventListener('input', (e) => {
+        currentFilter.search = e.target.value;
+        currentFilter.page = 1;
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => fetchAndRenderProducts(), 300);
+      });
+
+      document.getElementById('sort-select').addEventListener('change', (e) => {
+        currentFilter.sort = e.target.value;
+        currentFilter.page = 1;
+        fetchAndRenderProducts();
+      });
+
+      document.getElementById('apply-filter-btn').addEventListener('click', () => {
+        currentFilter.minPrice = parseFloat(document.getElementById('min-price').value) || null;
+        currentFilter.maxPrice = parseFloat(document.getElementById('max-price').value) || null;
+        currentFilter.page = 1;
+        fetchAndRenderProducts();
+      });
+
+      document.getElementById('reset-filter-btn').addEventListener('click', resetFilters);
+    });
+  </script>
+</body>
+</html>

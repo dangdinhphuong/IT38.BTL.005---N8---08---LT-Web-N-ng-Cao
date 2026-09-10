@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Sản Phẩm - Couppa</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- MASTER SITE HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Couppa
+      </a>
+
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Trang chủ</a>
+        <a href="products.html" class="nav-link active">Sản phẩm</a>
+        <a href="products.html?category=dien-thoai-tablet" class="nav-link">Điện thoại</a>
+        <a href="products.html?category=laptop-tin-hoc" class="nav-link">Laptop</a>
+        <a href="products.html?category=phu-kien" class="nav-link">Phụ kiện</a>
+      </nav>
+
+      <div class="header-search">
+        <svg class="header-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Tìm kiếm sản phẩm..." onkeydown="if(event.key==='Enter') window.location.href='products.html?search='+encodeURIComponent(this.value)">
+      </div>
+
+      <div class="header-actions">
+        <a href="cart.html" class="icon-btn" title="Giỏ hàng">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path></svg>
+          <span class="cart-badge">0</span>
+        </a>
+        <div id="header-auth-area"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- BREADCRUMB -->
+      <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: var(--space-6);">
+        <a href="index.html">Trang chủ</a> &nbsp;/&nbsp;
+        <a href="products.html">Sản phẩm</a> &nbsp;/&nbsp;
+        <span id="breadcrumb-title" style="color: var(--color-text-main);">Chi tiết sản phẩm</span>
+      </div>
+
+      <!-- PRODUCT DETAIL CARD LAYOUT -->
+      <div class="card" style="padding: var(--space-8); background: white; margin-bottom: var(--space-12);">
+        <div style="display: grid; grid-template-columns: 460px 1fr; gap: var(--space-12); align-items: start;">
+          
+          <!-- LEFT: IMAGE GALLERY -->
+          <div>
+            <div style="border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--color-border); margin-bottom: var(--space-4);">
+              <img id="detail-main-img" src="" alt="Product Image" style="width: 100%; height: 380px; object-fit: cover;">
+            </div>
+            <div class="flex gap-4">
+              <img id="thumb-1" src="" style="width: 72px; height: 72px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--color-primary); cursor: pointer;">
+              <img id="thumb-2" src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&auto=format&fit=crop&q=80" style="width: 72px; height: 72px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-border); cursor: pointer; opacity: 0.7;">
+            </div>
+          </div>
+
+          <!-- RIGHT: PRODUCT INFO & ACTION -->
+          <div>
+            <span id="detail-category" class="product-category" style="font-size: 0.875rem;">Danh mục</span>
+            <h1 id="detail-name" style="margin-top: 4px; margin-bottom: var(--space-2);">Tên Sản Phẩm</h1>
+            
+            <div class="flex items-center gap-4" style="margin-bottom: var(--space-4);">
+              <span class="caption">Mã SKU: <strong id="detail-sku" style="color: var(--color-text-main);">SP-001</strong></span>
+              <span class="caption">|</span>
+              <span id="detail-stock-badge" class="badge badge-success">Còn hàng (15)</span>
+            </div>
+
+            <div id="detail-price" style="font-size: 2rem; font-weight: 800; color: var(--color-primary); margin-bottom: var(--space-6);">0 VNĐ</div>
+
+            <div style="border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: var(--space-4) 0; margin-bottom: var(--space-6);">
+              <h4 style="margin-bottom: 8px;">Mô tả ngắn:</h4>
+              <p id="detail-short-desc">Thông tin mô tả sản phẩm đang được cập nhật...</p>
+            </div>
+
+            <!-- QUANTITY & ADD TO CART -->
+            <div class="flex items-center gap-6" style="margin-bottom: var(--space-6);">
+              <div>
+                <label class="form-label" style="margin-bottom: 6px; display: block;">Số lượng mua:</label>
+                <div class="quantity-control">
+                  <button class="quantity-btn" onclick="changeQty(-1)">-</button>
+                  <input type="number" id="detail-qty" class="quantity-input" value="1" min="1" readonly>
+                  <button class="quantity-btn" onclick="changeQty(1)">+</button>
+                </div>
+              </div>
+
+              <div style="flex: 1; margin-top: 24px;">
+                <button id="add-to-cart-btn" onclick="handleAddToCart()" class="btn btn-primary btn-lg btn-block">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path></svg>
+                  Thêm Vào Giỏ Hàng
+                </button>
+              </div>
+            </div>
+
+            <div style="background-color: var(--color-primary-light); padding: var(--space-4); border-radius: var(--radius-md); color: var(--color-primary); font-size: 0.85rem;">
+              ✓ Cam kết chính hãng 100% &nbsp;|&nbsp; ✓ Giao hàng nhanh toàn quốc &nbsp;|&nbsp; ✓ Đổi trả trong 7 ngày
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- DETAILED DESCRIPTION SECTION -->
+        <div style="margin-top: var(--space-12); border-top: 1px solid var(--color-border); padding-top: var(--space-8);">
+          <h3 style="margin-bottom: var(--space-4);">Mô Tả Chi Tiết Sản Phẩm</h3>
+          <div style="line-height: 1.8; color: var(--color-text-main);">
+            <p>Sản phẩm sở hữu thiết kế hiện đại, độ bền vượt trội cùng hiệu năng xử lý tác vụ ấn tượng. Được trang bị các công nghệ tiên tiến nhất năm 2026, sản phẩm đáp ứng hoàn hảo nhu cầu làm việc, giải trí và học tập hàng ngày.</p>
+            <br>
+            <h4>Đặc điểm nổi bật:</h4>
+            <ul style="list-style-type: disc; margin-left: 20px; color: var(--color-text-muted);">
+              <li>Vật liệu hoàn thiện cao cấp, chống bám vân tay và chống va đập tối ưu.</li>
+              <li>Hiệu suất hoạt động ổn định, tiết kiệm năng lượng hiệu quả.</li>
+              <li>Chế độ bảo hành chính hãng uy tín từ Couppa.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RELATED PRODUCTS -->
+      <section>
+        <h3 style="margin-bottom: var(--space-6);">Sản Phẩm Cùng Danh Mục</h3>
+        <div class="grid grid-cols-4" id="related-products-grid">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MASTER SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">Couppa</div>
+          <p style="margin-bottom: var(--space-4);">Hệ thống giới thiệu sản phẩm và giỏ hàng đơn giản, tối ưu trải nghiệm người dùng và hiệu năng vận hành.</p>
+          <p class="caption">&copy; 2026 Couppa Inc. All rights reserved.</p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Khám Phá</div>
+          <div class="footer-links">
+            <a href="index.html">Trang chủ</a>
+            <a href="products.html">Sản phẩm</a>
+            <a href="cart.html">Giỏ hàng</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Tài Khoản</div>
+          <div class="footer-links">
+            <a href="login.html">Đăng nhập</a>
+            <a href="register.html">Đăng ký</a>
+            <a href="profile.html">Thông tin cá nhân</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Quản Trị</div>
+          <div class="footer-links">
+            <a href="admin/dashboard.html">Admin Dashboard</a>
+            <a href="admin/products.html">Quản lý sản phẩm</a>
+            <a href="admin/reports.html">Báo cáo thống kê</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>Đồ án tốt nghiệp Đề tài 8 — Website Giới Thiệu Sản Phẩm và Giỏ Hàng Đơn Giản</span>
+        <span>Kiến trúc: ASP.NET Core Web API + PostgreSQL + Cookie Auth</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/apiClient.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    let currentProduct = null;
+
+    // ProductResponse.images là mảng object {id, imageUrl, isPrimary, sortOrder} - không có
+    // field ảnh đơn như mock cũ (imageUrl) nên phải tự tìm ảnh isPrimary, fallback ảnh đầu tiên.
+    function resolvePrimaryImage(images) {
+      if (!images || images.length === 0) return '';
+      const primary = images.find(i => i.isPrimary);
+      return (primary || images[0]).imageUrl;
+    }
+
+    function changeQty(delta) {
+      const input = document.getElementById('detail-qty');
+      let val = parseInt(input.value) || 1;
+      val += delta;
+      if (val < 1) val = 1;
+      if (currentProduct && val > currentProduct.stockQuantity) {
+        val = currentProduct.stockQuantity;
+        CouppaApp.showToast(`Chỉ còn ${currentProduct.stockQuantity} sản phẩm trong kho`, 'warning');
+      }
+      input.value = val;
+    }
+
+    async function handleAddToCart() {
+      if (!currentProduct) return;
+      const qty = parseInt(document.getElementById('detail-qty').value) || 1;
+      await CouppaApp.addToCart(currentProduct.id, qty);
+    }
+
+    async function loadRelatedProducts(categoryId, excludeId) {
+      const relatedGrid = document.getElementById('related-products-grid');
+      try {
+        const result = await ApiClient.get(`/products?category=${categoryId}&pageSize=5`);
+        const related = result.items.filter(p => p.id !== excludeId).slice(0, 4);
+
+        if (related.length > 0) {
+          relatedGrid.innerHTML = related.map(p => `
+            <div class="card product-card">
+              <div class="product-card-img-wrapper">
+                <img src="${CouppaApp.escapeHtml(p.primaryImageUrl || '')}" alt="${CouppaApp.escapeHtml(p.name)}" class="product-card-img">
+              </div>
+              <div class="product-card-content">
+                <span class="product-category">${CouppaApp.escapeHtml(p.categoryName || '')}</span>
+                <a href="product-detail.html?id=${p.id}" class="product-title">${CouppaApp.escapeHtml(p.name)}</a>
+                <div class="product-price-row">
+                  <div class="product-price">${CouppaApp.formatCurrency(p.price)}</div>
+                  <button onclick="CouppaApp.addToCart(${p.id})" class="btn btn-outline btn-sm">
+                    + Giỏ
+                  </button>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          relatedGrid.parentElement.style.display = 'none';
+        }
+      } catch (err) {
+        relatedGrid.parentElement.style.display = 'none';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const prodId = parseInt(urlParams.get('id')) || 1;
+
+      try {
+        currentProduct = await ApiClient.get(`/products/${prodId}`);
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+        return;
+      }
+
+      const mainImage = resolvePrimaryImage(currentProduct.images);
+
+      document.title = `${currentProduct.name} - Couppa`;
+      document.getElementById('breadcrumb-title').textContent = currentProduct.name;
+      document.getElementById('detail-category').textContent = currentProduct.categoryName;
+      document.getElementById('detail-name').textContent = currentProduct.name;
+      document.getElementById('detail-sku').textContent = currentProduct.sku;
+      document.getElementById('detail-price').textContent = CouppaApp.formatCurrency(currentProduct.price);
+      document.getElementById('detail-short-desc').textContent = currentProduct.shortDescription;
+      document.getElementById('detail-main-img').src = mainImage;
+      document.getElementById('thumb-1').src = mainImage;
+
+      // Gallery thật: hiển thị các thumbnail còn lại (nếu có nhiều hơn 1 ảnh) thay vì
+      // thumb-2 hard-code tĩnh của bản mock cũ.
+      const thumb2 = document.getElementById('thumb-2');
+      const otherImages = (currentProduct.images || []).filter(i => i.imageUrl !== mainImage);
+      if (otherImages.length > 0) {
+        thumb2.src = otherImages[0].imageUrl;
+        thumb2.style.display = '';
+      } else {
+        thumb2.style.display = 'none';
+      }
+
+      const badge = document.getElementById('detail-stock-badge');
+      const btn = document.getElementById('add-to-cart-btn');
+      const outOfStock = currentProduct.stockQuantity <= 0 || !currentProduct.isAvailableForCart;
+
+      if (outOfStock) {
+        badge.className = 'badge badge-danger';
+        badge.textContent = 'Hết hàng';
+        btn.disabled = true;
+        btn.innerHTML = 'Sản Phẩm Đã Hết Hàng';
+      } else {
+        badge.className = 'badge badge-success';
+        badge.textContent = `Còn hàng (${currentProduct.stockQuantity})`;
+      }
+
+      await loadRelatedProducts(currentProduct.categoryId, currentProduct.id);
+    });
+  </script>
+</body>
+</html>

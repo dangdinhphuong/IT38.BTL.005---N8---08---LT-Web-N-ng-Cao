@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Couppa - Website Giới Thiệu Sản Phẩm & Giỏ Hàng</title>
+  <meta name="description" content="Trải nghiệm mua sắm sản phẩm công nghệ hiện đại, chất lượng hàng đầu tại Couppa.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- MASTER SITE HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Couppa
+      </a>
+
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link active">Trang chủ</a>
+        <a href="products.html" class="nav-link">Sản phẩm</a>
+        <a href="products.html?category=dien-thoai-tablet" class="nav-link">Điện thoại</a>
+        <a href="products.html?category=laptop-tin-hoc" class="nav-link">Laptop</a>
+        <a href="products.html?category=phu-kien" class="nav-link">Phụ kiện</a>
+      </nav>
+
+      <div class="header-search">
+        <svg class="header-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="global-search" placeholder="Tìm kiếm sản phẩm..." onkeydown="if(event.key==='Enter') window.location.href='products.html?search='+encodeURIComponent(this.value)">
+      </div>
+
+      <div class="header-actions">
+        <a href="cart.html" class="icon-btn" title="Giỏ hàng">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path></svg>
+          <span class="cart-badge">0</span>
+        </a>
+
+        <div id="header-auth-area">
+          <!-- Rendered dynamically by main.js -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section style="background: linear-gradient(135deg, #4F46E5 0%, #312E81 100%); color: white; padding: var(--space-16) 0;">
+    <div class="container" style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--space-8); align-items: center;">
+      <div>
+        <span class="badge" style="background: rgba(255,255,255,0.15); color: white; padding: 6px 14px; margin-bottom: var(--space-4);">Công Nghệ Mới 2026</span>
+        <h1 style="color: white; font-size: 2.75rem; margin-bottom: var(--space-4);">Khám Phá Công Nghệ Đỉnh Cao Cùng Couppa</h1>
+        <p style="color: #C7D2FE; font-size: 1.125rem; margin-bottom: var(--space-8); max-width: 540px;">
+          Trải nghiệm các dòng sản phẩm laptop, điện thoại, phụ kiện cao cấp với mức giá ưu đãi và dịch vụ bảo hành tận tâm.
+        </p>
+        <div class="flex gap-4">
+          <a href="products.html" class="btn btn-secondary btn-lg">Xem Sản Phẩm</a>
+          <a href="#featured-section" class="btn btn-outline btn-lg" style="color: white; border-color: rgba(255,255,255,0.3);">Sản Phẩm Nổi Bật</a>
+        </div>
+      </div>
+      <div style="text-align: center;">
+        <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=700&auto=format&fit=crop&q=80" alt="Hero Product" style="border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); max-height: 380px; width: 100%; object-fit: cover;">
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="container">
+
+      <!-- CATEGORIES BANNER -->
+      <section style="margin-bottom: var(--space-12);">
+        <div class="flex justify-between items-center" style="margin-bottom: var(--space-6);">
+          <h2>Danh Mục Nổi Bật</h2>
+          <a href="products.html" style="color: var(--color-primary); font-weight: 600;">Xem tất cả &rarr;</a>
+        </div>
+
+        <div class="grid grid-cols-4">
+          <a href="products.html?category=dien-thoai-tablet" class="card" style="padding: var(--space-6); text-align: center; background: white;">
+            <div style="width: 56px; height: 56px; background: var(--color-primary-light); color: var(--color-primary); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3);">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            </div>
+            <h4 style="margin-bottom: 4px;">Điện thoại & Tablet</h4>
+            <span class="caption">12+ sản phẩm</span>
+          </a>
+
+          <a href="products.html?category=laptop-tin-hoc" class="card" style="padding: var(--space-6); text-align: center; background: white;">
+            <div style="width: 56px; height: 56px; background: var(--color-secondary-light); color: var(--color-secondary); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3);">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="20" x2="22" y2="20"></line></svg>
+            </div>
+            <h4 style="margin-bottom: 4px;">Laptop & Máy Tính</h4>
+            <span class="caption">8+ sản phẩm</span>
+          </a>
+
+          <a href="products.html?category=am-thanh" class="card" style="padding: var(--space-6); text-align: center; background: white;">
+            <div style="width: 56px; height: 56px; background: #FEF3C7; color: #D97706; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3);">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"></path><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"></path></svg>
+            </div>
+            <h4 style="margin-bottom: 4px;">Thiết Bị Âm Thanh</h4>
+            <span class="caption">15+ sản phẩm</span>
+          </a>
+
+          <a href="products.html?category=phu-kien" class="card" style="padding: var(--space-6); text-align: center; background: white;">
+            <div style="width: 56px; height: 56px; background: #DBEAFE; color: #2563EB; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3);">
+              <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path></svg>
+            </div>
+            <h4 style="margin-bottom: 4px;">Phụ Kiện Công Nghệ</h4>
+            <span class="caption">20+ sản phẩm</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- FEATURED PRODUCTS -->
+      <section id="featured-section" style="margin-bottom: var(--space-12);">
+        <div class="flex justify-between items-center" style="margin-bottom: var(--space-6);">
+          <div>
+            <h2>Sản Phẩm Nổi Bật</h2>
+            <p>Tuyển chọn những sản phẩm bán chạy và được yêu thích nhất</p>
+          </div>
+          <a href="products.html" class="btn btn-outline btn-sm">Xem tất cả</a>
+        </div>
+
+        <div class="grid grid-cols-4" id="featured-products-grid">
+          <!-- Rendered via JavaScript -->
+        </div>
+      </section>
+
+      <!-- LATEST PRODUCTS -->
+      <section>
+        <div class="flex justify-between items-center" style="margin-bottom: var(--space-6);">
+          <div>
+            <h2>Sản Phẩm Mới Nhất</h2>
+            <p>Cập nhật những công nghệ và thiết bị vừa ra mắt</p>
+          </div>
+          <a href="products.html?sort=newest" class="btn btn-outline btn-sm">Khám phá mới</a>
+        </div>
+
+        <div class="grid grid-cols-4" id="latest-products-grid">
+          <!-- Rendered via JavaScript -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MASTER SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">Couppa</div>
+          <p style="margin-bottom: var(--space-4);">Hệ thống giới thiệu sản phẩm và giỏ hàng đơn giản, tối ưu trải nghiệm người dùng và hiệu năng vận hành.</p>
+          <p class="caption">&copy; 2026 Couppa Inc. All rights reserved.</p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Khám Phá</div>
+          <div class="footer-links">
+            <a href="index.html">Trang chủ</a>
+            <a href="products.html">Sản phẩm</a>
+            <a href="cart.html">Giỏ hàng</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Tài Khoản</div>
+          <div class="footer-links">
+            <a href="login.html">Đăng nhập</a>
+            <a href="register.html">Đăng ký</a>
+            <a href="profile.html">Thông tin cá nhân</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Quản Trị</div>
+          <div class="footer-links">
+            <a href="admin/dashboard.html">Admin Dashboard</a>
+            <a href="admin/products.html">Quản lý sản phẩm</a>
+            <a href="admin/reports.html">Báo cáo thống kê</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>Đồ án tốt nghiệp Đề tài 8 — Website Giới Thiệu Sản Phẩm và Giỏ Hàng Đơn Giản</span>
+        <span>Kiến trúc: ASP.NET Core Web API + PostgreSQL + Cookie Auth</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/apiClient.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    function renderProductCard(p, { showBadge = false } = {}) {
+      const imageUrl = CouppaApp.escapeHtml(p.primaryImageUrl || '');
+      const outOfStock = p.stockQuantity <= 0 || !p.isAvailableForCart;
+      return `
+        <div class="card product-card">
+          <div class="product-card-img-wrapper">
+            <img src="${imageUrl}" alt="${CouppaApp.escapeHtml(p.name)}" class="product-card-img">
+            ${showBadge ? `<span class="product-card-badge ${outOfStock ? 'out-of-stock' : ''}">${outOfStock ? 'Hết hàng' : 'Nổi bật'}</span>` : ''}
+          </div>
+          <div class="product-card-content">
+            <span class="product-category">${CouppaApp.escapeHtml(p.categoryName || '')}</span>
+            <a href="product-detail.html?id=${p.id}" class="product-title">${CouppaApp.escapeHtml(p.name)}</a>
+            <div class="product-price-row">
+              <div>
+                <div class="product-price">${CouppaApp.formatCurrency(p.price)}</div>
+                <div class="stock-status ${p.stockQuantity > 0 ? 'in-stock' : 'out-of-stock'}">
+                  ${p.stockQuantity > 0 ? `Còn hàng (${p.stockQuantity})` : 'Hết hàng'}
+                </div>
+              </div>
+              <button onclick="CouppaApp.addToCart(${p.id})" class="btn btn-primary btn-sm" ${outOfStock ? 'disabled' : ''}>
+                + Giỏ
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const featuredContainer = document.getElementById('featured-products-grid');
+      const latestContainer = document.getElementById('latest-products-grid');
+
+      try {
+        const featured = await ApiClient.get('/products/featured');
+        featuredContainer.innerHTML = featured.map(p => renderProductCard(p, { showBadge: true })).join('');
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+
+      try {
+        // Route /products/latest tồn tại thật ở backend dù DESIGN_SYSTEM.md không liệt kê.
+        const latest = await ApiClient.get('/products/latest');
+        latestContainer.innerHTML = latest.map(p => renderProductCard(p)).join('');
+      } catch (err) {
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+      }
+    });
+  </script>
+</body>
+</html>

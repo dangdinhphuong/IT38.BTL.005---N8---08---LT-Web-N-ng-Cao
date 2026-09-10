@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng Nhập Tài Khoản - Couppa</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- MASTER SITE HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand-logo">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Couppa
+      </a>
+
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Trang chủ</a>
+        <a href="products.html" class="nav-link">Sản phẩm</a>
+        <a href="products.html?category=dien-thoai-tablet" class="nav-link">Điện thoại</a>
+        <a href="products.html?category=laptop-tin-hoc" class="nav-link">Laptop</a>
+        <a href="products.html?category=phu-kien" class="nav-link">Phụ kiện</a>
+      </nav>
+
+      <div class="header-search">
+        <svg class="header-search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Tìm kiếm sản phẩm..." onkeydown="if(event.key==='Enter') window.location.href='products.html?search='+encodeURIComponent(this.value)">
+      </div>
+
+      <div class="header-actions">
+        <a href="cart.html" class="icon-btn" title="Giỏ hàng">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path></svg>
+          <span class="cart-badge">0</span>
+        </a>
+
+        <div id="header-auth-area">
+          <!-- Rendered dynamically by main.js -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN AUTH CONTENT -->
+  <main class="main-content flex items-center justify-center">
+    <div class="container" style="max-width: 440px;">
+      
+      <div class="card" style="padding: var(--space-8); background: white;">
+        <div style="text-align: center; margin-bottom: var(--space-6);">
+          <h2>Đăng Nhập</h2>
+          <p class="caption" style="margin-top: 4px;">Nhập email và mật khẩu của bạn để truy cập hệ thống</p>
+        </div>
+
+        <!-- QUICK DEMO LOGINS -->
+        <div style="background: var(--color-primary-light); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-6); font-size: 0.8125rem;">
+          <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Đăng Nhập Nhanh (Demo Accounts):</div>
+          <div class="flex gap-2" style="margin-top: 6px;">
+            <button type="button" onclick="fillCredentials('user@couppa.vn', 'Abc12345')" class="btn btn-outline btn-sm" style="flex: 1; background: white;">User Demo</button>
+            <button type="button" onclick="fillCredentials('admin@couppa.vn', 'Admin12345')" class="btn btn-primary btn-sm" style="flex: 1;">Admin Demo</button>
+          </div>
+        </div>
+
+        <form id="login-form" onsubmit="handleLoginSubmit(event)">
+          
+          <div class="form-group">
+            <label class="form-label" for="login-email">Địa chỉ Email <span class="required">*</span></label>
+            <input type="email" id="login-email" class="form-input" placeholder="nhapemail@domain.com" required>
+            <div id="email-error" class="form-error" style="display: none;"></div>
+          </div>
+
+          <div class="form-group">
+            <div class="flex justify-between items-center">
+              <label class="form-label" for="login-password">Mật khẩu <span class="required">*</span></label>
+            </div>
+            <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+            <div id="password-error" class="form-error" style="display: none;"></div>
+          </div>
+
+          <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: var(--space-6);">
+            <label class="checkbox-label">
+              <input type="checkbox" id="remember-me" checked> Ghi nhớ đăng nhập
+            </label>
+          </div>
+
+          <button type="submit" id="submit-btn" class="btn btn-primary btn-block btn-lg">
+            Đăng Nhập
+          </button>
+        </form>
+
+        <div style="text-align: center; margin-top: var(--space-6); font-size: 0.875rem; color: var(--color-text-muted);">
+          Chưa có tài khoản? <a href="register.html" style="color: var(--color-primary); font-weight: 600;">Đăng ký tài khoản mới</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MASTER SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">Couppa</div>
+          <p style="margin-bottom: var(--space-4);">Hệ thống giới thiệu sản phẩm và giỏ hàng đơn giản, tối ưu trải nghiệm người dùng và hiệu năng vận hành.</p>
+          <p class="caption">&copy; 2026 Couppa Inc. All rights reserved.</p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Khám Phá</div>
+          <div class="footer-links">
+            <a href="index.html">Trang chủ</a>
+            <a href="products.html">Sản phẩm</a>
+            <a href="cart.html">Giỏ hàng</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Tài Khoản</div>
+          <div class="footer-links">
+            <a href="login.html">Đăng nhập</a>
+            <a href="register.html">Đăng ký</a>
+            <a href="profile.html">Thông tin cá nhân</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Quản Trị</div>
+          <div class="footer-links">
+            <a href="admin/dashboard.html">Admin Dashboard</a>
+            <a href="admin/products.html">Quản lý sản phẩm</a>
+            <a href="admin/reports.html">Báo cáo thống kê</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>Đồ án tốt nghiệp Đề tài 8 — Website Giới Thiệu Sản Phẩm và Giỏ Hàng Đơn Giản</span>
+        <span>Kiến trúc: ASP.NET Core Web API + PostgreSQL + Cookie Auth</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/apiClient.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    function fillCredentials(email, pass) {
+      document.getElementById('login-email').value = email;
+      document.getElementById('login-password').value = pass;
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value.trim();
+
+      const emailErr = document.getElementById('email-error');
+      const passwordErr = document.getElementById('password-error');
+      emailErr.style.display = 'none';
+      passwordErr.style.display = 'none';
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = 'Đang xác thực...';
+
+      try {
+        const user = await ApiClient.post('/auth/login', { email, password: pass });
+        CouppaApp.showToast(`Đăng nhập thành công! Chào mừng ${user.fullName}`, 'success');
+        const base = CouppaApp.getBasePath();
+        const admin = CouppaApp.getAdminPath();
+        setTimeout(() => {
+          window.location.href = user.role === 'Admin' ? `${admin}dashboard.html` : `${base}index.html`;
+        }, 600);
+      } catch (err) {
+        // 401/403: sai email/mật khẩu hoặc tài khoản bị khóa - hiển thị đúng message từ server.
+        CouppaApp.showToast(CouppaApp.getErrorMessage(err), 'error');
+        btn.disabled = false;
+        btn.innerHTML = 'Đăng Nhập';
+      }
+    }
+  </script>
+</body>
+</html>
