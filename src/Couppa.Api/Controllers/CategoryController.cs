@@ -1,12 +1,10 @@
-using Couppa.Api.Models.Responses;
 using Couppa.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Couppa.Api.Controllers;
 
-[ApiController]
-[Route("api/categories")]
-public class CategoryController : ControllerBase
+/// <summary>FR-CATEGORY-006/007 — public, chỉ trả category IsActive=true, dùng cho menu/dropdown filter (AJAX).</summary>
+public class CategoryController : Controller
 {
     private readonly ICategoryService _categoryService;
 
@@ -15,11 +13,10 @@ public class CategoryController : ControllerBase
         _categoryService = categoryService;
     }
 
-    /// <summary>FR-CATEGORY-006/007 — public, không cần đăng nhập, chỉ trả category IsActive = true.</summary>
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IReadOnlyList<CategoryResponse>>>> GetActiveList()
+    public async Task<IActionResult> GetActive()
     {
         var categories = await _categoryService.GetActiveListAsync();
-        return Ok(ApiResponse<IReadOnlyList<CategoryResponse>>.Ok(categories));
+        return Json(new { success = true, data = categories });
     }
 }

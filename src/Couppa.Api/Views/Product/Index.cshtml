@@ -1,0 +1,154 @@
+@model ProductListViewModel
+@{
+    ViewData["Title"] = "Danh sách sản phẩm - Couppa";
+}
+
+<div class="container" style="padding-top: var(--space-4);">
+    <!-- BREADCRUMB -->
+    <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: var(--space-4);">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a> &nbsp;/&nbsp; <span style="color: var(--color-text-main);">Danh sách sản phẩm</span>
+    </div>
+
+    <div class="flex justify-between items-center" style="margin-bottom: var(--space-6);">
+        <h1 id="page-heading">
+            @(Model.SelectedCategoryId == null ? "Tất Cả Sản Phẩm" : Model.Categories.FirstOrDefault(c => c.Id == Model.SelectedCategoryId)?.Name ?? "Danh mục")
+        </h1>
+        <div class="flex items-center gap-4">
+            <span class="caption" id="results-count">Hiển thị <strong>@Model.TotalItems</strong> sản phẩm</span>
+            <select id="productSort" class="form-select" style="width: auto; padding-right: 32px;">
+                <option value="@Url.Action("Index", new { category = Model.SelectedCategoryId, search = Model.SearchKeyword, sort = "newest" })" selected="@(Model.SortBy == "newest")">Mới nhất</option>
+                <option value="@Url.Action("Index", new { category = Model.SelectedCategoryId, search = Model.SearchKeyword, sort = "price_asc" })" selected="@(Model.SortBy == "price_asc")">Giá: Thấp đến Cao</option>
+                <option value="@Url.Action("Index", new { category = Model.SelectedCategoryId, search = Model.SearchKeyword, sort = "price_desc" })" selected="@(Model.SortBy == "price_desc")">Giá: Cao đến Thấp</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- LAYOUT GRID: SIDEBAR FILTER + PRODUCT GRID -->
+    <div style="display: grid; grid-template-columns: 260px 1fr; gap: var(--space-8); align-items: start;">
+        
+        <!-- FILTER SIDEBAR -->
+        <aside class="card" style="padding: var(--space-6); background: white;">
+            <h3 style="margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">Bộ Lọc Tìm Kiếm</h3>
+
+            <form id="filterForm" method="get" asp-action="Index">
+                <input type="hidden" name="search" value="@Model.SearchKeyword" />
+                <input type="hidden" name="sort" value="@Model.SortBy" />
+
+                <!-- Category Filter -->
+                <div class="form-group">
+                    <label class="form-label">Danh Mục</label>
+                    <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                        <label class="checkbox-label">
+                            <input type="radio" name="category" value="" @(Model.SelectedCategoryId == null ? "checked" : "") onchange="this.form.submit()"> Tất cả danh mục
+                        </label>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <label class="checkbox-label">
+                                <input type="radio" name="category" value="@cat.Id" @(Model.SelectedCategoryId == cat.Id ? "checked" : "") onchange="this.form.submit()"> @cat.Name (@cat.ProductCount)
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <a asp-action="Index" class="btn btn-outline btn-block btn-sm" style="margin-top: var(--space-4);">Xóa bộ lọc</a>
+            </form>
+        </aside>
+
+        <!-- PRODUCT LIST GRID -->
+        <div>
+            @if (!Model.Products.Any())
+            {
+                <div class="empty-state" style="background: white; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h3 class="empty-state-title">Không Tìm Thấy Sản Phẩm</h3>
+                    <p class="empty-state-desc">Rất tiếc, không có sản phẩm nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm của bạn.</p>
+                    <a asp-action="Index" class="btn btn-primary">Xóa Bộ Lọc & Tìm Lại</a>
+                </div>
+            }
+            else
+            {
+                <div id="productGrid" class="grid grid-cols-3">
+                    @foreach (var p in Model.Products)
+                    {
+                        bool outOfStock = p.StockQuantity <= 0;
+                        <div class="card product-card">
+                            <div class="product-card-img-wrapper">
+                                <img src="@p.PrimaryImageUrl" alt="@p.Name" class="product-card-img">
+                                @if (outOfStock)
+                                {
+                                    <span class="product-card-badge out-of-stock">Hết hàng</span>
+                                }
+                            </div>
+                            <div class="product-card-content">
+                                <span class="product-category">@p.CategoryName</span>
+                                <a asp-action="Detail" asp-route-id="@p.Id" class="product-title">@p.Name</a>
+                                <div class="product-price-row">
+                                    <div>
+                                        <div class="product-price">@p.Price.ToString("N0") đ</div>
+                                        <div class="stock-status @(p.StockQuantity > 0 ? "in-stock" : "out-of-stock")">
+                                            @(p.StockQuantity > 0 ? $"Còn hàng ({p.StockQuantity})" : "Hết hàng")
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-sm js-add-to-cart" data-product-id="@p.Id" @(outOfStock ? "disabled" : "")>
+                                        + Giỏ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- PAGINATION -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="pagination" style="margin-top: var(--space-8); background: white; border-radius: var(--radius-lg);">
+                        <span>Trang @Model.Page / @Model.TotalPages</span>
+                        <div class="page-btn-group">
+                            @if (Model.Page > 1)
+                            {
+                                <a class="page-btn" href="@Url.Action("Index", new { category = Model.SelectedCategoryId, search = Model.SearchKeyword, sort = Model.SortBy, page = Model.Page - 1 })">&laquo;</a>
+                            }
+                            else
+                            {
+                                <button class="page-btn" disabled>&laquo;</button>
+                            }
+
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                if (i == Model.Page)
+                                {
+                                    <button class="page-btn active">@i</button>
+                                }
+                                else
+                                {
+                                    <a class="page-btn" href="@Url.Action("Index", new { category = Model.SelectedCategoryId, search = Model.SearchKeyword, sort = Model.SortBy, page = i })">@i</a>
+                                }
+                            }
+
+                            @if (Model.Page < Model.TotalPages)
+                            {
+                                <a class="page-btn" href="@Url.Action("Index", new { category = Model.SelectedCategoryId, search = Model.SearchKeyword, sort = Model.SortBy, page = Model.Page + 1 })">&raquo;</a>
+                            }
+                            else
+                            {
+                                <button class="page-btn" disabled>&raquo;</button>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/cart-ajax.js" asp-append-version="true"></script>
+    <script>
+        document.getElementById('productSort')?.addEventListener('change', function () {
+            window.location.href = this.value;
+        });
+    </script>
+}

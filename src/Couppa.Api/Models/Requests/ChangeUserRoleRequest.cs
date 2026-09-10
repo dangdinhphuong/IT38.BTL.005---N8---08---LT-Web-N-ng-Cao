@@ -2,5 +2,5 @@ namespace Couppa.Api.Models.Requests;
 
 public class ChangeUserRoleRequest
 {
-    public required short RoleId { get; set; }
+    public required string RoleName { get; set; }
 }

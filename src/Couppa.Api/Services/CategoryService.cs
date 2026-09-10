@@ -29,7 +29,7 @@ public class CategoryService : ICategoryService
             await _db.Categories
                 .Where(c => c.IsActive)
                 .OrderBy(c => c.Name)
-                .Select(c => ToResponse(c))
+                .Select(c => ToResponseWithCount(c))
                 .ToListAsync());
     }
 
@@ -39,17 +39,19 @@ public class CategoryService : ICategoryService
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var keyword = search.Trim();
-            query = query.Where(c => EF.Functions.ILike(c.Name, $"%{keyword}%"));
+            var keyword = search.Trim().ToLower();
+            query = query.Where(c => c.Name.ToLower().Contains(keyword));
         }
 
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
         var totalItems = await query.CountAsync();
 
         var items = await query
             .OrderBy(c => c.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(c => ToResponse(c))
+            .Select(c => ToResponseWithCount(c))
             .ToListAsync();
 
         return new PagedResult<CategoryResponse>
@@ -73,9 +75,9 @@ public class CategoryService : ICategoryService
 
         var category = new Category
         {
-            Name = request.Name,
-            Slug = request.Slug,
-            Description = request.Description,
+            Name = request.Name.Trim(),
+            Slug = request.Slug.Trim(),
+            Description = request.Description?.Trim(),
             IsActive = true,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
@@ -97,9 +99,9 @@ public class CategoryService : ICategoryService
 
         await EnsureNameAndSlugUniqueAsync(request.Name, request.Slug, excludeId: id);
 
-        category.Name = request.Name;
-        category.Slug = request.Slug;
-        category.Description = request.Description;
+        category.Name = request.Name.Trim();
+        category.Slug = request.Slug.Trim();
+        category.Description = request.Description?.Trim();
         category.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -117,7 +119,10 @@ public class CategoryService : ICategoryService
 
         // Đếm chủ động trước khi xóa (không dựa vào DB RESTRICT + bắt DbUpdateException) vì response 409
         // phải trả kèm productCount chính xác cho client (task 06 API spec).
-        var productCount = await _db.Products.CountAsync(p => p.CategoryId == id);
+        // Soft-deleted products remain linked to the category and therefore still block deletion.
+        var productCount = await _db.Products
+            .IgnoreQueryFilters()
+            .CountAsync(p => p.CategoryId == id);
         if (productCount > 0)
         {
             throw AppException.Conflict(
@@ -163,6 +168,13 @@ public class CategoryService : ICategoryService
 
     private async Task EnsureNameAndSlugUniqueAsync(string name, string slug, long? excludeId)
     {
+        name = name.Trim();
+        slug = slug.Trim();
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(slug))
+        {
+            throw AppException.Unprocessable("CATEGORY_FIELDS_REQUIRED", "Tên và slug danh mục là bắt buộc.");
+        }
+
         var nameExists = await _db.Categories
             .AnyAsync(c => c.Name == name && (excludeId == null || c.Id != excludeId));
         if (nameExists)
@@ -187,5 +199,18 @@ public class CategoryService : ICategoryService
         IsActive = c.IsActive,
         CreatedAt = c.CreatedAt,
         UpdatedAt = c.UpdatedAt
+    };
+
+    // Global Query Filter (IsDeleted) trên Product áp dụng cả khi đếm qua navigation Products.Count.
+    private static CategoryResponse ToResponseWithCount(Category c) => new()
+    {
+        Id = c.Id,
+        Name = c.Name,
+        Slug = c.Slug,
+        Description = c.Description,
+        IsActive = c.IsActive,
+        CreatedAt = c.CreatedAt,
+        UpdatedAt = c.UpdatedAt,
+        ProductCount = c.Products.Count(p => p.IsActive)
     };
 }

@@ -1,4 +1,4 @@
-using Couppa.Api.Data.Entities;
+using System.Security.Claims;
 
 namespace Couppa.Api.Services;
 
@@ -18,16 +18,10 @@ public class CurrentUserService : ICurrentUserService
 
     public bool IsAuthenticated => Context.User.Identity?.IsAuthenticated ?? false;
 
-    public long? UserId
-    {
-        get
-        {
-            var claim = Context.User.FindFirst(AppClaimTypes.UserId)?.Value;
-            return claim is not null && long.TryParse(claim, out var id) ? id : null;
-        }
-    }
+    // Identity gắn UserId (GUID string) vào claim chuẩn ClaimTypes.NameIdentifier khi SignInManager đăng nhập.
+    public string? UserId => Context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-    public bool IsAdmin => Context.User.FindFirst(AppClaimTypes.Role)?.Value == "Admin";
+    public bool IsAdmin => Context.User.IsInRole("Admin");
 
     public Guid GetOrCreateGuestSessionId()
     {

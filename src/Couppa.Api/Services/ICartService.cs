@@ -10,24 +10,24 @@ namespace Couppa.Api.Services;
 /// </summary>
 public interface ICartService
 {
-    /// <summary>GET /api/cart (FR-CART-002).</summary>
+    /// <summary>GET /Cart/Index (FR-CART-002).</summary>
     Task<CartResponse> GetCurrentCartAsync();
 
-    /// <summary>POST /api/cart/items (FR-CART-001, UC-02). Validate BR-01/BR-02, ghi cart_activity_logs (action=add).</summary>
+    /// <summary>POST /Cart/AddItem (FR-CART-001, UC-02). Validate BR-01/BR-02, ghi cart_activity_logs (action=add).</summary>
     Task<CartResponse> AddItemAsync(AddCartItemRequest request);
 
-    /// <summary>PUT /api/cart/items/{id} (FR-CART-003/004). Validate BR-02, kiểm tra ownership item.</summary>
+    /// <summary>POST /Cart/UpdateItem/{id} (FR-CART-003/004). Validate BR-02, kiểm tra ownership item.</summary>
     Task<CartResponse> UpdateItemQuantityAsync(long itemId, UpdateCartItemRequest request);
 
-    /// <summary>DELETE /api/cart/items/{id} (FR-CART-005). Ghi cart_activity_logs (action=remove).</summary>
+    /// <summary>POST /Cart/RemoveItem/{id} (FR-CART-005). Ghi cart_activity_logs (action=remove).</summary>
     Task<CartResponse> RemoveItemAsync(long itemId);
 
-    /// <summary>DELETE /api/cart (FR-CART-006).</summary>
+    /// <summary>POST /Cart/Clear (FR-CART-006).</summary>
     Task ClearCartAsync();
 
     /// <summary>
     /// FR-CART-007 / BR-13: merge giỏ hàng Guest (sessionId) vào giỏ hàng User (userId) khi đăng nhập.
     /// Được AuthController gọi ngay sau khi xác thực thành công, TRƯỚC khi session Guest bị Clear.
     /// </summary>
-    Task<CartResponse> MergeGuestCartAsync(Guid guestSessionId, long userId);
+    Task<CartResponse> MergeGuestCartAsync(Guid guestSessionId, string userId);
 }

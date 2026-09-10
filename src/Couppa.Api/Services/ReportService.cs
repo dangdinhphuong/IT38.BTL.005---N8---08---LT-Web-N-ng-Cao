@@ -1,5 +1,6 @@
 using Couppa.Api.Data;
 using Couppa.Api.Data.Entities;
+using Couppa.Api.Middleware;
 using Couppa.Api.Models.Responses;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,10 +18,45 @@ public class ReportService : IReportService
         _db = db;
     }
 
+    public async Task<ReportSummaryResponse> GetSummaryAsync(DateTimeOffset? from, DateTimeOffset? to)
+    {
+        var rangeTo = to ?? DateTimeOffset.UtcNow;
+        var rangeFrom = from ?? rangeTo.AddDays(-DefaultRangeDays);
+        if (rangeFrom > rangeTo)
+        {
+            throw AppException.Unprocessable(
+                "REPORT_DATE_RANGE_INVALID", "Khoảng thời gian báo cáo không hợp lệ.");
+        }
+
+        var newUsers = await _db.Users.CountAsync(user =>
+            user.CreatedAt >= rangeFrom && user.CreatedAt <= rangeTo);
+
+        return new ReportSummaryResponse
+        {
+            ProductsByCategory = await _db.Categories
+                .OrderBy(category => category.Name)
+                .Select(category => new ProductsByCategoryItem
+                {
+                    CategoryName = category.Name,
+                    Count = category.Products.Count()
+                })
+                .ToListAsync(),
+            InStockProducts = await _db.Products.CountAsync(product => product.StockQuantity > 0),
+            OutOfStockProducts = await _db.Products.CountAsync(product => product.StockQuantity == 0),
+            TotalUsers = await _db.Users.CountAsync(),
+            NewUsers = newUsers
+        };
+    }
+
     public async Task<IReadOnlyList<CartTopProductResponse>> GetCartTopProductsAsync(DateTimeOffset? from, DateTimeOffset? to)
     {
         var rangeTo = to ?? DateTimeOffset.UtcNow;
         var rangeFrom = from ?? rangeTo.AddDays(-DefaultRangeDays);
+        if (rangeFrom > rangeTo)
+        {
+            throw AppException.Unprocessable(
+                "REPORT_DATE_RANGE_INVALID", "Khoảng thời gian báo cáo không hợp lệ.");
+        }
 
         // [Assumption] Task 11 không nói rõ có hiển thị sản phẩm đã soft-delete trong report hay không.
         // Chọn lọc bỏ: join với _db.Products (có Global Query Filter !IsDeleted) nên sản phẩm đã xóa

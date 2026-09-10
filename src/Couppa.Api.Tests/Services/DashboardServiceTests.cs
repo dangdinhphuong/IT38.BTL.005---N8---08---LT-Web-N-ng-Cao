@@ -57,14 +57,12 @@ public class DashboardServiceTests
         UpdatedAt = DateTimeOffset.UtcNow
     };
 
-    private static User NewUser(string email) => new()
+    private static ApplicationUser NewUser(string email) => new()
     {
+        UserName = email,
         Email = email,
-        PasswordHash = "hash",
         FullName = "Test User",
-        RoleId = RoleIds.User,
         CreatedAt = DateTimeOffset.UtcNow,
-        UpdatedAt = DateTimeOffset.UtcNow
     };
 
     [Fact]

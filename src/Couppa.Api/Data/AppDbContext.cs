@@ -1,16 +1,17 @@
 using Couppa.Api.Data.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Couppa.Api.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
 
-    public DbSet<Role> Roles => Set<Role>();
-    public DbSet<User> Users => Set<User>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
@@ -19,41 +20,39 @@ public class AppDbContext : DbContext
     public DbSet<CartActivityLog> CartActivityLogs => Set<CartActivityLog>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // Cart activity rows intentionally keep a required ProductId while Product has a
+        // soft-delete query filter. The relationship is still valid for reporting; suppress
+        // EF's design-time warning so migrations can be generated without a Windows EventLog
+        // provider turning the warning into an exception.
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // ---- roles ----
-        modelBuilder.Entity<Role>(e =>
-        {
-            e.ToTable("roles");
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedNever();
-            e.Property(x => x.Name).HasMaxLength(20).IsRequired();
-            e.HasIndex(x => x.Name).IsUnique();
-        });
+        // The PostgreSQL schema uses the snake_case column names from the SRS
+        // constraints, while the SQL Server model keeps EF's conventional
+        // PascalCase column names. Raw SQL used by checks/filtered indexes must
+        // therefore match the active provider.
+        var isPostgreSql = Database.ProviderName?.Contains(
+            "Npgsql", StringComparison.OrdinalIgnoreCase) == true;
+        var priceColumn = isPostgreSql ? "price" : "[Price]";
+        var stockQuantityColumn = isPostgreSql ? "stock_quantity" : "[StockQuantity]";
+        var quantityColumn = isPostgreSql ? "quantity" : "[Quantity]";
+        var userColumn = isPostgreSql ? "user_id" : "[UserId]";
+        var sessionColumn = isPostgreSql ? "session_id" : "[SessionId]";
 
-        // ---- users ----
-        modelBuilder.Entity<User>(e =>
+        // ---- ApplicationUser (mở rộng AspNetUsers) ----
+        modelBuilder.Entity<ApplicationUser>(e =>
         {
-            e.ToTable("users");
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Email).HasMaxLength(255).IsRequired();
-            e.HasIndex(x => x.Email).IsUnique();
-            e.Property(x => x.PasswordHash).HasMaxLength(255).IsRequired();
             e.Property(x => x.FullName).HasMaxLength(150).IsRequired();
             e.Property(x => x.Phone).HasMaxLength(20);
-            e.Property(x => x.RoleId).HasDefaultValue(RoleIds.User);
             e.Property(x => x.IsLocked).HasDefaultValue(false);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
-
-            e.HasOne(x => x.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(x => x.RoleId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            e.HasIndex(x => x.RoleId).HasDatabaseName("idx_users_role_id");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
         // ---- categories ----
@@ -66,8 +65,8 @@ public class AppDbContext : DbContext
             e.Property(x => x.Slug).HasMaxLength(120).IsRequired();
             e.HasIndex(x => x.Slug).IsUnique();
             e.Property(x => x.IsActive).HasDefaultValue(true);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasIndex(x => x.IsActive).HasDatabaseName("idx_categories_is_active");
         });
@@ -78,8 +77,8 @@ public class AppDbContext : DbContext
             e.ToTable("products", t =>
             {
                 // BR-09 / BR-10: giá và tồn kho không được âm.
-                t.HasCheckConstraint("ck_products_price_non_negative", "price >= 0");
-                t.HasCheckConstraint("ck_products_stock_non_negative", "stock_quantity >= 0");
+                t.HasCheckConstraint("ck_products_price_non_negative", $"{priceColumn} >= 0");
+                t.HasCheckConstraint("ck_products_stock_non_negative", $"{stockQuantityColumn} >= 0");
             });
             e.HasKey(x => x.Id);
             e.Property(x => x.Sku).HasMaxLength(50).IsRequired();
@@ -91,8 +90,8 @@ public class AppDbContext : DbContext
             e.Property(x => x.IsActive).HasDefaultValue(true);
             e.Property(x => x.IsFeatured).HasDefaultValue(false);
             e.Property(x => x.IsDeleted).HasDefaultValue(false);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             // BR-03: không cho xóa Category còn Product -> RESTRICT (EF Core mặc định Cascade cho FK bắt buộc).
             e.HasOne(x => x.Category)
@@ -134,14 +133,15 @@ public class AppDbContext : DbContext
             {
                 // BR-12: cart chỉ thuộc đúng 1 trong 2 (user hoặc session), không thể cả hai / không cả hai.
                 t.HasCheckConstraint("ck_carts_owner_xor",
-                    "(user_id IS NOT NULL AND session_id IS NULL) OR (user_id IS NULL AND session_id IS NOT NULL)");
+                    $"({userColumn} IS NOT NULL AND {sessionColumn} IS NULL) OR ({userColumn} IS NULL AND {sessionColumn} IS NOT NULL)");
             });
             e.HasKey(x => x.Id);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.UserId).HasMaxLength(450);
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            e.HasIndex(x => x.UserId).IsUnique().HasFilter("user_id IS NOT NULL");
-            e.HasIndex(x => x.SessionId).IsUnique().HasFilter("session_id IS NOT NULL");
+            e.HasIndex(x => x.UserId).IsUnique().HasFilter($"{userColumn} IS NOT NULL");
+            e.HasIndex(x => x.SessionId).IsUnique().HasFilter($"{sessionColumn} IS NOT NULL");
 
             e.HasOne(x => x.User)
                 .WithOne(u => u.Cart)
@@ -154,12 +154,12 @@ public class AppDbContext : DbContext
         {
             e.ToTable("cart_items", t =>
             {
-                t.HasCheckConstraint("ck_cart_items_quantity_positive", "quantity > 0");
+                t.HasCheckConstraint("ck_cart_items_quantity_positive", $"{quantityColumn} > 0");
             });
             e.HasKey(x => x.Id);
             e.Property(x => x.Quantity).HasDefaultValue(1);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasOne(x => x.Cart)
                 .WithMany(c => c.Items)
@@ -183,11 +183,20 @@ public class AppDbContext : DbContext
         {
             e.ToTable("cart_activity_logs");
             e.HasKey(x => x.Id);
+            e.Property(x => x.UserId).HasMaxLength(450);
             e.Property(x => x.Action).HasMaxLength(20).IsRequired();
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasIndex(x => x.ProductId).HasDatabaseName("idx_cart_activity_logs_product_id");
             e.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_cart_activity_logs_created_at");
+            e.HasOne(x => x.Product)
+                .WithMany()
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         // ---- audit_logs ----
@@ -195,13 +204,23 @@ public class AppDbContext : DbContext
         {
             e.ToTable("audit_logs");
             e.HasKey(x => x.Id);
+            e.Property(x => x.ActorUserId).HasMaxLength(450);
             e.Property(x => x.Action).HasMaxLength(50).IsRequired();
             e.Property(x => x.EntityType).HasMaxLength(50).IsRequired();
-            e.Property(x => x.DetailJson).HasColumnType("nvarchar(max)").HasColumnName("detail");
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            // PostgreSQL supports JSONB; SQL Server stores the same audit payload as
+            // nvarchar(max). Keep the model provider-aware because local development
+            // uses SQL Server Express while Docker uses PostgreSQL.
+            e.Property(x => x.DetailJson)
+                .HasColumnType(isPostgreSql ? "jsonb" : "nvarchar(max)")
+                .HasColumnName("detail");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasIndex(x => new { x.EntityType, x.EntityId }).HasDatabaseName("idx_audit_logs_entity");
             e.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_audit_logs_created_at");
+            e.HasOne(x => x.ActorUser)
+                .WithMany()
+                .HasForeignKey(x => x.ActorUserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

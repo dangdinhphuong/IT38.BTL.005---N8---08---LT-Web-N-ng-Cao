@@ -1,72 +1,36 @@
 services:
-  mssql:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: couppa-mssql
+  postgres:
+    image: postgres:16-alpine
+    container_name: couppa-postgres
     restart: unless-stopped
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "Couppa_dev_password1"
-      MSSQL_PID: "Express"
+      POSTGRES_DB: couppa
+      POSTGRES_USER: couppa
+      POSTGRES_PASSWORD: couppa_dev_password
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - couppa_mssql_data:/var/opt/mssql
+      - couppa_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U couppa -d couppa"]
+      interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 20s
 
-  api:
+  app:
     build:
       context: .
       dockerfile: Couppa.Api/Dockerfile
-    container_name: couppa-api
+    container_name: couppa-app
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Docker
-    expose:
-      - "8080"
-    depends_on:
-      mssql:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/auth/csrf-token"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 15s
-
-  web:
-    build:
-      context: ../html
-      dockerfile: Dockerfile
-    container_name: couppa-web
-    restart: unless-stopped
-    expose:
-      - "80"
-    depends_on:
-      - api
-
-  caddy:
-    image: caddy:2-alpine
-    container_name: couppa-caddy
-    restart: unless-stopped
+      ASPNETCORE_URLS: http://+:8080
     ports:
-      - "5001:5001"
-      - "5500:5500"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - couppa_caddy_data:/data
-      - couppa_caddy_config:/config
+      - "5001:8080"
     depends_on:
-      api:
+      postgres:
         condition: service_healthy
-      web:
-        condition: service_started
 
 volumes:
-  couppa_mssql_data:
-  couppa_caddy_data:
-  couppa_caddy_config:
+  couppa_postgres_data:

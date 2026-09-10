@@ -1,4 +1,5 @@
 using Couppa.Api.Data.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Couppa.Api.Data.Seed;
@@ -6,40 +7,49 @@ namespace Couppa.Api.Data.Seed;
 /// <summary>Seed roles (bắt buộc), + dữ liệu demo category/product/admin cho môi trường dev/demo.</summary>
 public static class DbSeeder
 {
-    public static async Task SeedAsync(AppDbContext db)
+    public const string AdminRole = "Admin";
+    public const string UserRole = "User";
+
+    public static async Task SeedAsync(
+        AppDbContext db,
+        RoleManager<IdentityRole> roleManager,
+        UserManager<ApplicationUser> userManager)
     {
-        await SeedRolesAsync(db);
-        await SeedAdminAsync(db);
+        await SeedRolesAsync(roleManager);
+        await SeedAdminAsync(userManager);
         await SeedCategoriesAndProductsAsync(db);
     }
 
-    private static async Task SeedRolesAsync(AppDbContext db)
+    private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
     {
-        if (await db.Roles.AnyAsync()) return;
-
-        db.Roles.AddRange(
-            new Role { Id = RoleIds.User, Name = "User" },
-            new Role { Id = RoleIds.Admin, Name = "Admin" }
-        );
-        await db.SaveChangesAsync();
+        foreach (var role in new[] { UserRole, AdminRole })
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
     }
 
-    private static async Task SeedAdminAsync(AppDbContext db)
+    private static async Task SeedAdminAsync(UserManager<ApplicationUser> userManager)
     {
-        if (await db.Users.AnyAsync(u => u.RoleId == RoleIds.Admin)) return;
+        if (await userManager.GetUsersInRoleAsync(AdminRole) is { Count: > 0 }) return;
 
-        var now = DateTimeOffset.UtcNow;
-        db.Users.Add(new User
+        var admin = new ApplicationUser
         {
+            UserName = "admin@couppa.com",
             Email = "admin@couppa.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@12345"),
             FullName = "Quản trị viên",
-            RoleId = RoleIds.Admin,
             IsLocked = false,
-            CreatedAt = now,
-            UpdatedAt = now
-        });
-        await db.SaveChangesAsync();
+            CreatedAt = DateTimeOffset.UtcNow,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(admin, "Admin@12345");
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(admin, AdminRole);
+        }
     }
 
     private static async Task SeedCategoriesAndProductsAsync(AppDbContext db)

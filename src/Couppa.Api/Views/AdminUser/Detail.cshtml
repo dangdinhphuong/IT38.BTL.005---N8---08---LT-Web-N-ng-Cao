@@ -1,0 +1,41 @@
+@model UserDetailResponse
+@{
+    ViewData["Title"] = $"Chi tiết người dùng - {Model.Email}";
+}
+
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Quản lý Người dùng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Email</li>
+        </ol>
+    </nav>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">Họ và tên</dt>
+            <dd class="col-sm-9">@Model.FullName</dd>
+
+            <dt class="col-sm-3">Số điện thoại</dt>
+            <dd class="col-sm-9">@(Model.Phone ?? "—")</dd>
+
+            <dt class="col-sm-3">Vai trò</dt>
+            <dd class="col-sm-9">
+                <span class="badge @(Model.Role == "Admin" ? "bg-danger" : "bg-primary")">@Model.Role</span>
+            </dd>
+
+            <dt class="col-sm-3">Trạng thái</dt>
+            <dd class="col-sm-9">
+                <span class="badge @(Model.IsLocked ? "bg-secondary" : "bg-success")">
+                    @(Model.IsLocked ? "Đã khóa" : "Hoạt động")
+                </span>
+            </dd>
+
+            <dt class="col-sm-3">Ngày tạo</dt>
+            <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+        </dl>
+    </div>
+</div>

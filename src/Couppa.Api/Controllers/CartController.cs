@@ -1,17 +1,15 @@
 using Couppa.Api.Models.Requests;
-using Couppa.Api.Models.Responses;
+using Couppa.Api.Models.ViewModels;
 using Couppa.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Couppa.Api.Controllers;
 
 /// <summary>
-/// DD-02: KHÔNG [Authorize] ở mức class - Guest chưa đăng nhập vẫn thao tác giỏ hàng được qua
-/// Session cookie (couppa.session), ICartService tự phân biệt Guest/User qua ICurrentUserService.
+/// DD-01: /Cart/Index render View (SRS 15.4). Add/Update/Remove/Clear trả JsonResult, gọi qua
+/// AJAX (Chương 12) — không reload trang giỏ hàng.
 /// </summary>
-[ApiController]
-[Route("api/cart")]
-public class CartController : ControllerBase
+public class CartController : Controller
 {
     private readonly ICartService _cartService;
 
@@ -20,44 +18,42 @@ public class CartController : ControllerBase
         _cartService = cartService;
     }
 
-    /// <summary>FR-CART-002.</summary>
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<CartResponse>>> GetCurrentCart()
+    public async Task<IActionResult> Index()
     {
-        var cart = await _cartService.GetCurrentCartAsync();
-        return Ok(ApiResponse<CartResponse>.Ok(cart));
+        var cartResponse = await _cartService.GetCurrentCartAsync();
+        return View(new CartViewModel { Cart = cartResponse });
     }
 
-    /// <summary>FR-CART-001, UC-02.</summary>
-    [HttpPost("items")]
-    public async Task<ActionResult<ApiResponse<CartResponse>>> AddItem([FromBody] AddCartItemRequest request)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddItem([FromBody] AddCartItemRequest request)
     {
         var cart = await _cartService.AddItemAsync(request);
-        return StatusCode(StatusCodes.Status201Created, ApiResponse<CartResponse>.Ok(cart));
+        return Json(new { success = true, data = cart });
     }
 
-    /// <summary>FR-CART-003/004.</summary>
-    [HttpPut("items/{id:long}")]
-    public async Task<ActionResult<ApiResponse<CartResponse>>> UpdateItemQuantity(
-        long id, [FromBody] UpdateCartItemRequest request)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateItem(long id, [FromBody] UpdateCartItemRequest request)
     {
         var cart = await _cartService.UpdateItemQuantityAsync(id, request);
-        return Ok(ApiResponse<CartResponse>.Ok(cart));
+        return Json(new { success = true, data = cart });
     }
 
-    /// <summary>FR-CART-005.</summary>
-    [HttpDelete("items/{id:long}")]
-    public async Task<ActionResult<ApiResponse<CartResponse>>> RemoveItem(long id)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveItem(long id)
     {
         var cart = await _cartService.RemoveItemAsync(id);
-        return Ok(ApiResponse<CartResponse>.Ok(cart));
+        return Json(new { success = true, data = cart });
     }
 
-    /// <summary>FR-CART-006.</summary>
-    [HttpDelete]
-    public async Task<ActionResult<ApiResponse<object>>> ClearCart()
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Clear()
     {
         await _cartService.ClearCartAsync();
-        return Ok(ApiResponse<object>.Ok(new { success = true }));
+        return Json(new { success = true });
     }
 }

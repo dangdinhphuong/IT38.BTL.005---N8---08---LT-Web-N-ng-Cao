@@ -6,7 +6,7 @@ namespace Couppa.Api.Services;
 /// </summary>
 public interface ICurrentUserService
 {
-    long? UserId { get; }
+    string? UserId { get; }
     bool IsAuthenticated { get; }
     bool IsAdmin { get; }
 

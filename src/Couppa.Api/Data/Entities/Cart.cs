@@ -7,11 +7,11 @@ namespace Couppa.Api.Data.Entities;
 public class Cart
 {
     public long Id { get; set; }
-    public long? UserId { get; set; }
+    public string? UserId { get; set; }
     public Guid? SessionId { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
-    public User? User { get; set; }
+    public ApplicationUser? User { get; set; }
     public ICollection<CartItem> Items { get; set; } = new List<CartItem>();
 }

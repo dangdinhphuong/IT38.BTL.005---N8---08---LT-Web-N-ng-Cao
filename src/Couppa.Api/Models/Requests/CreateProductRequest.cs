@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace Couppa.Api.Models.Requests;
 
@@ -31,5 +32,13 @@ public class CreateProductRequest
 
     public bool IsFeatured { get; set; }
 
+    /// <summary>
+    /// Ảnh được gửi bằng multipart/form-data từ Admin. File sẽ được lưu vào
+    /// wwwroot/uploads/products và chỉ URL tương đối được lưu trong database.
+    /// </summary>
+    public List<IFormFile> ImageFiles { get; set; } = new();
+
+    // Giữ property này cho các test/service caller nội bộ cũ. Form Admin không
+    // còn nhận URL ảnh từ người dùng.
     public string[] ImageUrls { get; set; } = Array.Empty<string>();
 }

@@ -20,4 +20,11 @@ public class ProductResponse
     public required DateTimeOffset CreatedAt { get; init; }
     public required DateTimeOffset UpdatedAt { get; init; }
     public required IReadOnlyList<ProductImageResponse> Images { get; init; }
+
+    /// <summary>Ảnh đại diện (IsPrimary=true, hoặc ảnh đầu tiên) — tiện cho View, tương đương ProductSummaryResponse.PrimaryImageUrl.</summary>
+    public string? PrimaryImageUrl => Images
+        .OrderByDescending(i => i.IsPrimary)
+        .ThenBy(i => i.SortOrder)
+        .Select(i => i.ImageUrl)
+        .FirstOrDefault();
 }

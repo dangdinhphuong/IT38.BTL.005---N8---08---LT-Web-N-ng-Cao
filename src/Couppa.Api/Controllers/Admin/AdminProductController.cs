@@ -1,62 +1,88 @@
 using Couppa.Api.Models.Requests;
 using Couppa.Api.Models.Responses;
+using Couppa.Api.Models.ViewModels;
 using Couppa.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Couppa.Api.Controllers.Admin;
 
-[ApiController]
-[Route("api/admin/products")]
+/// <summary>SRS 15.2b — /Admin/Product/Index render View; Create nhận multipart/form-data
+/// để upload ảnh, các thao tác còn lại trả JSON cho AJAX.</summary>
+[Route("Admin/Product/[action]")]
 [Authorize(Policy = "RequireAdmin")]
-public class AdminProductController : ControllerBase
+public class AdminProductController : Controller
 {
     private readonly IProductService _productService;
+    private readonly ICategoryService _categoryService;
 
-    public AdminProductController(IProductService productService)
+    public AdminProductController(IProductService productService, ICategoryService categoryService)
     {
         _productService = productService;
+        _categoryService = categoryService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<PagedResult<ProductSummaryResponse>>>> GetList([FromQuery] AdminProductListQuery query)
+    public async Task<IActionResult> Index(string? search, long? category, string? status, int page = 1)
     {
-        var result = await _productService.GetAdminListAsync(query);
-        return Ok(ApiResponse<PagedResult<ProductSummaryResponse>>.Ok(result));
+        var pagedResult = await _productService.GetAdminListAsync(new AdminProductListQuery
+        {
+            Search = search,
+            Category = category,
+            Status = status,
+            Page = page,
+            PageSize = 50
+        });
+        var categories = await _categoryService.GetActiveListAsync();
+
+        return View(new AdminProductsViewModel
+        {
+            Products = pagedResult.Items.ToList(),
+            Categories = categories.ToList()
+        });
     }
 
-    [HttpGet("{id:long}")]
-    public async Task<ActionResult<ApiResponse<ProductResponse>>> GetById(long id)
+    [HttpGet]
+    public async Task<IActionResult> Detail(long id)
     {
         var product = await _productService.GetAdminDetailAsync(id);
-        return Ok(ApiResponse<ProductResponse>.Ok(product));
+        return View("~/Views/Product/Detail.cshtml", new ProductDetailViewModel
+        {
+            Product = product,
+            RelatedProducts = new List<ProductSummaryResponse>()
+        });
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<ProductResponse>>> Create([FromBody] CreateProductRequest request)
+    [ValidateAntiForgeryToken]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Create([FromForm] CreateProductRequest request)
     {
         var product = await _productService.CreateAsync(request);
-        return StatusCode(StatusCodes.Status201Created, ApiResponse<ProductResponse>.Ok(product));
+        return StatusCode(StatusCodes.Status201Created, new { success = true, data = product });
     }
 
-    [HttpPut("{id:long}")]
-    public async Task<ActionResult<ApiResponse<ProductResponse>>> Update(long id, [FromBody] UpdateProductRequest request)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(long id, [FromBody] UpdateProductRequest request)
     {
         var product = await _productService.UpdateAsync(id, request);
-        return Ok(ApiResponse<ProductResponse>.Ok(product));
+        return Json(new { success = true, data = product });
     }
 
-    [HttpDelete("{id:long}")]
-    public async Task<ActionResult<ApiResponse<object>>> Delete(long id)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(long id)
     {
         await _productService.DeleteAsync(id);
-        return Ok(ApiResponse<object>.Ok(new { success = true }));
+        return Json(new { success = true });
     }
 
-    [HttpPatch("{id:long}/status")]
-    public async Task<ActionResult<ApiResponse<ProductResponse>>> ChangeStatus(long id, [FromBody] ChangeProductStatusRequest request)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleStatus(long id, [FromBody] ChangeProductStatusRequest request)
     {
         var product = await _productService.ChangeStatusAsync(id, request.IsActive);
-        return Ok(ApiResponse<ProductResponse>.Ok(product));
+        return Json(new { success = true, data = product });
     }
 }

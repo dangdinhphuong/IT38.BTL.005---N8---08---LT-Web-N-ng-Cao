@@ -1,0 +1,152 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ - Cửa hàng Công nghệ Couppa";
+}
+
+<!-- HERO SECTION -->
+<section style="background: linear-gradient(135deg, #4F46E5 0%, #312E81 100%); color: white; padding: var(--space-16) 0; margin-top: -var(--space-6);">
+  <div class="container" style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--space-8); align-items: center;">
+    <div>
+      <span class="badge" style="background: rgba(255,255,255,0.15); color: white; padding: 6px 14px; margin-bottom: var(--space-4);">Công Nghệ Mới 2026</span>
+      <h1 style="color: white; font-size: 2.75rem; margin-bottom: var(--space-4);">Khám Phá Công Nghệ Đỉnh Cao Cùng Couppa</h1>
+      <p style="color: #C7D2FE; font-size: 1.125rem; margin-bottom: var(--space-8); max-width: 540px;">
+        Trải nghiệm các dòng sản phẩm laptop, điện thoại, phụ kiện cao cấp với mức giá ưu đãi và dịch vụ bảo hành tận tâm.
+      </p>
+      <div class="flex gap-4">
+        <a asp-controller="Product" asp-action="Index" class="btn btn-secondary btn-lg">Xem Sản Phẩm</a>
+        <a href="#featured-section" class="btn btn-outline btn-lg" style="color: white; border-color: rgba(255,255,255,0.3);">Sản Phẩm Nổi Bật</a>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=700&auto=format&fit=crop&q=80" alt="Hero Product" style="border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); max-height: 380px; width: 100%; object-fit: cover;">
+    </div>
+  </div>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="container" style="padding-top: var(--space-8);">
+
+  <!-- CATEGORIES BANNER -->
+  <section style="margin-bottom: var(--space-12);">
+    <div class="flex justify-between items-center" style="margin-bottom: var(--space-6);">
+      <div>
+        <h2>Danh Mục Nổi Bật</h2>
+        <p class="caption">Các nhóm sản phẩm công nghệ hot nhất</p>
+      </div>
+      <a asp-controller="Product" asp-action="Index" style="color: var(--color-primary); font-weight: 600;">Xem tất cả &rarr;</a>
+    </div>
+
+    <div class="grid grid-cols-4">
+      @if (Model.Categories != null && Model.Categories.Any())
+      {
+        var categoryStyles = new[] {
+            new { Bg = "var(--color-primary-light)", Color = "var(--color-primary)", Icon = "bi-phone" },
+            new { Bg = "var(--color-secondary-light)", Color = "var(--color-secondary)", Icon = "bi-laptop" },
+            new { Bg = "#FEF3C7", Color = "#D97706", Icon = "bi-headphones" },
+            new { Bg = "#DBEAFE", Color = "#2563EB", Icon = "bi-smartwatch" }
+        };
+        int index = 0;
+        foreach (var cat in Model.Categories)
+        {
+          var style = categoryStyles[index % categoryStyles.Length];
+          index++;
+          <a asp-controller="Product" asp-action="Index" asp-route-category="@cat.Id" class="card" style="padding: var(--space-6); text-align: center; background: white;">
+            <div style="width: 56px; height: 56px; background: @style.Bg; color: @style.Color; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3); font-size: 1.5rem;">
+              <i class="bi @style.Icon"></i>
+            </div>
+            <h4 style="margin-bottom: 4px;">@cat.Name</h4>
+            <span class="caption">@cat.ProductCount sản phẩm</span>
+          </a>
+        }
+      }
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section id="featured-section" style="margin-bottom: var(--space-12);">
+    <div class="flex justify-between items-center" style="margin-bottom: var(--space-6);">
+      <div>
+        <h2>Sản Phẩm Nổi Bật</h2>
+        <p>Tuyển chọn những sản phẩm bán chạy và được yêu thích nhất</p>
+      </div>
+      <a asp-controller="Product" asp-action="Index" class="btn btn-outline btn-sm">Xem tất cả</a>
+    </div>
+
+    <div class="grid grid-cols-4">
+      @foreach (var p in Model.FeaturedProducts)
+      {
+        bool outOfStock = p.StockQuantity <= 0;
+        <div class="card product-card">
+          <div class="product-card-img-wrapper">
+            <img src="@p.PrimaryImageUrl" alt="@p.Name" class="product-card-img">
+            <span class="product-card-badge @(outOfStock ? "out-of-stock" : "")">
+              @(outOfStock ? "Hết hàng" : "Nổi bật")
+            </span>
+          </div>
+          <div class="product-card-content">
+            <span class="product-category">@p.CategoryName</span>
+            <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="product-title">@p.Name</a>
+            <div class="product-price-row">
+              <div>
+                <div class="product-price">@p.Price.ToString("N0") đ</div>
+                <div class="stock-status @(p.StockQuantity > 0 ? "in-stock" : "out-of-stock")">
+                  @(p.StockQuantity > 0 ? $"Còn hàng ({p.StockQuantity})" : "Hết hàng")
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm js-add-to-cart" data-product-id="@p.Id" @(outOfStock ? "disabled" : "")>
+                + Giỏ
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- LATEST PRODUCTS -->
+  <section style="margin-bottom: var(--space-12);">
+    <div class="flex justify-between items-center" style="margin-bottom: var(--space-6);">
+      <div>
+        <h2>Sản Phẩm Mới Nhất</h2>
+        <p>Cập nhật những công nghệ và thiết bị vừa ra mắt</p>
+      </div>
+      <a asp-controller="Product" asp-action="Index" asp-route-sort="newest" class="btn btn-outline btn-sm">Khám phá mới</a>
+    </div>
+
+    <div class="grid grid-cols-4">
+      @foreach (var p in Model.LatestProducts)
+      {
+        bool outOfStock = p.StockQuantity <= 0;
+        <div class="card product-card">
+          <div class="product-card-img-wrapper">
+            <img src="@p.PrimaryImageUrl" alt="@p.Name" class="product-card-img">
+            @if (outOfStock)
+            {
+              <span class="product-card-badge out-of-stock">Hết hàng</span>
+            }
+          </div>
+          <div class="product-card-content">
+            <span class="product-category">@p.CategoryName</span>
+            <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="product-title">@p.Name</a>
+            <div class="product-price-row">
+              <div>
+                <div class="product-price">@p.Price.ToString("N0") đ</div>
+                <div class="stock-status @(p.StockQuantity > 0 ? "in-stock" : "out-of-stock")">
+                  @(p.StockQuantity > 0 ? $"Còn hàng ({p.StockQuantity})" : "Hết hàng")
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm js-add-to-cart" data-product-id="@p.Id" @(outOfStock ? "disabled" : "")>
+                + Giỏ
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/cart-ajax.js" asp-append-version="true"></script>
+}

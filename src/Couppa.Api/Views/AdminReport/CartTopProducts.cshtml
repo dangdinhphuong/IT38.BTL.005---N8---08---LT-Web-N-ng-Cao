@@ -1,0 +1,156 @@
+@model AdminReportsViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Báo cáo Thống kê - Admin Couppa";
+    int totalProds = (Model.Summary.InStockProducts + Model.Summary.OutOfStockProducts) > 0 
+        ? (Model.Summary.InStockProducts + Model.Summary.OutOfStockProducts) 
+        : 1;
+    int inStockPct = (int)Math.Round((double)Model.Summary.InStockProducts / totalProds * 100);
+    int outStockPct = 100 - inStockPct;
+}
+
+<div class="admin-wrapper">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            Couppa Admin
+        </div>
+
+        <nav class="admin-menu">
+            <a href="/Admin/Dashboard/Index" class="admin-menu-item">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </a>
+            <a href="/Admin/Product/Index" class="admin-menu-item">
+                <i class="bi bi-box-seam me-2"></i> Quản Lý Sản Phẩm
+            </a>
+            <a href="/Admin/Category/Index" class="admin-menu-item">
+                <i class="bi bi-tags me-2"></i> Quản Lý Danh Mục
+            </a>
+            <a href="/Admin/User/Index" class="admin-menu-item">
+                <i class="bi bi-people me-2"></i> Quản Lý Người Dùng
+            </a>
+            <a href="/Admin/Report/CartTopProducts" class="admin-menu-item active">
+                <i class="bi bi-bar-chart me-2"></i> Báo Cáo Thống Kê
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding: var(--space-4); border-top: 1px solid #1E293B;">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline btn-block btn-sm" style="color: #94A3B8; border-color: #334155;">&larr; Xem Website Public</a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <h3>Báo Cáo Thống Kê Nghiệp Vụ</h3>
+            <button onclick="window.print()" class="btn btn-outline btn-sm">
+                🖨 In Báo Cáo
+            </button>
+        </header>
+
+        <main class="admin-content">
+            <!-- REPORT 1 & 2: CATEGORY & STOCK BREAKDOWN -->
+            <div class="grid grid-cols-2" style="gap: var(--space-8); margin-bottom: var(--space-8);">
+                
+                <div class="card" style="padding: var(--space-6); background: white;">
+                    <h4 style="margin-bottom: var(--space-2);">Thống Kê Sản Phẩm Theo Danh Mục</h4>
+                    <p class="caption" style="margin-bottom: var(--space-4);">Tỷ lệ phân bổ sản phẩm theo các nhóm danh mục hiện có</p>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tên Danh Mục</th>
+                                <th>Số Lượng SP</th>
+                                <th>Tỷ Lệ %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Summary.ProductsByCategory)
+                            {
+                                int pct = (int)Math.Round((double)item.Count / totalProds * 100);
+                                <tr>
+                                    <td style="font-weight: 600;">@item.CategoryName</td>
+                                    <td>@item.Count sản phẩm</td>
+                                    <td><strong style="color: var(--color-primary);">@pct%</strong></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card" style="padding: var(--space-6); background: white;">
+                    <h4 style="margin-bottom: var(--space-2);">Thống Kê Trạng Thái Tồn Kho</h4>
+                    <p class="caption" style="margin-bottom: var(--space-4);">Phân tích tỷ lệ sản phẩm còn hàng vs hết hàng</p>
+
+                    <div style="display: flex; flex-direction: column; gap: var(--space-4); margin-top: var(--space-4);">
+                        <div>
+                            <div class="flex justify-between" style="font-size: 0.875rem; margin-bottom: 6px;">
+                                <span style="font-weight: 600; color: var(--color-success);">Sản phẩm còn hàng (> 0)</span>
+                                <strong>@Model.Summary.InStockProducts sản phẩm</strong>
+                            </div>
+                            <div style="height: 12px; background: #E2E8F0; border-radius: var(--radius-full);">
+                                <div style="height: 100%; background: var(--color-success); border-radius: var(--radius-full); width: @(inStockPct)%;"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between" style="font-size: 0.875rem; margin-bottom: 6px;">
+                                <span style="font-weight: 600; color: var(--color-error);">Sản phẩm hết hàng (= 0)</span>
+                                <strong>@Model.Summary.OutOfStockProducts sản phẩm</strong>
+                            </div>
+                            <div style="height: 12px; background: #E2E8F0; border-radius: var(--radius-full);">
+                                <div style="height: 100%; background: var(--color-error); border-radius: var(--radius-full); width: @(outStockPct)%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TOP PRODUCTS ADDED TO CART -->
+            <div class="card" style="padding: var(--space-6); background: white;">
+                <div class="flex justify-between items-center" style="margin-bottom: var(--space-4);">
+                    <div>
+                        <h4>Top Sản Phẩm Được Thêm Vào Giỏ Hàng Nhiều Nhất</h4>
+                        <p class="caption">Dữ liệu trích xuất từ lịch sử thêm giỏ hàng (cart_activity_logs)</p>
+                    </div>
+                    <span class="badge badge-info">30 Ngày Gần Nhất</span>
+                </div>
+
+                @if (!Model.TopProducts.Any())
+                {
+                    <div class="empty-state" style="padding: var(--space-8);">
+                        <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
+                        <p class="empty-state-desc">Chưa có dữ liệu thống kê giỏ hàng trong 30 ngày qua.</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Xếp Hạng</th>
+                                <th>Mã SP</th>
+                                <th>Sản Phẩm</th>
+                                <th>Lượt Thêm Vào Giỏ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int rank = 1; }
+                            @foreach (var item in Model.TopProducts)
+                            {
+                                <tr>
+                                    <td><strong style="color: var(--color-primary);">#@(rank++)</strong></td>
+                                    <td><code>#@item.ProductId</code></td>
+                                    <td style="font-weight: 600;">@item.ProductName</td>
+                                    <td><span class="badge badge-success">@item.AddCount lượt thêm</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </main>
+    </div>
+</div>
