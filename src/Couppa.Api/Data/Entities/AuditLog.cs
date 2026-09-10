@@ -2,6 +2,8 @@ namespace Couppa.Api.Data.Entities;
 
 public static class AuditAction
 {
+    public const string LoginSuccess = "LOGIN_SUCCESS";
+    public const string Logout = "LOGOUT";
     public const string ProductCreate = "PRODUCT_CREATE";
     public const string ProductUpdate = "PRODUCT_UPDATE";
     public const string ProductDelete = "PRODUCT_DELETE";
@@ -34,4 +36,5 @@ public class AuditLog
     public string? DetailJson { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
+    public ApplicationUser? ActorUser { get; set; }
 }

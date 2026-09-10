@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow text-warning me-2"></i>Báo cáo Thống kê</h2>
-            <p class="text-muted mb-0">Thống kê các sản phẩm được đưa vào giỏ hàng nhiều nhất</p>
+        <p class="text-muted mb-0">Thống kê sản phẩm, tồn kho, người dùng và hoạt động giỏ hàng</p>
         </div>
     </div>
 
@@ -47,5 +47,27 @@
                 </table>
             </div>
         }
+    </div>
+
+    <div class="row g-4 mt-1 mb-4">
+        <div class="col-md-3"><div class="card border-0 shadow-sm rounded-4 p-3"><small class="text-muted">Còn hàng</small><strong class="fs-3 text-success">@Model.Summary.InStockProducts</strong></div></div>
+        <div class="col-md-3"><div class="card border-0 shadow-sm rounded-4 p-3"><small class="text-muted">Hết hàng</small><strong class="fs-3 text-danger">@Model.Summary.OutOfStockProducts</strong></div></div>
+        <div class="col-md-3"><div class="card border-0 shadow-sm rounded-4 p-3"><small class="text-muted">Tổng người dùng</small><strong class="fs-3 text-primary">@Model.Summary.TotalUsers</strong></div></div>
+        <div class="col-md-3"><div class="card border-0 shadow-sm rounded-4 p-3"><small class="text-muted">Người dùng mới trong kỳ</small><strong class="fs-3 text-warning">@Model.Summary.NewUsers</strong></div></div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+        <h4 class="fw-bold mb-3">Sản phẩm theo danh mục</h4>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead><tr><th>Danh mục</th><th class="text-end">Số lượng</th></tr></thead>
+                <tbody>
+                @foreach (var item in Model.Summary.ProductsByCategory)
+                {
+                    <tr><td>@item.CategoryName</td><td class="text-end">@item.Count</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

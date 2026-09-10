@@ -18,6 +18,21 @@ public class AdminReportController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Index(DateTimeOffset? from, DateTimeOffset? to)
+    {
+        var summary = await _reportService.GetSummaryAsync(from, to);
+        var topProducts = await _reportService.GetCartTopProductsAsync(from, to);
+        return View(new AdminReportsViewModel { Summary = summary, TopProducts = topProducts });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Summary(DateTimeOffset? from, DateTimeOffset? to)
+    {
+        var summary = await _reportService.GetSummaryAsync(from, to);
+        return Json(new { success = true, data = summary });
+    }
+
+    [HttpGet]
     public async Task<IActionResult> CartTopProducts(DateTimeOffset? from, DateTimeOffset? to)
     {
         var topProducts = await _reportService.GetCartTopProductsAsync(from, to);
@@ -27,6 +42,10 @@ public class AdminReportController : Controller
             return Json(new { success = true, data = topProducts });
         }
 
-        return View(new AdminReportsViewModel { TopProducts = topProducts });
+        return View(new AdminReportsViewModel
+        {
+            Summary = await _reportService.GetSummaryAsync(from, to),
+            TopProducts = topProducts
+        });
     }
 }

@@ -1,0 +1,48 @@
+# Build output
+**/bin/
+**/obj/
+**/buildtmp/
+
+# Visual Studio / .NET IDE files
+.vs/
+**/.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Test and coverage output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Logs and local runtime files
+*.log
+*.tmp
+*.pid
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+appsettings.*.Local.json
+secrets.json
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# NuGet package cache
+packages/
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# LibreOffice / Word lock files
+.~lock.*#
+

@@ -3,65 +3,100 @@
     ViewData["Title"] = "Quản lý Sản phẩm - Admin Couppa";
 }
 
-<div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1"><i class="bi bi-box-seam text-success me-2"></i>Quản lý Sản phẩm</h2>
-            <p class="text-muted mb-0">Danh sách và tạo mới sản phẩm công nghệ</p>
+<div class="admin-wrapper" style="margin-top: -var(--space-6);">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            Couppa Admin
         </div>
-        <button class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createProductModal">
-            <i class="bi bi-plus-circle me-1"></i> Thêm sản phẩm mới
-        </button>
-    </div>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="ps-4">Sản phẩm</th>
-                        <th>Danh mục</th>
-                        <th>Đơn giá</th>
-                        <th>Tồn kho</th>
-                        <th>Trạng thái</th>
-                        <th class="text-end pe-4">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var p in Model.Products)
-                    {
-                        <tr>
-                            <td class="ps-4 py-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <img src="@p.PrimaryImageUrl" class="rounded-3 shadow-sm" style="width: 50px; height: 50px; object-fit: cover;" alt="@p.Name">
-                                    <div>
-                                        <div class="fw-bold">@p.Name</div>
-                                        <small class="text-muted">SKU: @p.Sku</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span class="badge bg-light text-dark border">@p.CategoryName</span></td>
-                            <td class="fw-bold text-primary">@p.Price.ToString("N0") đ</td>
-                            <td>
-                                <span class="badge @(p.StockQuantity > 0 ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger") rounded-pill">
-                                    @p.StockQuantity
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge @(p.IsActive ? "bg-success" : "bg-secondary")">
-                                    @(p.IsActive ? "Đang bán" : "Ngừng bán")
-                                </span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <button type="button" class="btn btn-outline-danger btn-sm rounded-circle js-delete-product" data-id="@p.Id" title="Xóa">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <nav class="admin-menu">
+            <a href="/Admin/Dashboard/Index" class="admin-menu-item">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </a>
+            <a href="/Admin/Product/Index" class="admin-menu-item active">
+                <i class="bi bi-box-seam me-2"></i> Quản Lý Sản Phẩm
+            </a>
+            <a href="/Admin/Category/Index" class="admin-menu-item">
+                <i class="bi bi-tags me-2"></i> Quản Lý Danh Mục
+            </a>
+            <a href="/Admin/User/Index" class="admin-menu-item">
+                <i class="bi bi-people me-2"></i> Quản Lý Người Dùng
+            </a>
+            <a href="/Admin/Report/CartTopProducts" class="admin-menu-item">
+                <i class="bi bi-bar-chart me-2"></i> Báo Cáo Thống Kê
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding: var(--space-4); border-top: 1px solid #1E293B;">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline btn-block btn-sm" style="color: #94A3B8; border-color: #334155;">&larr; Xem Website Public</a>
         </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <h3>Danh Sách Quản Lý Sản Phẩm</h3>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProductModal">
+                <i class="bi bi-plus-lg me-1"></i> Thêm Sản Phẩm Mới
+            </button>
+        </header>
+
+        <main class="admin-content">
+            <div class="data-table-container">
+                <div class="table-toolbar">
+                    <span class="caption">Tổng số: <strong>@Model.Products.Count</strong> sản phẩm</span>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Mã SKU</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Danh Mục</th>
+                            <th>Giá Bán (VNĐ)</th>
+                            <th>Tồn Kho</th>
+                            <th>Trạng Thái</th>
+                            <th style="text-align: right;">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productRows">
+                        @foreach (var p in Model.Products)
+                        {
+                            <tr data-id="@p.Id">
+                                <td>
+                                    <img src="@p.PrimaryImageUrl" style="width: 44px; height: 44px; object-fit: cover; border-radius: var(--radius-md);" alt="@p.Name">
+                                </td>
+                                <td><code>@p.Sku</code></td>
+                                <td style="font-weight: 600;">@p.Name</td>
+                                <td>@p.CategoryName</td>
+                                <td style="font-weight: 700; color: var(--color-primary);">@p.Price.ToString("N0") đ</td>
+                                <td>
+                                    <span class="badge @(p.StockQuantity > 0 ? "badge-success" : "badge-danger")">
+                                        @p.StockQuantity
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge @(p.IsActive ? "badge-success" : "badge-danger")">
+                                        @(p.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <button type="button" class="btn btn-outline btn-sm js-toggle-product-status" data-id="@p.Id" data-active="@p.IsActive.ToString().ToLowerInvariant()" title="Đổi trạng thái" style="margin-right: 4px;">
+                                        <i class="bi bi-power"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline btn-sm js-delete-product" data-id="@p.Id" title="Xóa" style="color: var(--color-error); border-color: var(--color-error-light);">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </main>
     </div>
 </div>
 
@@ -70,25 +105,25 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-4 border-0 shadow">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold">Thêm Sản Phẩm Mới</h5>
+                <h3 class="modal-title">Thêm Sản Phẩm Mới</h3>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="createProductForm">
                 <div class="modal-body">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Mã sản phẩm (SKU)</label>
-                            <input type="text" name="sku" class="form-control" required placeholder="vd: SKU00099" />
+                    <div class="grid grid-cols-2" style="gap: var(--space-4);">
+                        <div class="form-group">
+                            <label class="form-label">Mã sản phẩm (SKU) <span class="required">*</span></label>
+                            <input type="text" name="sku" class="form-input" required placeholder="vd: SKU00099" />
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Tên sản phẩm</label>
-                            <input type="text" name="name" class="form-control" required placeholder="vd: iPhone 16 Pro Max" />
+                        <div class="form-group">
+                            <label class="form-label">Tên sản phẩm <span class="required">*</span></label>
+                            <input type="text" name="name" class="form-input" required placeholder="vd: iPhone 16 Pro Max" />
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Danh mục</label>
+                    <div class="grid grid-cols-2" style="gap: var(--space-4);">
+                        <div class="form-group">
+                            <label class="form-label">Danh mục <span class="required">*</span></label>
                             <select name="categoryId" class="form-select" required>
                                 @foreach (var cat in Model.Categories)
                                 {
@@ -96,31 +131,31 @@
                                 }
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">URL Hình ảnh</label>
-                            <input type="url" name="imageUrl" class="form-control" placeholder="https://..." />
+                        <div class="form-group">
+                            <label class="form-label">URL Hình ảnh</label>
+                            <input type="url" name="imageUrl" class="form-input" placeholder="https://..." />
                         </div>
                     </div>
 
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Giá bán (VNĐ)</label>
-                            <input type="number" name="price" class="form-control" required step="1000" min="0" placeholder="34990000" />
+                    <div class="grid grid-cols-2" style="gap: var(--space-4);">
+                        <div class="form-group">
+                            <label class="form-label">Giá bán (VNĐ) <span class="required">*</span></label>
+                            <input type="number" name="price" class="form-input" required step="1000" min="0" placeholder="34990000" />
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Số lượng tồn kho</label>
-                            <input type="number" name="stockQuantity" class="form-control" required min="0" value="10" />
+                        <div class="form-group">
+                            <label class="form-label">Số lượng tồn kho <span class="required">*</span></label>
+                            <input type="number" name="stockQuantity" class="form-input" required min="0" value="10" />
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Mô tả sản phẩm</label>
-                        <textarea name="description" class="form-control" rows="4" placeholder="Nhập thông số kỹ thuật, đặc điểm nổi bật..."></textarea>
+                    <div class="form-group">
+                        <label class="form-label">Mô tả sản phẩm</label>
+                        <textarea name="description" class="form-textarea" rows="4" placeholder="Nhập thông số kỹ thuật, đặc điểm nổi bật..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">Lưu sản phẩm</button>
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Hủy Bỏ</button>
+                    <button type="submit" class="btn btn-primary">Lưu Sản Phẩm</button>
                 </div>
             </form>
         </div>
@@ -152,13 +187,29 @@
         });
 
         document.addEventListener('click', async function (e) {
+            const toggle = e.target.closest('.js-toggle-product-status');
+            if (toggle) {
+                const isActive = toggle.dataset.active !== 'true';
+                const result = await window.couppaAdminAjax.postJson(`/Admin/Product/ToggleStatus/${toggle.dataset.id}`, { isActive });
+                if (result.success) {
+                    toggle.dataset.active = isActive.toString();
+                    const status = toggle.closest('tr')?.querySelector('td:nth-child(7) span');
+                    if (status) {
+                        status.className = `badge ${isActive ? 'badge-success' : 'badge-danger'}`;
+                        status.textContent = isActive ? 'Active' : 'Inactive';
+                    }
+                } else {
+                    alert(result.error?.message || 'Không thể cập nhật trạng thái sản phẩm.');
+                }
+                return;
+            }
             const btn = e.target.closest('.js-delete-product');
             if (!btn) return;
             if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
 
             const result = await window.couppaAdminAjax.postJson(`/Admin/Product/Delete/${btn.dataset.id}`, null);
             if (result.success) {
-                location.reload();
+                btn.closest('tr')?.remove();
             } else {
                 alert(result.error?.message || 'Không thể xóa sản phẩm.');
             }

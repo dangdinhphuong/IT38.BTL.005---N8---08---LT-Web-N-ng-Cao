@@ -2,6 +2,7 @@ using Couppa.Api.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Couppa.Api.Data;
 
@@ -19,9 +20,31 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<CartActivityLog> CartActivityLogs => Set<CartActivityLog>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // Cart activity rows intentionally keep a required ProductId while Product has a
+        // soft-delete query filter. The relationship is still valid for reporting; suppress
+        // EF's design-time warning so migrations can be generated without a Windows EventLog
+        // provider turning the warning into an exception.
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(CoreEventId.PossibleIncorrectRequiredNavigationWithQueryFilterInteractionWarning));
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // The PostgreSQL schema uses the snake_case column names from the SRS
+        // constraints, while the SQL Server model keeps EF's conventional
+        // PascalCase column names. Raw SQL used by checks/filtered indexes must
+        // therefore match the active provider.
+        var isPostgreSql = Database.ProviderName?.Contains(
+            "Npgsql", StringComparison.OrdinalIgnoreCase) == true;
+        var priceColumn = isPostgreSql ? "price" : "[Price]";
+        var stockQuantityColumn = isPostgreSql ? "stock_quantity" : "[StockQuantity]";
+        var quantityColumn = isPostgreSql ? "quantity" : "[Quantity]";
+        var userColumn = isPostgreSql ? "user_id" : "[UserId]";
+        var sessionColumn = isPostgreSql ? "session_id" : "[SessionId]";
 
         // ---- ApplicationUser (mở rộng AspNetUsers) ----
         modelBuilder.Entity<ApplicationUser>(e =>
@@ -54,8 +77,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.ToTable("products", t =>
             {
                 // BR-09 / BR-10: giá và tồn kho không được âm.
-                t.HasCheckConstraint("ck_products_price_non_negative", "price >= 0");
-                t.HasCheckConstraint("ck_products_stock_non_negative", "stock_quantity >= 0");
+                t.HasCheckConstraint("ck_products_price_non_negative", $"{priceColumn} >= 0");
+                t.HasCheckConstraint("ck_products_stock_non_negative", $"{stockQuantityColumn} >= 0");
             });
             e.HasKey(x => x.Id);
             e.Property(x => x.Sku).HasMaxLength(50).IsRequired();
@@ -110,15 +133,15 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             {
                 // BR-12: cart chỉ thuộc đúng 1 trong 2 (user hoặc session), không thể cả hai / không cả hai.
                 t.HasCheckConstraint("ck_carts_owner_xor",
-                    "(user_id IS NOT NULL AND session_id IS NULL) OR (user_id IS NULL AND session_id IS NOT NULL)");
+                    $"({userColumn} IS NOT NULL AND {sessionColumn} IS NULL) OR ({userColumn} IS NULL AND {sessionColumn} IS NOT NULL)");
             });
             e.HasKey(x => x.Id);
             e.Property(x => x.UserId).HasMaxLength(450);
             e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             e.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            e.HasIndex(x => x.UserId).IsUnique().HasFilter("user_id IS NOT NULL");
-            e.HasIndex(x => x.SessionId).IsUnique().HasFilter("session_id IS NOT NULL");
+            e.HasIndex(x => x.UserId).IsUnique().HasFilter($"{userColumn} IS NOT NULL");
+            e.HasIndex(x => x.SessionId).IsUnique().HasFilter($"{sessionColumn} IS NOT NULL");
 
             e.HasOne(x => x.User)
                 .WithOne(u => u.Cart)
@@ -131,7 +154,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         {
             e.ToTable("cart_items", t =>
             {
-                t.HasCheckConstraint("ck_cart_items_quantity_positive", "quantity > 0");
+                t.HasCheckConstraint("ck_cart_items_quantity_positive", $"{quantityColumn} > 0");
             });
             e.HasKey(x => x.Id);
             e.Property(x => x.Quantity).HasDefaultValue(1);
@@ -166,6 +189,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
             e.HasIndex(x => x.ProductId).HasDatabaseName("idx_cart_activity_logs_product_id");
             e.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_cart_activity_logs_created_at");
+            e.HasOne(x => x.Product)
+                .WithMany()
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         // ---- audit_logs ----
@@ -176,11 +207,20 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.ActorUserId).HasMaxLength(450);
             e.Property(x => x.Action).HasMaxLength(50).IsRequired();
             e.Property(x => x.EntityType).HasMaxLength(50).IsRequired();
-            e.Property(x => x.DetailJson).HasColumnType("jsonb").HasColumnName("detail");
+            // PostgreSQL supports JSONB; SQL Server stores the same audit payload as
+            // nvarchar(max). Keep the model provider-aware because local development
+            // uses SQL Server Express while Docker uses PostgreSQL.
+            e.Property(x => x.DetailJson)
+                .HasColumnType(isPostgreSql ? "jsonb" : "nvarchar(max)")
+                .HasColumnName("detail");
             e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasIndex(x => new { x.EntityType, x.EntityId }).HasDatabaseName("idx_audit_logs_entity");
             e.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_audit_logs_created_at");
+            e.HasOne(x => x.ActorUser)
+                .WithMany()
+                .HasForeignKey(x => x.ActorUserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

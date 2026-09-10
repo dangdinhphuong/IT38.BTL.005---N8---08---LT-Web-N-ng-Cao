@@ -15,9 +15,8 @@ namespace Couppa.Api.Tests.Services;
 /// </summary>
 public class CartServiceTests
 {
-    private const long GuestUserIdUnused = 0; // Guest không có UserId, chỉ để đọc code rõ nghĩa hơn.
     private static readonly Guid FixedGuestSessionId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-    private const long FixedUserId = 100;
+    private const string FixedUserId = "user-100";
 
     private static AppDbContext CreateDbContext()
     {
@@ -31,12 +30,12 @@ public class CartServiceTests
     {
         var mock = new Mock<ICurrentUserService>();
         mock.SetupGet(c => c.IsAuthenticated).Returns(false);
-        mock.SetupGet(c => c.UserId).Returns((long?)null);
+        mock.SetupGet(c => c.UserId).Returns((string?)null);
         mock.Setup(c => c.GetOrCreateGuestSessionId()).Returns(FixedGuestSessionId);
         return mock;
     }
 
-    private static Mock<ICurrentUserService> CreateUserCurrentUser(long userId = FixedUserId)
+    private static Mock<ICurrentUserService> CreateUserCurrentUser(string userId = FixedUserId)
     {
         var mock = new Mock<ICurrentUserService>();
         mock.SetupGet(c => c.IsAuthenticated).Returns(true);

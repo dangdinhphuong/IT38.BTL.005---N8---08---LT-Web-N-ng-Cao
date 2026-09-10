@@ -1,4 +1,5 @@
 using Couppa.Api.Models.Requests;
+using Couppa.Api.Models.Responses;
 using Couppa.Api.Models.ViewModels;
 using Couppa.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -40,12 +41,23 @@ public class AdminProductController : Controller
         });
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Detail(long id)
+    {
+        var product = await _productService.GetAdminDetailAsync(id);
+        return View("~/Views/Product/Detail.cshtml", new ProductDetailViewModel
+        {
+            Product = product,
+            RelatedProducts = new List<ProductSummaryResponse>()
+        });
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([FromBody] CreateProductRequest request)
     {
         var product = await _productService.CreateAsync(request);
-        return Json(new { success = true, data = product });
+        return StatusCode(StatusCodes.Status201Created, new { success = true, data = product });
     }
 
     [HttpPost]

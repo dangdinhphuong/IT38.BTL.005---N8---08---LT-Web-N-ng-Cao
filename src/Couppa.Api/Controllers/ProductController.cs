@@ -28,7 +28,8 @@ public class ProductController : Controller
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
         [FromQuery] string sort = "newest",
-        [FromQuery] int page = 1)
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 12)
     {
         var query = new ProductListQuery
         {
@@ -38,7 +39,7 @@ public class ProductController : Controller
             MaxPrice = maxPrice,
             Sort = sort,
             Page = page,
-            PageSize = 12
+            PageSize = pageSize
         };
 
         var pagedResult = await _productService.GetPublicListAsync(query);
@@ -61,23 +62,23 @@ public class ProductController : Controller
 
     /// <summary>AJAX: tìm kiếm/lọc/sắp xếp/phân trang không reload — trả cùng shape với Index (JSON).</summary>
     [HttpGet]
-    public async Task<IActionResult> Search(string? keyword, long? category, string sort = "newest", int page = 1)
-        => await FilteredJsonAsync(keyword, category, null, null, sort, page);
+    public async Task<IActionResult> Search(string? keyword, long? category, string sort = "newest", int page = 1, int pageSize = 12)
+        => await FilteredJsonAsync(keyword, category, null, null, sort, page, pageSize);
 
     [HttpGet]
-    public async Task<IActionResult> Filter(long? category, decimal? minPrice, decimal? maxPrice, string sort = "newest", int page = 1)
-        => await FilteredJsonAsync(null, category, minPrice, maxPrice, sort, page);
+    public async Task<IActionResult> Filter(long? category, decimal? minPrice, decimal? maxPrice, string sort = "newest", int page = 1, int pageSize = 12, string? search = null)
+        => await FilteredJsonAsync(search, category, minPrice, maxPrice, sort, page, pageSize);
 
     [HttpGet]
-    public async Task<IActionResult> Sort(string sort, long? category = null, string? search = null, int page = 1)
-        => await FilteredJsonAsync(search, category, null, null, sort, page);
+    public async Task<IActionResult> Sort(string sort, long? category = null, string? search = null, int page = 1, int pageSize = 12)
+        => await FilteredJsonAsync(search, category, null, null, sort, page, pageSize);
 
     [HttpGet]
-    public async Task<IActionResult> Page(int page, long? category = null, string? search = null, string sort = "newest")
-        => await FilteredJsonAsync(search, category, null, null, sort, page);
+    public async Task<IActionResult> Page(int page, long? category = null, string? search = null, string sort = "newest", int pageSize = 12)
+        => await FilteredJsonAsync(search, category, null, null, sort, page, pageSize);
 
     private async Task<IActionResult> FilteredJsonAsync(
-        string? search, long? category, decimal? minPrice, decimal? maxPrice, string? sort, int page)
+        string? search, long? category, decimal? minPrice, decimal? maxPrice, string? sort, int page, int pageSize)
     {
         var result = await _productService.GetPublicListAsync(new ProductListQuery
         {
@@ -87,7 +88,7 @@ public class ProductController : Controller
             MaxPrice = maxPrice,
             Sort = sort,
             Page = page,
-            PageSize = 12
+            PageSize = pageSize
         });
 
         return Json(new { success = true, data = result });
@@ -110,23 +111,15 @@ public class ProductController : Controller
     [HttpGet]
     public async Task<IActionResult> Detail(long id)
     {
-        try
-        {
-            var product = await _productService.GetPublicDetailAsync(id);
-            var featured = await _productService.GetFeaturedAsync();
+        var product = await _productService.GetPublicDetailAsync(id);
+        var featured = await _productService.GetFeaturedAsync();
 
-            var viewModel = new ProductDetailViewModel
-            {
-                Product = product,
-                RelatedProducts = featured.Where(p => p.Id != id).Take(4).ToList()
-            };
-
-            return View(viewModel);
-        }
-        catch (Middleware.AppException)
+        var viewModel = new ProductDetailViewModel
         {
-            TempData["ErrorMessage"] = "Sản phẩm không tồn tại hoặc đã bị gỡ bỏ.";
-            return RedirectToAction(nameof(Index));
-        }
+            Product = product,
+            RelatedProducts = featured.Where(p => p.Id != id).Take(4).ToList()
+        };
+
+        return View(viewModel);
     }
 }

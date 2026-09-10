@@ -19,4 +19,7 @@ public class CartActivityLog
     public required string Action { get; set; }
     public int Quantity { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+
+    public Product Product { get; set; } = null!;
+    public ApplicationUser? User { get; set; }
 }

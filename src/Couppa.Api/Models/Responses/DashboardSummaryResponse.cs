@@ -1,6 +1,6 @@
 namespace Couppa.Api.Models.Responses;
 
-/// <summary>Response cho GET /api/admin/dashboard/summary (task 10, FR-DASH-001..004).</summary>
+/// <summary>Response cho GET /Admin/Dashboard/Summary (FR-DASH-001..004).</summary>
 public class DashboardSummaryResponse
 {
     public int TotalProducts { get; init; }

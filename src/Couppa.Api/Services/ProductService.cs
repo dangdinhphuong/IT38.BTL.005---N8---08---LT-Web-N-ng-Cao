@@ -32,10 +32,10 @@ public class ProductService : IProductService
     public async Task<PagedResult<ProductSummaryResponse>> GetPublicListAsync(ProductListQuery query)
     {
         var page = query.Page < 1 ? 1 : query.Page;
-        var pageSize = query.PageSize < 1 ? 20 : query.PageSize;
+        var pageSize = Math.Clamp(query.PageSize < 1 ? 20 : query.PageSize, 1, 100);
 
         // is_deleted đã bị Global Query Filter loại (AppDbContext.cs) - chỉ cần tự lọc is_active ở đây.
-        var products = _db.Products.Where(p => p.IsActive).AsQueryable();
+        var products = _db.Products.Where(p => p.IsActive && p.Category.IsActive).AsQueryable();
         products = ApplyCommonFilters(products, query.Search, query.Category, query.MinPrice, query.MaxPrice);
         products = ApplySort(products, query.Sort);
 
@@ -47,7 +47,7 @@ public class ProductService : IProductService
         var ttlMinutes = _configuration.GetValue<double>("Cache:ProductsFeaturedTtlMinutes");
         return await _cache.GetOrCreateAsync(CacheKeys.ProductsFeatured, TimeSpan.FromMinutes(ttlMinutes), async () =>
             await _db.Products
-                .Where(p => p.IsActive && p.IsFeatured)
+                .Where(p => p.IsActive && p.Category.IsActive && p.IsFeatured)
                 .OrderByDescending(p => p.CreatedAt)
                 .Include(p => p.Images)
                 .Include(p => p.Category)
@@ -60,7 +60,7 @@ public class ProductService : IProductService
         var ttlMinutes = _configuration.GetValue<double>("Cache:ProductsLatestTtlMinutes");
         return await _cache.GetOrCreateAsync(CacheKeys.ProductsLatest, TimeSpan.FromMinutes(ttlMinutes), async () =>
             await _db.Products
-                .Where(p => p.IsActive)
+                .Where(p => p.IsActive && p.Category.IsActive)
                 .OrderByDescending(p => p.CreatedAt)
                 .Take(10)
                 .Include(p => p.Images)
@@ -75,7 +75,7 @@ public class ProductService : IProductService
         var product = await _db.Products
             .Include(p => p.Images)
             .Include(p => p.Category)
-            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
+            .FirstOrDefaultAsync(p => p.Id == id && p.IsActive && p.Category.IsActive);
 
         if (product is null)
         {
@@ -88,7 +88,7 @@ public class ProductService : IProductService
     public async Task<PagedResult<ProductSummaryResponse>> GetAdminListAsync(AdminProductListQuery query)
     {
         var page = query.Page < 1 ? 1 : query.Page;
-        var pageSize = query.PageSize < 1 ? 20 : query.PageSize;
+        var pageSize = Math.Clamp(query.PageSize < 1 ? 20 : query.PageSize, 1, 100);
 
         // Admin: trả cả Inactive, chỉ is_deleted bị loại (Global Query Filter).
         var products = _db.Products.AsQueryable();
@@ -122,6 +122,8 @@ public class ProductService : IProductService
 
     public async Task<ProductResponse> CreateAsync(CreateProductRequest request)
     {
+        ValidateRequiredText(request.Sku, "PRODUCT_SKU_REQUIRED", "Mã sản phẩm (SKU) là bắt buộc.");
+        ValidateRequiredText(request.Name, "PRODUCT_NAME_REQUIRED", "Tên sản phẩm là bắt buộc.");
         ValidatePriceAndStock(request.Price, request.StockQuantity);
         await EnsureSkuUniqueAsync(request.Sku, excludeId: null);
         await EnsureCategoryActiveAsync(request.CategoryId);
@@ -132,8 +134,8 @@ public class ProductService : IProductService
             Sku = request.Sku.Trim(),
             Name = request.Name.Trim(),
             CategoryId = request.CategoryId,
-            ShortDescription = request.ShortDescription,
-            Description = request.Description,
+            ShortDescription = request.ShortDescription?.Trim(),
+            Description = request.Description?.Trim(),
             Price = request.Price,
             StockQuantity = request.StockQuantity,
             IsFeatured = request.IsFeatured,
@@ -158,6 +160,8 @@ public class ProductService : IProductService
     {
         var product = await FindOrThrowAsync(id, includeImages: true);
 
+        ValidateRequiredText(request.Sku, "PRODUCT_SKU_REQUIRED", "Mã sản phẩm (SKU) là bắt buộc.");
+        ValidateRequiredText(request.Name, "PRODUCT_NAME_REQUIRED", "Tên sản phẩm là bắt buộc.");
         ValidatePriceAndStock(request.Price, request.StockQuantity);
         // Loại trừ chính record đang sửa khỏi check unique SKU.
         await EnsureSkuUniqueAsync(request.Sku, excludeId: id);
@@ -166,8 +170,8 @@ public class ProductService : IProductService
         product.Sku = request.Sku.Trim();
         product.Name = request.Name.Trim();
         product.CategoryId = request.CategoryId;
-        product.ShortDescription = request.ShortDescription;
-        product.Description = request.Description;
+        product.ShortDescription = request.ShortDescription?.Trim();
+        product.Description = request.Description?.Trim();
         product.Price = request.Price;
         product.StockQuantity = request.StockQuantity;
         product.IsFeatured = request.IsFeatured;
@@ -261,6 +265,14 @@ public class ProductService : IProductService
         }
     }
 
+    private static void ValidateRequiredText(string? value, string code, string message)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw AppException.Unprocessable(code, message);
+        }
+    }
+
     private async Task EnsureSkuUniqueAsync(string sku, long? excludeId)
     {
         var trimmedSku = sku.Trim();
@@ -318,9 +330,8 @@ public class ProductService : IProductService
     {
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var keyword = search.Trim();
-            // Lưu ý: EF.Functions.ILike không chạy được trên EF InMemory provider dùng trong test (giới hạn đã biết).
-            query = query.Where(p => EF.Functions.ILike(p.Name, $"%{keyword}%"));
+            var keyword = search.Trim().ToLower();
+            query = query.Where(p => p.Name.ToLower().Contains(keyword));
         }
 
         if (categoryId.HasValue)

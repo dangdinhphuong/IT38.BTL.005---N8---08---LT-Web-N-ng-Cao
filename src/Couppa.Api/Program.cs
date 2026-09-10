@@ -1,16 +1,32 @@
 using Couppa.Api.Data;
 using Couppa.Api.Data.Entities;
+using Couppa.Api.Infrastructure;
 using Couppa.Api.Data.Seed;
 using Couppa.Api.Middleware;
 using Couppa.Api.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ---- DbContext ----
+var databaseProvider = builder.Configuration["Database:Provider"] ?? "PostgreSql";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection chưa được cấu hình.");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlServer(connectionString);
+    }
+    else
+    {
+        options.UseNpgsql(connectionString);
+    }
+});
 
 // ---- CORS: bắt buộc AllowCredentials + origin cụ thể, KHÔNG dùng AllowAnyOrigin
 // (trình duyệt từ chối wildcard origin kết hợp credentials -> cookie sẽ không được gửi). ----
@@ -69,6 +85,28 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/Login";
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (ShouldReturnStatusCode(context.Request))
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        }
+
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        if (ShouldReturnStatusCode(context.Request))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        }
+
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services.AddAuthorizationBuilder()
@@ -100,7 +138,9 @@ builder.Services.AddRateLimiter(options =>
 
 // ---- Application services & MVC Controllers with Views ----
 builder.Services.AddAppServices();
-builder.Services.AddControllersWithViews();
+builder.Services.AddHostedService<GuestCartCleanupService>();
+builder.Services.AddControllersWithViews(options =>
+    options.Filters.Add<ApiModelStateValidationFilter>());
 
 var app = builder.Build();
 
@@ -131,7 +171,20 @@ app.MapGet("/Account/AntiForgeryToken", (Microsoft.AspNetCore.Antiforgery.IAntif
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
+    if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+    {
+        // Local SQL Server Express uses the existing IT38 database. EnsureCreated creates
+        // missing Identity/business tables without trying to apply PostgreSQL migrations.
+        await db.Database.EnsureCreatedAsync();
+    }
+    else if (db.Database.IsRelational())
+    {
+        await db.Database.MigrateAsync();
+    }
+    else
+    {
+        await db.Database.EnsureCreatedAsync();
+    }
     if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
     {
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -141,6 +194,16 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+static bool ShouldReturnStatusCode(HttpRequest request)
+{
+    return request.Path.StartsWithSegments("/Admin")
+        || request.Path.StartsWithSegments("/User")
+        || request.Headers["X-Requested-With"] == "XMLHttpRequest"
+        || request.ContentType?.StartsWith("application/json", StringComparison.OrdinalIgnoreCase) == true
+        || request.Headers.Accept.Any(value =>
+            value?.Contains("application/json", StringComparison.OrdinalIgnoreCase) == true);
+}
 
 // Cho phép WebApplicationFactory<Program> trong Integration Test (Phase 13) tham chiếu tới entry point.
 public partial class Program { }

@@ -1,376 +1,818 @@
-# BÁO CÁO ĐỒ ÁN TỐT NGHIỆP / NÂNG CAO
-## XÂY DỰNG WEBSITE GIỚI THIỆU SẢN PHẨM VÀ GIỎ HÀNG BẰNG ASP.NET CORE MVC
+# BÁO CÁO ĐỒ ÁN — COUPPA
+## Website giới thiệu sản phẩm và giỏ hàng bằng ASP.NET Core MVC
 
 | Thông tin | Chi tiết |
 |---|---|
-| **Đề tài** | Đề tài 8 — Website giới thiệu sản phẩm và giỏ hàng đơn giản |
-| **Tên ứng dụng** | Couppa Tech Store |
-| **Công nghệ chính** | ASP.NET Core 8.0 MVC + Entity Framework Core + SQL Server + Cookie Auth + Bootstrap 5.3 |
-| **File Word đính kèm** | [`BaoCao_DoAn_Couppa_ASP.NET_MVC.docx`](BaoCao_DoAn_Couppa_ASP.NET_MVC.docx) |
-| **Ngày hoàn thành** | 10/09/2026 |
+| Đề tài | Đề tài 8 — Website giới thiệu sản phẩm và giỏ hàng đơn giản |
+| Tên hệ thống | Couppa |
+| Tài liệu yêu cầu đối chiếu | [`docs/SRS.md`](docs/SRS.md), phiên bản 1.0 ngày 07/09/2026 |
+| Ngày cập nhật báo cáo | 10/09/2026 |
+| Project chính | `src/Couppa.Api` |
+| Project kiểm thử | `src/Couppa.Api.Tests` |
+
+> Báo cáo này mô tả source code hiện tại, không mô tả một hệ thống giả định.
+> Các chức năng SRS chưa có bằng chứng trong source được ghi rõ là
+> `NOT IMPLEMENTED` hoặc `CANNOT VERIFY`.
 
 ---
 
-## MỤC LỤC BÁO CÁO
+## 1. Phạm vi và phương pháp đối chiếu
 
-- [CHƯƠNG 1. GIỚI THIỆU ĐỀ TÀI & CÔNG CỤ PHÁT TRIỂN](#chương-1-giới-thiệu-đề-tài--công-cụ-phát-triển)
-  - [1.1. Lý do chọn đề tài](#11-lý-do-chọn-đề-tài)
-  - [1.2. Mục tiêu đề tài](#12-mục-tiêu-đề-tài)
-  - [1.3. Phạm vi & Đối tượng sử dụng](#13-phạm-vi--đối-tượng-sử-dụng)
-  - [1.4. Thành phần Ngôn ngữ & Công nghệ (Tech Stack)](#14-thành-phần-ngôn-ngữ--công-nghệ-tech-stack)
-  - [1.5. Công cụ IDE & Môi trường phát triển (Development Tools)](#15-công-cụ-ide--môi-trường-phát-triển-development-tools)
-- [CHƯƠNG 2. PHÂN TÍCH YÊU CẦU NGHỆP VỤ (SRS) & SƠ ĐỒ USE CASE](#chương-2-phân-tích-yêu-cầu-nghiệp-vụ-srs--sơ-đồ-use-case)
-  - [2.1. Phân tích Actors & Bảng Use Case Tổng Quan](#21-phân-tích-actors--bảng-use-case-tổng-quan)
-  - [2.2. Sơ đồ Use Case Tổng Quan Hệ Thống (System Use Case Diagram)](#22-sơ-đồ-use-case-tổng-quan-hệ-thống-system-use-case-diagram)
-  - [2.3. Sơ đồ Use Case Phân Rã Theo Phân Hệ (Sub-system Use Case Diagrams)](#23-sơ-đồ-use-case-phân-rã-theo-phân-hệ-sub-system-use-case-diagrams)
-  - [2.4. Business Rules & Quyết định Thiết kế (Design Decisions)](#24-business-rules--quyết-định-thiết-kế-design-decisions)
-- [CHƯƠNG 3. PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG](#chương-3-phân-tích-và-thiết-kế-hệ-thống)
-  - [3.1. Kiến trúc tổng thể ASP.NET Core MVC](#31-kiến-trúc-tổng-thể-aspnet-core-mvc)
-  - [3.2. Thiết kế Cơ sở dữ liệu EF Core (9 Entities & ERD)](#32-thiết-kế-cơ-sở-dữ-liệu-ef-core-9-entities--erd)
-  - [3.3. Thiết kế Controllers, ViewModels & Views](#33-thiết-kế-controllers-viewmodels--views)
-  - [3.4. Thiết kế Bảo mật & Caching Architecture](#34-thiết-kế-bảo-mật--caching-architecture)
-- [CHƯƠNG 4. THỰC THI NGUỒN MÃ & QUY TRÌNH PHÁT TRIỂN](#chương-4-thực-thi-nguồn-mã--quy-trình-phát-triển)
-  - [4.1. Khởi tạo Project & Entry Point (`Program.cs`)](#41-khởi-tạo-project--entry-point-programcs)
-  - [4.2. Tầng Dữ liệu & EF Core Migration (`AppDbContext.cs`)](#42-tầng-dữ-liệu--ef-core-migration-appdbcontextcs)
-  - [4.3. Tầng Service Nghiệp vụ](#43-tầng-service-nghiệp-vụ)
-  - [4.4. Tầng Controller & Razor Views + Bootstrap 5](#44-tầng-controller--razor-views--bootstrap-5)
-- [CHƯƠNG 5. QUY TRÌNH KIỂM THỬ HỆ THỐNG (TESTING WORKFLOW)](#chương-5-quy-trình-kiểm-thử-hệ-thống-testing-workflow)
-  - [5.1. Quy trình Kiểm thử 4 Bước (Testing Process)](#51-quy-trình-kiểm-thử-4-bước-testing-process)
-  - [5.2. Bảng Mô Tả Chi Tiết Quy Trình Các Ca Kiểm Thử (Test Execution Log)](#52-bảng-mô-tả-chi-tiết-quy-trình-các-ca-kiểm-thử-test-execution-log)
-  - [5.3. Kết quả Kiểm thử Tự động (81/81 Test Cases PASS)](#53-kết-quả-kiểm-thử-tự-động-8181-test-cases-pass)
-- [CHƯƠNG 6. KẾT QUẢ THỰC HIỆN VÀ ĐỐI CHIẾU TIÊU CHÍ](#chương-6-kết-quả-thực-hiện-và-đối-chiếu-tiêu-chí)
-  - [6.1. Bảng đối chiếu minh chứng 10 Tiêu chí Đề bài](#61-bảng-đối-chiếu-minh-chứng-10-tiêu-chí-đề-bài)
-  - [6.2. Danh mục 15 Screenshot Minh chứng thực tế](#62-danh-mục-15-screenshot-minh-chứng-thực-tế)
-- [CHƯƠNG 7. ĐÁNH GIÁ VÀ HƯỚNG PHÁT TRIỂN](#chương-7-đánh-giá-và-hướng-phát-triển)
-  - [7.1. Kết quả đạt được](#71-kết-quả-đạt-được)
-  - [7.2. Hạn chế & Hướng nâng cấp tương lai](#72-hạn-chế--hướng-nâng-cấp-tương-lai)
+Việc phân tích được thực hiện theo thứ tự:
+
+1. Đọc `docs/SRS.md` để xác định Actors, Functional Requirements (FR),
+   Business Rules (BR), Non-functional Requirements (NFR), API và database.
+2. Kiểm tra cây thư mục, project file, `Program.cs`, `AppDbContext`,
+   entity, request/response model, service, controller, view, JavaScript,
+   migration và test.
+3. Đối chiếu từng nhóm yêu cầu với bằng chứng code.
+
+Các trạng thái sử dụng trong báo cáo:
+
+| Trạng thái | Ý nghĩa |
+|---|---|
+| `IMPLEMENTED` | Có code tương ứng và đã xác định được đường đi chính. |
+| `PARTIALLY IMPLEMENTED` | Có một phần chức năng nhưng chưa đủ toàn bộ SRS. |
+| `NOT IMPLEMENTED` | SRS yêu cầu nhưng chưa tìm thấy code thực hiện. |
+| `MISMATCH` | Code có nhưng khác yêu cầu hoặc công nghệ được mô tả trong SRS. |
+| `EXTRA IMPLEMENTATION` | Có trong code nhưng không phải yêu cầu bắt buộc của SRS. |
+| `CANNOT VERIFY` | Không đủ bằng chứng để kết luận, thường cần kiểm thử thủ công hoặc môi trường triển khai. |
 
 ---
 
-## CHƯƠNG 1. GIỚI THIỆU ĐỀ TÀI & CÔNG CỤ PHÁT TRIỂN
+## 2. Tổng quan hệ thống
 
-### 1.1. Lý do chọn đề tài
-Trong kỷ nguyên chuyển đổi số mạnh mẽ, thương mại điện tử (E-Commerce) đã trở thành hạ tầng cốt lõi cho mọi doanh nghiệp bán lẻ công nghệ. Việc xây dựng một website giới thiệu sản phẩm mượt mà, hỗ trợ tìm kiếm/lọc thông minh, giỏ hàng tiện lợi và trang quản trị bảo mật là bài toán thực tế tiêu chuẩn. 
+### 2.1. Mục tiêu
 
-Đề tài **"Website giới thiệu sản phẩm và giỏ hàng đơn giản" (Couppa Tech Store)** được lựa chọn nhằm áp dụng toàn bộ các kỹ thuật phát triển ứng dụng Web nâng cao trên nền tảng **ASP.NET Core 8.0 MVC**, quản lý dữ liệu với **Entity Framework Core**, xác thực phân quyền qua **Cookie Authentication & Roles**, bảo mật ứng dụng Web theo chuẩn OWASP và thiết kế giao diện **Bootstrap 5 Responsive**.
+Couppa là website giới thiệu sản phẩm công nghệ, cho phép Guest/User duyệt
+sản phẩm và sử dụng giỏ hàng. Admin quản lý sản phẩm, danh mục, người dùng,
+dashboard và báo cáo hoạt động giỏ hàng.
 
-### 1.2. Mục tiêu đề tài
-- **Kiến trúc sạch (Clean Architecture / MVC)**: Xây dựng cấu trúc phân lớp rõ ràng giữa Controller, Service, EF Core DbContext và Razor Views.
-- **Quản lý dữ liệu mạnh mẽ**: Sử dụng EF Core 8.0 Code-First với SQL Server, xử lý quan hệ phức tạp và tối ưu truy vấn LINQ.
-- **Trải nghiệm mua sắm mượt mà**: Hỗ trợ giỏ hàng cho cả Khách (Guest - lưu Session) và Thành viên (User - lưu DB), tự động gộp (merge) giỏ hàng khi đăng nhập.
-- **Quản trị toàn diện (Admin Panel)**: CRUD Sản phẩm, Danh mục, Người dùng, xem Dashboard thống kê và Báo cáo sản phẩm hot.
-- **Bảo mật đa lớp**: Chống tấn công CSRF (Anti-forgery tokens), băm mật khẩu an toàn với BCrypt, chống Brute-force với Rate Limiting, Cookie HttpOnly/SameSite.
-- **Tối ưu hiệu năng**: Caching với `IMemoryCache` cho danh mục và dữ liệu dashboard.
+SRS quy định ứng dụng là một project ASP.NET Core MVC duy nhất. Code hiện tại
+đúng với quyết định này: Razor View được render bởi MVC Controller; các thao
+tác tương tác trả JSON và được gọi bằng Fetch API, không có frontend SPA riêng.
 
-### 1.3. Phạm vi & Đối tượng sử dụng
-- **Phạm vi**: Giới thiệu sản phẩm công nghệ, lọc/tìm kiếm, quản lý giỏ hàng, xác thực/phân quyền người dùng, quản trị sản phẩm & báo cáo. Không bao gồm thanh toán trực tuyến thực tế (VNPay/Momo) hay tích hợp đơn vị vận chuyển.
-- **Đối tượng sử dụng**: 
-  1. **Guest (Khách)**: Chưa có tài khoản, thao tác xem/tìm kiếm/lọc sản phẩm và thêm giỏ hàng tạm.
-  2. **User (Thành viên)**: Đã đăng ký/đăng nhập, mua sắm và quản lý hồ sơ cá nhân.
-  3. **Admin (Quản trị viên)**: Nhân sự quản lý toàn bộ hệ thống sản phẩm, danh mục, người dùng và báo cáo.
+### 2.2. Actors
 
-### 1.4. Thành phần Ngôn ngữ & Công nghệ (Tech Stack)
+| Actor | Chức năng thực tế |
+|---|---|
+| Guest | Xem/tìm/lọc sản phẩm, xem chi tiết, thêm và quản lý giỏ hàng qua `ISession` định danh. |
+| User | Toàn bộ chức năng Guest, đăng nhập, quản lý profile, đổi mật khẩu và duy trì giỏ hàng theo User ID. |
+| Admin | Chức năng User và các action dưới `/Admin/**`: sản phẩm, danh mục, người dùng, dashboard, báo cáo. |
+| System | ASP.NET Core Identity, middleware xử lý lỗi, cache và `GuestCartCleanupService`. |
 
-| Thành phần | Ngôn ngữ / Công nghệ | Phiên bản / Thư viện sử dụng | Vai trò trong dự án |
-|---|---|---|---|
-| **Ngôn ngữ Backend** | **C# (C-Sharp)** | C# 12 / .NET 8.0 SDK | Lập trình logic xử lý nghiệp vụ, Controllers, Services và Data Access. |
-| **Framework Web** | **ASP.NET Core MVC** | `Microsoft.NET.Sdk.Web` (8.0.8) | Framework chủ đạo dựng ứng dụng Web theo kiến trúc Model-View-Controller. |
-| **ORM / Data Access** | **Entity Framework Core** | `Microsoft.EntityFrameworkCore.SqlServer` (8.0.8) | Tương tác CSDL SQL Server qua mã C# LINQ, Code-First Migration. |
-| **Password Hashing** | **BCrypt** | `BCrypt.Net-Next` (4.0.3) | Băm mật khẩu an toàn với Salt tự động chống tấn công Rainbow Table. |
-| **Ngôn ngữ Frontend** | **HTML5, CSS3, JavaScript** | ES6+ / Fetch API | Định dạng cấu trúc trang, kiểu dáng tùy chỉnh và xử lý tương tác phía client. |
-| **View Engine** | **Razor Syntax** | ASP.NET Core Razor (`.cshtml`) | Render HTML động từ Server-side kết hợp C# và Tag Helpers. |
-| **UI Framework** | **Bootstrap 5** | Bootstrap v5.3.3 + Bootstrap Icons v1.11.3 | Thiết kế giao diện hiện đại, Responsive Grid System trên mọi màn hình. |
+### 2.3. Công nghệ thực tế
 
-### 1.5. Công cụ IDE & Môi trường phát triển (Development Tools)
+| Thành phần | Bằng chứng thực tế |
+|---|---|
+| Runtime | .NET 8 (`TargetFramework net8.0`) |
+| Web framework | ASP.NET Core MVC (`Microsoft.NET.Sdk.Web`) |
+| ORM | Entity Framework Core 8.0.10 |
+| Authentication | ASP.NET Core Identity Cookie Authentication |
+| Database local | SQL Server/SQL Server Express, provider chọn bằng `Database:Provider` |
+| Database Docker | PostgreSQL 16, cấu hình trong `appsettings.Docker.json` |
+| UI | Razor `.cshtml`, Bootstrap 5.3.3 từ CDN, Bootstrap Icons |
+| Client interaction | JavaScript Fetch API tại `wwwroot/js/cart-ajax.js`, `admin-ajax.js` |
+| Cache | `IMemoryCache` qua `MemoryCacheService` |
+| Test | xUnit, Moq, EF Core InMemory, `WebApplicationFactory` |
 
-- **IDE / Code Editor chính**: 
-  - **Visual Studio 2022 (v17.8+)**: Môi trường phát triển tích hợp chính thức cho ASP.NET Core, hỗ trợ IntelliSense, Debugger và Visual EF Designer.
-  - **Visual Studio Code**: Trình biên soạn mã nguồn nhẹ kết hợp extension **C# Dev Kit** và **Live Server**.
-- **Hệ quản trị CSDL & Database Tools**:
-  - **Microsoft SQL Server 2022**: Chạy container Docker `mssql` (hoặc bản cài đặt Native trên Windows/Linux).
-  - **SQL Server Management Studio (SSMS) / Azure Data Studio**: Công cụ quản lý, truy vấn và kiểm tra bảng dữ liệu.
-- **Công cụ dòng lệnh CLI**:
-  - **.NET CLI (`dotnet`)**: Biên dịch (`dotnet build`), khởi chạy (`dotnet run`), kiểm thử (`dotnet test`).
-  - **EF Core CLI Tool (`dotnet-ef`)**: Khởi tạo và quản lý Migration (`dotnet ef migrations add`, `dotnet ef database update`).
-- **Môi trường Containerization & Proxy**:
-  - **Docker & Docker Compose**: Đóng gói và khởi chạy đồng thời SQL Server, Backend API/MVC, Caddy Proxy.
-  - **Caddy Server**: Reverse Proxy cấp phát chứng chỉ HTTPS tự ký cho môi trường Dev.
-- **Framework Kiểm thử (Testing Tools)**:
-  - **xUnit 2.8+**: Khung kiểm thử tự động cho Unit Test.
-  - **`Microsoft.AspNetCore.Mvc.Testing`**: Giả lập Server cho Integration Test (`WebApplicationFactory`).
+SRS đề xuất PostgreSQL là database chính. Code hiện tại hỗ trợ PostgreSQL cho
+Docker và có thêm chế độ SQL Server local để sử dụng database `IT38`; phần
+SQL Server là thích nghi môi trường, không phải một database thứ ba.
 
 ---
 
-## CHƯƠNG 2. PHÂN TÍCH YÊU CẦU NGHỆP VỤ (SRS) & SƠ ĐỒ USE CASE
-
-### 2.1. Phân tích Actors & Bảng Use Case Tổng Quan
-
-Hệ thống bao gồm 3 Actors chính thao tác với các nhóm Use Case theo phân quyền:
-
-| Actor | Danh sách Use Cases chính | Mô tả phạm vi quyền hạn |
-|---|---|---|
-| **Guest (Khách)** | UC-01: Xem danh sách & Chi tiết sản phẩm<br>UC-02: Tìm kiếm & Lọc danh mục<br>UC-03: Thêm/Sửa/Xóa giỏ hàng Session<br>UC-04: Đăng ký tài khoản<br>UC-05: Đăng nhập | Duyệt sản phẩm, sử dụng giỏ hàng tạm qua Session Id, không cần đăng nhập. |
-| **User (Thành viên)** | Tất cả Use Cases của Guest +<br>UC-06: Đăng xuất<br>UC-07: Quản lý giỏ hàng DB (gộp cart)<br>UC-08: Xem & Cập nhật Hồ sơ cá nhân<br>UC-09: Đổi mật khẩu | Thành viên đã xác thực Cookie Auth. Giỏ hàng lưu DB vĩnh viễn. |
-| **Admin (Quản trị)** | Tất cả Use Cases của User +<br>UC-10: Xem Admin Dashboard thống kê<br>UC-11: Quản lý CRUD Sản phẩm<br>UC-12: Quản lý CRUD Danh mục<br>UC-13: Quản lý Người dùng (Khóa/Mở)<br>UC-14: Xem Báo cáo Top 10 Giỏ hàng<br>UC-15: Xem Nhật ký Audit Logs | Quản trị viên có Policy RequireAdmin. Toàn quyền quản trị hệ thống. |
-
-### 2.2. Sơ đồ Use Case Tổng Quan Hệ Thống (System Use Case Diagram)
-
-```mermaid
-graph TD
-    subgraph System ["Hệ Thống Couppa Tech Store"]
-        UC1("UC-01: Xem danh sách & Chi tiết sản phẩm")
-        UC2("UC-02: Tìm kiếm & Lọc danh mục")
-        UC3("UC-03: Quản lý Giỏ hàng (Session/DB)")
-        UC4("UC-04: Đăng ký Tài khoản")
-        UC5("UC-05: Đăng nhập Xác thực")
-        UC6("UC-06: Đăng xuất")
-        UC7("UC-07: Quản lý Hồ sơ cá nhân")
-        UC8("UC-08: Admin Dashboard Thống kê")
-        UC9("UC-09: CRUD Quản lý Sản phẩm")
-        UC10("UC-10: CRUD Quản lý Danh mục")
-        UC11("UC-11: Quản lý Người dùng & Khóa TK")
-        UC12("UC-12: Báo cáo Thống kê & Audit Logs")
-    end
-
-    Guest(["Khách (Guest)"]) --> UC1
-    Guest --> UC2
-    Guest --> UC3
-    Guest --> UC4
-    Guest --> UC5
-
-    User(["Thành viên (User)"]) --> UC1
-    User --> UC2
-    User --> UC3
-    User --> UC6
-    User --> UC7
-
-    Admin(["Quản trị viên (Admin)"]) --> UC8
-    Admin --> UC9
-    Admin --> UC10
-    Admin --> UC11
-    Admin --> UC12
-
-    User -.->|Kế thừa| Guest
-    Admin -.->|Kế thừa| User
-```
-
-### 2.3. Sơ đồ Use Case Phân Rã Theo Phân Hệ (Sub-system Use Case Diagrams)
-
-#### A. Sơ đồ Phân hệ Giỏ hàng & Merge Cart (Cart Subsystem)
-```mermaid
-graph LR
-    ActorGuest([Guest]) --> UC_AddCart(Thêm sản phẩm vào giỏ)
-    ActorGuest --> UC_ViewCart(Xem giỏ hàng)
-    ActorGuest --> UC_UpdateCart(Sửa số lượng / Xóa món)
-
-    UC_AddCart ..->|include| UC_CheckStock[Kiểm tra Tồn kho BR-01]
-    
-    ActorUser([User]) --> UC_Login(Đăng nhập)
-    UC_Login ..->|include| UC_MergeCart[Gộp Giỏ Session vào DB User BR-13]
-```
-
-#### B. Sơ đồ Phân hệ Quản trị Admin (Admin Management Subsystem)
-```mermaid
-graph LR
-    ActorAdmin([Admin]) --> UC_Dashboard(Xem Dashboard)
-    ActorAdmin --> UC_CRUD_Prod(CRUD Sản phẩm)
-    ActorAdmin --> UC_CRUD_Cat(CRUD Danh mục)
-    ActorAdmin --> UC_LockUser(Khóa/Mở khóa User)
-    ActorAdmin --> UC_Report(Xem Báo cáo Top 10 SP Giỏ)
-
-    UC_CRUD_Prod ..->|include| UC_AuditLog[Ghi nhật ký Audit Log]
-    UC_CRUD_Cat ..->|include| UC_AuditLog
-    UC_LockUser ..->|include| UC_AuditLog
-```
-
-### 2.4. Business Rules & Quyết định Thiết kế (Design Decisions)
-- **DD-01 (Kiến trúc MVC đơn nhất)**: Toàn bộ ứng dụng đóng gói trong 1 project ASP.NET Core MVC duy nhất. Controllers trả về `ViewResult` cho các luồng duyệt trang và `JsonResult` cho các API AJAX.
-- **DD-02 (Cookie Auth & Roles)**: Dùng Cookie Authentication kết hợp Role Claims để xác thực/phân quyền chuẩn mực.
-- **DD-03 (Guest Cart & Merge Logic)**: Giỏ hàng luôn lưu ở DB. Khi Guest đăng nhập, toàn bộ món hàng trong giỏ Session sẽ tự động gộp vào giỏ của User mà không bị mất dữ liệu.
-
----
-
-## CHƯƠNG 3. PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG
-
-### 3.1. Kiến trúc tổng thể ASP.NET Core MVC
-
-```
-                                  +---------------------------------------+
-                                  |         Trình duyệt Client            |
-                                  |   (Razor View HTML5 + Bootstrap 5)    |
-                                  +-------------------+-------------------+
-                                                      |
-                                                      | HTTP Request (GET/POST)
-                                                      v
-                                  +-------------------+-------------------+
-                                  |         ASP.NET Core MVC Pipeline     |
-                                  |   (Routing, Auth Cookie, CSRF Filter) |
-                                  +-------------------+-------------------+
-                                                      |
-                                                      v
-                                  +-------------------+-------------------+
-                                  |          Controller Layer             |
-                                  |  (HomeController, ProductController,  |
-                                  |   CartController, AuthController...)  |
-                                  +-------------------+-------------------+
-                                                      |
-                                                      v
-                                  +-------------------+-------------------+
-                                  |           Service Layer               |
-                                  | (ProductService, CartService, Auth...) |
-                                  +---------+-------------------+---------+
-                                            |                   |
-                     IMemoryCache           v                   v      EF Core LINQ
-                     +----------------------+      +------------+------------+
-                     | MemoryCacheService   |      | AppDbContext (EF Core)  |
-                     +----------------------+      +------------+------------+
-                                                                |
-                                                                v
-                                                   +------------+------------+
-                                                   |  SQL Server Database    |
-                                                   +-------------------------+
-```
-
-### 3.2. Thiết kế Cơ sở dữ liệu EF Core (9 Entities & ERD)
-
-1. **`User`** (`users`): `Id` (PK), `Email` (Unique), `PasswordHash`, `FullName`, `Phone`, `Address`, `RoleId` (FK), `IsLocked`, `CreatedAt`.
-2. **`Role`** (`roles`): `Id` (PK), `Name` ("Admin", "User"), `Description`.
-3. **`Category`** (`categories`): `Id` (PK), `Name`, `Slug` (Unique), `Description`, `IsActive`, `CreatedAt`.
-4. **`Product`** (`products`): `Id` (PK), `Sku` (Unique), `Name`, `CategoryId` (FK), `Price`, `StockQuantity`, `IsActive`, `IsFeatured`, `IsDeleted`.
-5. **`ProductImage`** (`product_images`): `Id` (PK), `ProductId` (FK), `ImageUrl`, `IsPrimary`.
-6. **`Cart`** (`carts`): `Id` (PK), `UserId` (FK Nullable), `SessionId` (Nullable), `CreatedAt`, `UpdatedAt`.
-7. **`CartItem`** (`cart_items`): `Id` (PK), `CartId` (FK), `ProductId` (FK), `Quantity`, `UnitPrice`.
-8. **`AuditLog`** (`audit_logs`): `Id` (PK), `UserId`, `Action`, `EntityType`, `EntityId`, `Details`, `IpAddress`, `CreatedAt`.
-9. **`CartActivityLog`** (`cart_activity_logs`): `Id` (PK), `CartId`, `ProductId`, `Action`, `Quantity`, `CreatedAt`.
-
----
-
-## CHƯƠNG 4. THỰC THI NGUỒN MÃ & QUY TRÌNH PHÁT TRIỂN
-
-### 4.1. Khởi tạo Project & Entry Point (`Program.cs`)
-File [`src/Couppa.Api/Program.cs`](src/Couppa.Api/Program.cs) được cấu hình tích hợp đầy đủ các dịch vụ MVC, Cookie Auth, Antiforgery và Routing:
-
-```csharp
-// Đăng ký MVC Controllers với Razor Views
-builder.Services.AddAppServices();
-builder.Services.AddControllersWithViews();
-
-// Cấu hình Cookie Authentication & Chuyển hướng khi 401/403
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.Cookie.Name = "couppa.auth";
-        options.Cookie.HttpOnly = true;
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-        options.LoginPath = "/Auth/Login";
-        options.AccessDeniedPath = "/Auth/Login";
-    });
-
-// Middleware Pipeline
-app.UseStaticFiles();
-app.UseSession();
-app.UseAuthentication();
-app.UseAuthorization();
-
-// Định tuyến MVC Routing
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-```
-
-### 4.2. Tầng Controller & Razor Views + Bootstrap 5
-- **`HomeController`**: Phụ trách trang chủ, gọi `CategoryService` và `ProductService` nạp sản phẩm nổi bật/mới nhất đưa vào `HomeViewModel` render ra `Views/Home/Index.cshtml`.
-- **`ProductController`**: Phụ trách xem danh sách sản phẩm phân trang, tìm kiếm từ khóa, lọc danh mục và xem chi tiết sản phẩm (`Views/Product/Index.cshtml` & `Details.cshtml`).
-- **`CartController`**: Phụ trách giỏ hàng, nhận form post thêm/sửa/xóa sản phẩm và chuyển hướng hiển thị `Views/Cart/Index.cshtml`.
-- **`AuthController`**: Phụ trách Đăng nhập, Đăng ký, Đăng xuất, gọi `AuthService.ValidateCredentialsAsync` và thực hiện Cookie SignIn/SignOut.
-- **`AdminController`**: Phụ trách khu vực quản trị, bảo vệ bởi `[Authorize(Policy = "RequireAdmin")]`, điều khiển các Razor View Quản lý Sản phẩm, Danh mục, Người dùng, Dashboard và Báo cáo.
-
----
-
-## CHƯƠNG 5. QUY TRÌNH KIỂM THỬ HỆ THỐNG (TESTING WORKFLOW)
-
-### 5.1. Quy trình Kiểm thử 4 Bước (Testing Process)
-
-Sơ đồ quy trình thực hiện kiểm thử tự động trong dự án:
-
-```mermaid
-graph TD
-    A["Bước 1: Phân tích Ca kiểm thử (Boundary & Equivalence)"] --> B["Bước 2: Xây dựng Unit Tests (EF Core InMemory)"]
-    B --> C["Bước 3: Xây dựng Integration Tests (WebApplicationFactory)"]
-    C --> D["Bước 4: Thực thi 'dotnet test' & Xuất Báo cáo PASS 100%"]
-```
-
-1. **Bước 1 — Phân tích & Lập Kế hoạch Kiểm thử**: Xác định các ca kiểm thử biên (Boundary Value Analysis) và phân vùng tương đương (Equivalence Partitioning) dựa trên Acceptance Criteria của SRS.
-2. **Bước 2 — Xây dựng Unit Test (Tầng Service)**: Tạo các file kiểm thử đơn vị cho `ProductService`, `CartService`, `AuthService`, `UserService`, `CategoryService` sử dụng EF Core InMemory Database.
-3. **Bước 3 — Xây dựng Integration Test (Tầng HTTP Pipeline)**: Sử dụng `WebApplicationFactory<Program>` trong `AuthCartFlowIntegrationTests.cs` để giả lập toàn bộ pipeline thực tế (Routing, CSRF Middleware, Session, Cookie Auth).
-4. **Bước 4 — Thực thi & Báo cáo Kết quả**: Chạy lệnh `dotnet test` tự động, kiểm tra log kết quả và xác nhận 100% test cases đạt trạng thái PASS.
-
-### 5.2. Bảng Mô Tả Chi Tiết Quy Trình Các Ca Kiểm Thử (Test Execution Log)
-
-| Mã Test | Mô tả Ca kiểm thử | Quy trình Các bước Thực hiện | Kết quả mong đợi | Kết quả Thực tế |
-|---|---|---|---|---|
-| **TC-AUTH-01** | Đăng ký tài khoản hợp lệ | 1. POST `/Auth/Register` với Email/Password hợp lệ.<br>2. Gọi `AuthService.RegisterAsync`. | Tạo User mới, băm BCrypt, chuyển về `/Auth/Login`. | **PASS** (200 OK) |
-| **TC-AUTH-02** | Đăng ký trùng Email (BR-04) | 1. Nhập Email đã tồn tại trong DB.<br>2. Nhấn Submit Đăng ký. | Ném Conflict Exception, hiển thị thông báo lỗi trên View. | **PASS** (Conflict) |
-| **TC-CART-01** | Guest thêm SP vào giỏ hàng | 1. Guest chọn SP còn tồn kho.<br>2. POST `/Cart/AddToCart`. | Tạo Cart với SessionId, tăng số lượng món trong giỏ. | **PASS** (Success) |
-| **TC-CART-02** | Merge giỏ hàng khi Đăng nhập (BR-13) | 1. Guest có 2 SP trong giỏ.<br>2. Đăng nhập tài khoản User.<br>3. Gọi `MergeGuestCartAsync`. | 2 SP giỏ Guest chuyển sang giỏ User DB thành công. | **PASS** (Merged) |
-| **TC-ADMIN-01** | Truy cập Admin không có quyền | 1. User thường mở `/Admin/Dashboard`.<br>2. Policy `RequireAdmin` kiểm tra. | Từ chối quyền (403 Access Denied), chuyển về `/Auth/Login`. | **PASS** (Forbidden) |
-
-### 5.3. Kết quả Kiểm thử Tự động (81/81 PASS)
-Kết quả chạy lệnh `dotnet test src/Couppa.sln`:
+## 3. Cấu trúc project thực tế
 
 ```text
-Passed!  - Failed: 0, Passed: 81, Skipped: 0, Total: 81, Duration: 4.2 s - Couppa.Api.Tests.dll
+docs/
+└── SRS.md
+
+src/
+├── Couppa.Api/
+│   ├── Controllers/
+│   │   ├── AccountController.cs
+│   │   ├── CartController.cs
+│   │   ├── CategoryController.cs
+│   │   ├── HomeController.cs
+│   │   ├── ProductController.cs
+│   │   ├── UserController.cs
+│   │   └── Admin/
+│   │       ├── AdminCategoryController.cs
+│   │       ├── AdminDashboardController.cs
+│   │       ├── AdminProductController.cs
+│   │       ├── AdminReportController.cs
+│   │       └── AdminUserController.cs
+│   ├── Data/
+│   │   ├── AppDbContext.cs
+│   │   ├── Entities/
+│   │   ├── Migrations/
+│   │   └── Seed/DbSeeder.cs
+│   ├── Infrastructure/ApiModelStateValidationFilter.cs
+│   ├── Middleware/
+│   │   ├── AppException.cs
+│   │   └── ExceptionHandlingMiddleware.cs
+│   ├── Models/
+│   │   ├── Requests/
+│   │   ├── Responses/
+│   │   └── ViewModels/
+│   ├── Services/
+│   ├── Views/
+│   ├── wwwroot/
+│   ├── Program.cs
+│   ├── appsettings.json
+│   └── appsettings.Docker.json
+└── Couppa.Api.Tests/
+    ├── Integration/
+    └── Services/
+```
+
+Không có `Areas/` hoặc `Repositories/`. Admin được tổ chức bằng namespace
+`Controllers.Admin` và attribute route, còn truy cập dữ liệu dùng trực tiếp
+`AppDbContext` trong Service.
+
+---
+
+## 4. Kiến trúc MVC và luồng hệ thống
+
+### 4.1. Sơ đồ kiến trúc
+
+```mermaid
+flowchart LR
+    Browser["Browser<br/>Razor + Bootstrap + Fetch"]
+    Pipeline["ASP.NET Core pipeline<br/>Routing / Session / Identity / CSRF"]
+    Controller["MVC Controllers"]
+    Service["Business Services"]
+    Cache["IMemoryCache"]
+    Identity["UserManager / SignInManager / RoleManager"]
+    DbContext["AppDbContext<br/>IdentityDbContext"]
+    Database[("SQL Server local<br/>hoặc PostgreSQL Docker")]
+
+    Browser --> Pipeline
+    Pipeline --> Controller
+    Controller --> Service
+    Controller --> Identity
+    Service --> Cache
+    Service --> DbContext
+    Identity --> DbContext
+    DbContext --> Database
+    Controller --> Browser
+```
+
+Luồng View thông thường:
+
+```text
+Browser
+  ↓
+Routing
+  ↓
+Controller Action
+  ↓
+Service / Identity
+  ↓
+AppDbContext + EF Core
+  ↓
+Database
+  ↓
+ViewModel hoặc Response
+  ↓
+Razor View / JSON
+```
+
+### 4.2. `Program.cs`
+
+`src/Couppa.Api/Program.cs` thực hiện các nhiệm vụ:
+
+- Chọn `UseSqlServer` hoặc `UseNpgsql` theo `Database:Provider`.
+- Đăng ký CORS với origin cụ thể và credentials.
+- Đăng ký Distributed Memory Cache và ASP.NET Core Session.
+- Đăng ký `AddIdentity<ApplicationUser, IdentityRole>`.
+- Cấu hình cookie `couppa.auth`, login path `/Account/Login` và access denied path.
+- Cấu hình password policy, Identity Lockout và rate limit login 5 lần/phút/IP.
+- Đăng ký antiforgery cookie `couppa.csrf`.
+- Đăng ký toàn bộ Service và `GuestCartCleanupService`.
+- Đăng ký `ApiModelStateValidationFilter`.
+- Đặt `ExceptionHandlingMiddleware` trước pipeline MVC.
+- Dùng `EnsureCreatedAsync()` cho SQL Server; dùng `MigrateAsync()` cho database
+  relational không phải SQL Server, gồm môi trường Docker PostgreSQL.
+- Seed role, Admin, categories và products trong Development/Docker.
+
+### 4.3. Controller và View
+
+| Controller | Action chính | Kết quả |
+|---|---|---|
+| `HomeController` | `GET /Home/Index` | `Views/Home/Index.cshtml` |
+| `ProductController` | `Index`, `Detail` | Razor View |
+| `ProductController` | `Search`, `Filter`, `Sort`, `Page`, `Featured`, `Latest` | JSON cho Fetch |
+| `CategoryController` | `GET /Category/GetActive` | JSON |
+| `CartController` | `Index` | Razor View |
+| `CartController` | `AddItem`, `UpdateItem`, `RemoveItem`, `Clear` | JSON |
+| `AccountController` | `Login`, `Register`, `Logout` | View hoặc JSON tùy request |
+| `UserController` | `Profile` | Razor View |
+| `UserController` | `UpdateProfile`, `ChangePassword` | JSON |
+| `AdminProductController` | `Index`, `Detail` | Admin View |
+| `AdminProductController` | `Create`, `Edit`, `Delete`, `ToggleStatus` | JSON |
+| `AdminCategoryController` | `Index` | Admin View |
+| `AdminCategoryController` | `Create`, `Edit`, `Delete`, `ToggleStatus` | JSON |
+| `AdminUserController` | `Index`, `Detail` | Admin View |
+| `AdminUserController` | `Lock`, `ChangeRole` | JSON |
+| `AdminDashboardController` | `Index` | Dashboard View |
+| `AdminDashboardController` | `Summary` | JSON |
+| `AdminReportController` | `Index`, `CartTopProducts` | View hoặc JSON |
+| `AdminReportController` | `Summary` | JSON |
+
+Các action ghi dữ liệu đều có `[ValidateAntiForgeryToken]`. Những action Admin
+đều có `[Authorize(Policy = "RequireAdmin")]`.
+
+---
+
+## 5. Use Case
+
+### 5.1. Sơ đồ Use Case
+
+```mermaid
+flowchart TB
+    Guest(["Guest"])
+    User(["User"])
+    Admin(["Admin"])
+
+    Browse(["Duyệt / tìm / lọc sản phẩm"])
+    Cart(["Quản lý giỏ hàng"])
+    Register(["Đăng ký"])
+    Login(["Đăng nhập"])
+    Logout(["Đăng xuất"])
+    Profile(["Quản lý profile / đổi mật khẩu"])
+    Merge(["Merge giỏ Guest khi login"])
+    ProductAdmin(["CRUD sản phẩm"])
+    CategoryAdmin(["CRUD danh mục"])
+    UserAdmin(["Quản lý user / role / khóa tài khoản"])
+    Dashboard(["Dashboard"])
+    Report(["Báo cáo"])
+
+    Guest --> Browse
+    Guest --> Cart
+    Guest --> Register
+    Guest --> Login
+    User --> Browse
+    User --> Cart
+    User --> Logout
+    User --> Profile
+    Login -.-> Merge
+    Admin --> ProductAdmin
+    Admin --> CategoryAdmin
+    Admin --> UserAdmin
+    Admin --> Dashboard
+    Admin --> Report
+```
+
+### 5.2. Luồng đăng nhập và merge cart
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant View as Login View
+    participant Account as AccountController
+    participant Identity as UserManager/SignInManager
+    participant Cart as CartService
+    participant DB as AppDbContext
+
+    User->>View: Nhập email/password
+    View->>Account: POST /Account/Login
+    Account->>Identity: FindByEmail + PasswordSignInAsync
+    Identity->>DB: Kiểm tra AspNetUsers/Identity tables
+    Identity-->>Account: Kết quả xác thực
+    Account->>Cart: MergeGuestCartAsync(sessionId, userId)
+    Cart->>DB: Đọc carts/cart_items và cập nhật tồn kho
+    Account-->>View: Cookie Authentication + redirect/JSON
+```
+
+### 5.3. Luồng thêm sản phẩm vào giỏ
+
+```mermaid
+flowchart TD
+    A["POST /Cart/AddItem"] --> B{"ModelState hợp lệ?"}
+    B -- Không --> C["422 VALIDATION_ERROR cho JSON"]
+    B -- Có --> D["CartService đọc Product"]
+    D --> E{"Active, chưa soft-delete, còn hàng?"}
+    E -- Không --> F["409 PRODUCT_UNAVAILABLE"]
+    E -- Có --> G{"Quantity vượt tồn kho?"}
+    G -- Có --> H["409 CART_QUANTITY_EXCEEDS_STOCK"]
+    G -- Không --> I["Tạo/cập nhật CartItem"]
+    I --> J["Ghi cart_activity_logs"]
+    J --> K["SaveChanges + trả CartResponse"]
 ```
 
 ---
 
-## CHƯƠNG 6. KẾT QUẢ THỰC HIỆN VÀ ĐỐI CHIẾU TIÊU CHÍ
+## 6. Model, ViewModel, Request và Response
 
-### 6.1. Bảng đối chiếu minh chứng 10 Tiêu chí Đề bài
+### 6.1. Entity
 
-| STT | Tiêu chí đề bài | Trạng thái | Bằng chứng Nguồn mã (Code Proof) | Vị trí kiểm tra trong Code |
-|---|---|---|---|---|
-| **1** | **Kiến trúc MVC** | **ĐẠT** | `Program.cs` cấu hình `AddControllersWithViews()`, 6 Controllers trong `Controllers/`, ViewModels trong `Models/ViewModels/`, Views trong `Views/`. | [`src/Couppa.Api/Program.cs`](src/Couppa.Api/Program.cs), [`src/Couppa.Api/Controllers/HomeController.cs`](src/Couppa.Api/Controllers/HomeController.cs) |
-| **2** | **EF Core & DB** | **ĐẠT** | `AppDbContext` kế thừa `DbContext`, sử dụng SQL Server (`UseSqlServer`), 9 Entity Classes, Migrations sẵn có. | [`src/Couppa.Api/Data/AppDbContext.cs`](src/Couppa.Api/Data/AppDbContext.cs), `src/Couppa.Api/Data/Migrations/` |
-| **3** | **CRUD Chức năng** | **ĐẠT** | Thực hiện đủ CRUD trên Sản phẩm, Danh mục, Giỏ hàng, Tài khoản người dùng. | [`src/Couppa.Api/Controllers/ProductController.cs`](src/Couppa.Api/Controllers/ProductController.cs), [`src/Couppa.Api/Controllers/AdminController.cs`](src/Couppa.Api/Controllers/AdminController.cs) |
-| **4** | **ASP.NET Identity / Auth** | **ĐẠT 1 PHẦN** | Sử dụng Cookie Authentication (`CookieAuthenticationDefaults`) + Role Claims Authorization (`RequireAdmin`) + BCrypt. | [`src/Couppa.Api/Controllers/AuthController.cs`](src/Couppa.Api/Controllers/AuthController.cs), `Program.cs` |
-| **5** | **Login / Logout** | **ĐẠT** | `AuthController` xử lý `SignInAsync`, `SignOutAsync`, chuyển hướng an toàn, gộp giỏ hàng Guest khi login thành công. | [`src/Couppa.Api/Controllers/AuthController.cs`](src/Couppa.Api/Controllers/AuthController.cs) |
-| **6** | **Kỹ thuật Bảo mật** | **ĐẠT** | Biểu mẫu sử dụng `@Html.AntiForgeryToken()`, Controller có `[ValidateAntiForgeryToken]`, băm BCrypt, Cookie HttpOnly, RateLimiter. | [`src/Couppa.Api/Program.cs`](src/Couppa.Api/Program.cs), `src/Couppa.Api/Views/Auth/Login.cshtml` |
-| **7** | **Tối ưu Caching** | **ĐẠT 1 PHẦN** | Triển khai `IMemoryCache` qua `MemoryCacheService` cho Danh mục (TTL 10m) và Dashboard Summary (TTL 5m). | [`src/Couppa.Api/Services/MemoryCacheService.cs`](src/Couppa.Api/Services/MemoryCacheService.cs) |
-| **8** | **Tích hợp AJAX** | **ĐẠT 1 PHẦN** | Cung cấp JSON API Endpoints (`/api/...`) kết hợp client script `apiClient.js` (Fetch API). | `html/js/apiClient.js`, `Program.cs` |
-| **9** | **Razor View + Bootstrap** | **ĐẠT** | 100% Giao diện dựng bằng `.cshtml` Razor syntax + Bootstrap v5.3.3 + Responsive Grid System (`_Layout.cshtml`). | `src/Couppa.Api/Views/Shared/_Layout.cshtml`, `src/Couppa.Api/Views/Home/Index.cshtml` |
-| **10** | **Báo cáo Mô tả Chi tiết** | **ĐẠT** | File báo cáo chi tiết Markdown & xuất file Word [`BaoCao_DoAn_Couppa_ASP.NET_MVC.docx`](BaoCao_DoAn_Couppa_ASP.NET_MVC.docx). | File Word đính kèm tại root dự án. |
+| Entity | Vai trò |
+|---|---|
+| `ApplicationUser` | Mở rộng `IdentityUser`, thêm `FullName`, `Phone`, `IsLocked`, `CreatedAt`, navigation `Cart`. |
+| `Category` | Danh mục sản phẩm, có `Name`, `Slug`, `IsActive`. |
+| `Product` | Sản phẩm, giá, tồn kho, trạng thái, soft delete và cờ featured. |
+| `ProductImage` | Nhiều ảnh cho một sản phẩm, `IsPrimary`, `SortOrder`. |
+| `Cart` | Một cart thuộc User hoặc Guest Session. |
+| `CartItem` | Sản phẩm và số lượng trong cart. |
+| `CartActivityLog` | Log add/remove để báo cáo top sản phẩm. |
+| `AuditLog` | Log hành động nghiệp vụ và JSON chi tiết. |
 
-### 6.2. Danh mục 15 Screenshot Minh chứng thực tế
+### 6.2. Request model và validation
 
-1. **Screenshot 1 — Cấu trúc Project MVC**: Chụp Visual Studio / VS Code cây thư mục `Controllers`, `Models`, `Views`, `Services`, `Data`. *Minh chứng Tiêu chí 1 (MVC)*.
-2. **Screenshot 2 — Mã nguồn DbContext & Entity**: Chụp file `AppDbContext.cs` & các Entities. *Minh chứng Tiêu chí 2 (EF Core)*.
-3. **Screenshot 3 — Migration Database**: Chụp thư mục `Data/Migrations` và bảng trong SSMS. *Minh chứng Tiêu chí 2 (Database)*.
-4. **Screenshot 4 — Trang chủ Couppa**: Chụp trình duyệt `https://localhost:5001/` hiển thị Banner, Danh mục & SP Nổi bật. *Minh chứng Tiêu chí 9 (Razor + Bootstrap)*.
-5. **Screenshot 5 — Trang Danh sách & Lọc Sản phẩm**: Chụp `https://localhost:5001/Product` với bộ lọc danh mục & thanh tìm kiếm. *Minh chứng Tiêu chí 3 (CRUD Read/Search)*.
-6. **Screenshot 6 — Trang Chi tiết Sản phẩm**: Chụp `https://localhost:5001/Product/Details/1` hiển thị mô tả & nút Thêm vào giỏ. *Minh chứng Tiêu chí 3 (Read Detail)*.
-7. **Screenshot 7 — Trang Giỏ hàng**: Chụp `https://localhost:5001/Cart` hiển thị danh sách món, chỉnh số lượng & tổng tiền. *Minh chứng Tiêu chí 3 (Cart CRUD)*.
-8. **Screenshot 8 — Form Đăng nhập & Validation**: Chụp `https://localhost:5001/Auth/Login` với thông báo lỗi validation khi nhập sai. *Minh chứng Tiêu chí 5 & 6 (Login & Security)*.
-9. **Screenshot 9 — Form Đăng ký Tài khoản**: Chụp `https://localhost:5001/Auth/Register`. *Minh chứng Tiêu chí 5 (Auth Register)*.
-10. **Screenshot 10 — Trang Hồ sơ Cá nhân**: Chụp `https://localhost:5001/User/Profile` hiển thị thông tin & form đổi mật khẩu. *Minh chứng Tiêu chí 3 (User Profile Update)*.
-11. **Screenshot 11 — Admin Dashboard**: Chụp `https://localhost:5001/Admin/Dashboard` hiển thị các card thống kê tổng quan. *Minh chứng Tiêu chí 4 (Admin Role Authorization)*.
-12. **Screenshot 12 — Quản lý Sản phẩm Admin Modal**: Chụp `https://localhost:5001/Admin/Products` mở Bootstrap Modal Thêm sản phẩm mới. *Minh chứng Tiêu chí 3 (CRUD Create Product)*.
-13. **Screenshot 13 — Quản lý Danh mục Admin**: Chụp `https://localhost:5001/Admin/Categories`. *Minh chứng Tiêu chí 3 (CRUD Category)*.
-14. **Screenshot 14 — Quản lý Người dùng Admin**: Chụp `https://localhost:5001/Admin/Users` với nút Khóa/Mở khóa tài khoản. *Minh chứng Tiêu chí 3 & 4 (User Management & Roles)*.
-15. **Screenshot 15 — Kết quả Chạy Kiểm thử (81 PASS)**: Chụp màn hình Terminal chạy `dotnet test` xanh 100%. *Minh chứng Tiêu chí 10 (Testing & Quality)*.
+Các request model chính nằm trong `Models/Requests`:
+
+- `RegisterRequest`, `LoginRequest`.
+- `CreateProductRequest`, `UpdateProductRequest`, `ChangeProductStatusRequest`.
+- `CreateCategoryRequest`, `UpdateCategoryRequest`, `ChangeCategoryStatusRequest`.
+- `AddCartItemRequest`, `UpdateCartItemRequest`.
+- `UpdateProfileRequest`, `ChangePasswordRequest`.
+- `LockUserRequest`, `ChangeUserRoleRequest`.
+- `ProductListQuery`, `AdminProductListQuery`.
+
+Validation thực tế gồm `[Required]`, `[EmailAddress]`, `[MaxLength]`,
+`[MinLength]`, `[Range]`, `DataType` và validation bổ sung trong Service.
+JSON request lỗi model binding được `ApiModelStateValidationFilter` trả về
+HTTP 422 với code `VALIDATION_ERROR`; form Razor được trả lại View và
+`ModelState`.
+
+### 6.3. Response
+
+`Models/Responses` có các response chính:
+
+- `ApiResponse<T>` và `ApiError` cho JSON contract.
+- `PagedResult<T>` cho phân trang.
+- `ProductResponse`, `ProductSummaryResponse`, `ProductImageResponse`.
+- `CategoryResponse`.
+- `CartResponse`, `CartItemResponse`.
+- `UserResponse`, `UserDetailResponse`.
+- `DashboardSummaryResponse`, `ReportSummaryResponse`,
+  `CartTopProductResponse`.
+
+Response user không chứa `PasswordHash`. Cart item không khả dụng vẫn được
+trả về với `IsAvailable = false`, nhưng không tính vào `TotalQuantity` và
+`Subtotal`.
 
 ---
 
-## CHƯƠNG 7. ĐÁNH GIÁ VÀ HƯỚNG PHÁT TRIỂN
+## 7. Service và business logic
 
-### 7.1. Kết quả đạt được
-- Hệ thống xây dựng hoàn chỉnh theo chuẩn kiến trúc ASP.NET Core 8.0 MVC.
-- Quản lý dữ liệu nhất quán với Entity Framework Core & SQL Server.
-- Giao diện đẹp mắt, hiện đại, tương thích hoàn hảo trên di động nhờ Bootstrap 5.
-- Cơ chế xác thực Cookie Auth & phân quyền Role-based hoạt động chính xác.
-- Bảo mật đa lớp đạt chuẩn OWASP (Anti-CSRF, Password Hashing, Rate Limiting).
-- Đạt 100% tỉ lệ pass kiểm thử tự động với 81/81 Test Cases.
+| Service | Business logic thực tế |
+|---|---|
+| `ProductService` | Public/admin list, search/filter/sort, detail, CRUD, soft delete, validate SKU/price/stock/category, image list, invalidate cache. |
+| `CategoryService` | Public active list, admin list, CRUD, unique name/slug, chặn xóa category còn product, invalidate cache. |
+| `CartService` | Tạo/đọc cart theo User hoặc Session, add/update/remove/clear, kiểm tra tồn kho, ghi activity log, merge 4 trường hợp. |
+| `UserService` | Profile, đổi password, danh sách/chi tiết admin, lock/unlock, change role, chặn Admin tự khóa mình. |
+| `DashboardService` | 5 số liệu tổng hợp, sản phẩm theo category, 5 sản phẩm mới; cache 5 phút. |
+| `ReportService` | In-stock/out-of-stock, users/new users, products by category, top 10 add logs theo khoảng thời gian. |
+| `AuditLogService` | Lưu actor, action, entity, entity ID và `DetailJson`; không ghi password. |
+| `CurrentUserService` | Đọc `ClaimTypes.NameIdentifier`, role Admin và tạo Guest session ID. |
+| `MemoryCacheService` | Đọc/tạo cache theo TTL và xóa key khi CUD. |
+| `GuestCartCleanupService` | Hosted service chạy theo chu kỳ một giờ, xóa Guest cart không hoạt động quá cấu hình (mặc định 7 ngày). |
 
-### 7.2. Hạn chế & Hướng nâng cấp tương lai
-- **Hạn chế**: Chưa tích hợp thanh toán trực tuyến qua cổng VNPay/MoMo; Caching dừng ở mức in-process `IMemoryCache`.
-- **Hướng phát triển**: Tích hợp thanh toán QR Code, nâng cấp Caching lên Redis Distributed Cache khi mở rộng mô hình Multi-node, gửi email tự động xác nhận đơn hàng.
+Không có Repository layer riêng; `AppDbContext` là abstraction truy cập dữ
+liệu được Service sử dụng trực tiếp.
+
+---
+
+## 8. Thiết kế database và EF Core
+
+### 8.1. DbContext
+
+`AppDbContext : IdentityDbContext<ApplicationUser>` có các `DbSet`:
+
+```text
+Categories
+Products
+ProductImages
+Carts
+CartItems
+CartActivityLogs
+AuditLogs
+```
+
+Ngoài bảy bảng nghiệp vụ trên, Identity tạo các bảng `AspNetUsers`,
+`AspNetRoles`, `AspNetUserClaims`, `AspNetUserLogins`, `AspNetUserRoles`,
+`AspNetUserTokens`, `AspNetRoleClaims`.
+
+### 8.2. Bảng nghiệp vụ
+
+| Bảng | Khóa chính | Quan hệ và ràng buộc chính |
+|---|---|---|
+| `categories` | `Id` | Unique `Name`, `Slug`; index `IsActive`. |
+| `products` | `Id` | FK `CategoryId` với `Restrict`; unique `Sku`; check `Price >= 0`, `StockQuantity >= 0`; global filter `!IsDeleted`. |
+| `product_images` | `Id` | FK `ProductId` với `Cascade`; index `ProductId`. |
+| `carts` | `Id` | FK User; unique filtered index User/Session; check XOR User/Session. |
+| `cart_items` | `Id` | FK Cart `Cascade`, FK Product `Restrict`; unique `(CartId, ProductId)`; check `Quantity > 0`. |
+| `cart_activity_logs` | `Id` | FK Product/User; index ProductId/CreatedAt; action `add` hoặc `remove`. |
+| `audit_logs` | `Id` | FK `ActorUserId` với `SetNull`; index entity và CreatedAt; cột `detail` lưu JSON. |
+
+### 8.3. ERD
+
+```mermaid
+erDiagram
+    AspNetUsers ||--o| carts : owns
+    AspNetUsers ||--o{ cart_activity_logs : creates
+    AspNetUsers ||--o{ audit_logs : acts
+    categories ||--o{ products : contains
+    products ||--o{ product_images : has
+    products ||--o{ cart_items : appears_in
+    products ||--o{ cart_activity_logs : records
+    carts ||--o{ cart_items : contains
+
+    categories {
+        bigint Id PK
+        string Name
+        string Slug UK
+        bool IsActive
+    }
+    products {
+        bigint Id PK
+        string Sku UK
+        bigint CategoryId FK
+        decimal Price
+        int StockQuantity
+        bool IsActive
+        bool IsFeatured
+        bool IsDeleted
+    }
+    carts {
+        bigint Id PK
+        string UserId FK
+        uuid SessionId
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+    cart_items {
+        bigint Id PK
+        bigint CartId FK
+        bigint ProductId FK
+        int Quantity
+    }
+```
+
+### 8.4. Provider và migration
+
+- `appsettings.json` hiện đặt `Database:Provider = SqlServer` và database
+  `IT38` trên `localhost\SQLEXPRESS`.
+- `appsettings.Docker.json` đặt `Database:Provider = PostgreSql` và kết nối
+  service `postgres`.
+- `Program.cs` dùng `EnsureCreatedAsync()` cho SQL Server local, không áp
+  dụng migration PostgreSQL lên database SQL Server.
+- Docker PostgreSQL dùng thư mục `Data/Migrations`.
+- Bảng nghiệp vụ được đặt tên dạng snake_case, nhưng các property column
+  chính trong model hiện vẫn theo convention EF (`Price`, `StockQuantity`,
+  `UserId`, ...). Đây là điểm khác với naming convention column snake_case
+  đầy đủ được mô tả trong Chương 13 SRS (`MISMATCH` cần lưu ý khi triển khai
+  PostgreSQL mới).
+
+---
+
+## 9. Authentication, authorization và security
+
+### 9.1. Authentication
+
+`AccountController` sử dụng trực tiếp:
+
+- `UserManager<ApplicationUser>` để tạo và tìm user.
+- `RoleManager<IdentityRole>` để tạo/gán role.
+- `SignInManager<ApplicationUser>` để login/logout.
+
+Identity tự hash password bằng `PasswordHasher` mặc định của ASP.NET Core.
+Code không tham chiếu package BCrypt.
+
+Cookie thực tế:
+
+```text
+Name: couppa.auth
+HttpOnly: true
+ExpireTimeSpan: 30 phút
+SlidingExpiration: true
+LoginPath: /Account/Login
+AccessDeniedPath: /Account/Login
+```
+
+Password policy:
+
+```text
+Tối thiểu 8 ký tự
+Có chữ số
+Có chữ hoa
+Không bắt buộc ký tự đặc biệt
+```
+
+Identity Lockout được bật với 5 lần thất bại và thời gian khóa mặc định
+5 phút. Ngoài Lockout, `ApplicationUser.IsLocked` là trạng thái khóa thủ
+công do Admin quản lý.
+
+### 9.2. Authorization
+
+`Program.cs` đăng ký policy `RequireAdmin` yêu cầu role `Admin`.
+Toàn bộ controller Admin có `[Authorize(Policy = "RequireAdmin")]`.
+`UserController` có `[Authorize]`.
+
+Khi request dạng JSON/AJAX:
+
+- Chưa đăng nhập: trả HTTP 401.
+- Đã đăng nhập nhưng thiếu quyền: trả HTTP 403.
+
+### 9.3. CSRF, validation và lỗi
+
+- Các POST ghi dữ liệu có `[ValidateAntiForgeryToken]`.
+- `GET /Account/AntiForgeryToken` cấp request token cho JavaScript.
+- `cart-ajax.js` và `admin-ajax.js` gửi token qua header
+  `RequestVerificationToken`.
+- `ExceptionHandlingMiddleware` chuẩn hóa `AppException` và lỗi hệ thống.
+- Lỗi hệ thống trả code `INTERNAL_ERROR`, không trả stack trace.
+- EF Core dùng parameterized LINQ query, không nối chuỗi SQL tùy ý.
+
+---
+
+## 10. Giao diện và Fetch API
+
+### 10.1. Razor Views thực tế
+
+| Nhóm | View |
+|---|---|
+| Layout | `Views/Shared/_Layout.cshtml`, `_ValidationScriptsPartial.cshtml` |
+| Public | `Home/Index`, `Product/Index`, `Product/Detail`, `Cart/Index` |
+| Account | `Account/Login`, `Account/Register` |
+| User | `User/Profile` |
+| Admin | `AdminProduct/Index`, `AdminCategory/Index`, `AdminUser/Index`, `AdminUser/Detail`, `AdminDashboard/Index`, `AdminReport/CartTopProducts` |
+
+Layout dùng Bootstrap CDN, Bootstrap Icons, Google Fonts và
+`wwwroot/css/site.css`. Grid Bootstrap `col-lg`, `col-md`, `col-sm` được
+dùng cho giao diện responsive.
+
+### 10.2. JavaScript
+
+- `cart-ajax.js`: add/update/remove/clear cart và cập nhật tổng tiền không
+  reload trang.
+- `admin-ajax.js`: helper POST JSON cho CRUD Admin.
+- `site.js`: đóng alert sau 5 giây.
+
+Search/filter/sort/page sản phẩm gọi các action JSON của
+`ProductController`; không có `apiClient.js` hoặc API prefix `/api` riêng.
+
+---
+
+## 11. API và routing
+
+Ứng dụng dùng conventional route mặc định:
+
+```text
+{controller=Home}/{action=Index}/{id?}
+```
+
+Admin dùng attribute route:
+
+```text
+/Admin/Product/{action}
+/Admin/Category/{action}
+/Admin/User/{action}
+/Admin/Dashboard/{action}
+/Admin/Report/{action}
+```
+
+### 11.1. Public và account
+
+| Method | URL | Kết quả |
+|---|---|---|
+| GET | `/` hoặc `/Home/Index` | Trang chủ |
+| GET | `/Product/Index` | Danh sách có query `category`, `search`, `minPrice`, `maxPrice`, `sort`, `page`, `pageSize` |
+| GET | `/Product/Detail/{id}` | Chi tiết sản phẩm |
+| GET | `/Product/Search` | JSON search |
+| GET | `/Product/Filter` | JSON filter |
+| GET | `/Product/Sort` | JSON sort |
+| GET | `/Product/Page` | JSON pagination |
+| GET | `/Product/Featured` | JSON sản phẩm nổi bật |
+| GET | `/Product/Latest` | JSON sản phẩm mới nhất |
+| GET | `/Category/GetActive` | JSON danh mục active |
+| GET/POST | `/Account/Login` | Login View hoặc JSON |
+| GET/POST | `/Account/Register` | Register View hoặc JSON |
+| POST | `/Account/Logout` | Đăng xuất |
+| GET | `/Account/AntiForgeryToken` | Cấp CSRF request token |
+
+### 11.2. Cart và User
+
+| Method | URL | Kết quả |
+|---|---|---|
+| GET | `/Cart/Index` | Trang giỏ hàng |
+| POST | `/Cart/AddItem` | Thêm item, JSON `CartResponse` |
+| POST | `/Cart/UpdateItem/{id}` | Cập nhật số lượng |
+| POST | `/Cart/RemoveItem/{id}` | Xóa item |
+| POST | `/Cart/Clear` | Xóa toàn bộ item |
+| GET/POST | `/User/Profile` | Xem/cập nhật profile |
+| POST | `/User/UpdateProfile` | JSON cập nhật profile |
+| POST | `/User/ChangePassword` | JSON đổi mật khẩu |
+
+### 11.3. Admin
+
+| Nhóm | GET View | POST/GET JSON |
+|---|---|---|
+| Product | `/Admin/Product/Index`, `/Admin/Product/Detail/{id}` | `Create`, `Edit`, `Delete`, `ToggleStatus` |
+| Category | `/Admin/Category/Index` | `Create`, `Edit`, `Delete`, `ToggleStatus` |
+| User | `/Admin/User/Index`, `/Admin/User/Detail/{id}` | `Lock`, `ChangeRole` |
+| Dashboard | `/Admin/Dashboard/Index` | `/Admin/Dashboard/Summary` |
+| Report | `/Admin/Report/Index`, `/Admin/Report/CartTopProducts` | `/Admin/Report/Summary`, JSON `CartTopProducts` |
+
+---
+
+## 12. Business Rules và đối chiếu code
+
+| ID | Quy tắc SRS | Bằng chứng code | Trạng thái |
+|---|---|---|---|
+| BR-01 | Không thêm sản phẩm inactive/hết hàng | `Product.IsAvailableForCart`, `CartService.AddItemAsync` | `IMPLEMENTED` |
+| BR-02 | Cart quantity không vượt stock | `CartService` add/update và test | `IMPLEMENTED` |
+| BR-03 | Không xóa category còn product | `CategoryService.DeleteAsync`, FK Restrict | `IMPLEMENTED` |
+| BR-04 | Email duy nhất | Identity `RequireUniqueEmail`, `CreateAsync` | `IMPLEMENTED` |
+| BR-05 | SKU duy nhất | unique index + `EnsureSkuUniqueAsync` | `IMPLEMENTED` |
+| BR-06 | Password >= 8, hoa, số | Identity options | `IMPLEMENTED` |
+| BR-07 | User bị `IsLocked` không login | `AccountController.Login` | `IMPLEMENTED` |
+| BR-08 | Chỉ Admin truy cập `/Admin/**` | `RequireAdmin` trên 5 Admin controller | `IMPLEMENTED` |
+| BR-09 | Price >= 0 | Data Annotation, Service, DB check | `IMPLEMENTED` |
+| BR-10 | Stock >= 0 | Data Annotation, Service, DB check | `IMPLEMENTED` |
+| BR-11 | Cart item sản phẩm inactive/delete vẫn giữ và đánh dấu | `CartService.BuildResponseAsync`, `IsAvailable` | `IMPLEMENTED` |
+| BR-12 | Cart có đúng một owner User hoặc Session | check constraint `ck_carts_owner_xor` | `IMPLEMENTED` |
+| BR-13 | Merge Guest/User, cộng và giới hạn theo stock | `CartService.MergeGuestCartAsync` với 4 trường hợp | `IMPLEMENTED` |
+| BR-14 | Admin không tự khóa mình | `UserService.LockUserAsync` | `IMPLEMENTED` |
+| BR-15 | Category inactive không public, Admin vẫn thấy | `CategoryService.GetActiveListAsync` và admin list | `IMPLEMENTED` |
+
+---
+
+## 13. Kiểm thử
+
+### 13.1. Test hiện có
+
+| File | Số test |
+|---|---:|
+| `AuthCartFlowIntegrationTests.cs` | 1 |
+| `CachingIntegrationTests.cs` | 6 |
+| `CartServiceTests.cs` | 11 |
+| `CategoryServiceTests.cs` | 6 |
+| `DashboardServiceTests.cs` | 4 |
+| `ProductServiceTests.cs` | 11 |
+| `ReportServiceTests.cs` | 4 |
+| `UserServiceTests.cs` | 3 |
+| **Tổng** | **46** |
+
+Kiểu test:
+
+- Unit/service test dùng EF Core InMemory.
+- Cache integration test dùng `MemoryCacheService` và `MemoryCache` thật.
+- Integration test dùng `WebApplicationFactory<Program>`, test luồng
+  Register → Login → Add to Cart → View Cart.
+
+Kết quả kiểm tra gần nhất:
+
+```text
+Build succeeded.
+Passed! - Failed: 0, Passed: 46, Skipped: 0, Total: 46
+```
+
+Con số `81/81` từng xuất hiện trong báo cáo cũ không có bằng chứng ở project
+hiện tại và đã được loại bỏ.
+
+### 13.2. Các nhóm chưa có test tự động đầy đủ
+
+Các yêu cầu sau có code nhưng chưa có test bao phủ đầy đủ trong danh sách test
+hiện tại; không suy diễn thành đã đạt 100%:
+
+- Toàn bộ Admin controller authorization theo từng endpoint.
+- Toàn bộ response validation 422 và tất cả mã lỗi middleware.
+- Manual responsive test trên Desktop/Tablet/Mobile.
+- Benchmark NFR `< 500ms`.
+- Kiểm thử PostgreSQL Docker thực tế trong lần chạy hiện tại.
+
+Trạng thái các mục này: `CANNOT VERIFY` nếu cần môi trường/manual test.
+
+---
+
+## 14. Traceability — SRS ↔ Code
+
+| Nhóm requirement | Controller / Service | Database / View | Trạng thái |
+|---|---|---|---|
+| FR-AUTH-001..006 | `AccountController`, Identity | `AspNetUsers`, Account Views | `IMPLEMENTED` |
+| FR-AUTHZ-001..003 | Admin controllers, `RequireAdmin`, `UserController` | Identity roles/cookie | `IMPLEMENTED` |
+| FR-PRODUCT-001..006 | `AdminProductController`, `ProductService` | `products`, `product_images`, Admin Product View | `IMPLEMENTED` |
+| FR-PRODUCT-007 | Request image URLs, `ProductImage` | `product_images` | `PARTIALLY IMPLEMENTED` — ảnh đầu tiên tự primary, chưa có action chọn lại ảnh đại diện |
+| FR-PRODUCT-008..010 | `ProductService`, AppDbContext | unique/check constraints | `IMPLEMENTED` |
+| FR-CATEGORY-001..007 | `AdminCategoryController`, `CategoryController`, `CategoryService` | `categories` | `IMPLEMENTED` |
+| FR-BROWSE-001..006 | `HomeController`, `ProductController`, `ProductService` | public Product/Home Views | `IMPLEMENTED` |
+| FR-BROWSE-007 | `Product.IsAvailableForCart`, Product Views | disable nút khi hết hàng, inactive bị loại public | `IMPLEMENTED` theo nhánh hiển thị/disable của SRS |
+| FR-CART-001..008 | `CartController`, `CartService`, cleanup Hosted Service | `carts`, `cart_items`, `cart_activity_logs`, Cart View | `IMPLEMENTED` |
+| FR-USER-001..009 | `AdminUserController`, `UserController`, `UserService` | `AspNetUsers`, User Views | `IMPLEMENTED` |
+| FR-DASH-001..002 | `AdminDashboardController`, `DashboardService` | Dashboard View + cache | `IMPLEMENTED` |
+| FR-DASH-003 | `DashboardService` trả `ProductsByCategory` | View hiển thị bảng, chưa có chart component | `PARTIALLY IMPLEMENTED` |
+| FR-DASH-004 | `DashboardService` lấy 5 recent products | Dashboard View | `IMPLEMENTED` |
+| FR-REPORT-001..004 | `AdminReportController`, `ReportService` | `products`, `categories`, `AspNetUsers`, `cart_activity_logs` | `IMPLEMENTED` |
+| FR-ADMIN-001..002 | Admin controllers + policy | `/Admin/**` | `IMPLEMENTED` |
+
+### 14.1. NFR và điểm khác SRS
+
+| NFR / yêu cầu | Đối chiếu |
+|---|---|
+| PostgreSQL làm database đề xuất | Docker thực hiện; local còn hỗ trợ SQL Server `IT38` — `EXTRA IMPLEMENTATION`/thích nghi môi trường |
+| PostgreSQL naming convention toàn bộ column snake_case | Table đã snake_case nhưng column property chính còn PascalCase — `MISMATCH` |
+| Password hash BCrypt cost >= 10 | Code dùng Identity `PasswordHasher`, không có package BCrypt — `MISMATCH` |
+| JSON error format | Có middleware/filter cho JSON; form MVC trả lại View/ModelState — `PARTIALLY IMPLEMENTED` nếu hiểu “mọi lỗi” là JSON |
+| Cache categories/featured/latest/dashboard | `MemoryCacheService`, đúng key và TTL cấu hình — `IMPLEMENTED` |
+| Logging/Audit | `AuditLogService` cho login/logout/product/category/user; application log qua `ILogger` — `IMPLEMENTED` |
+| Responsive 3 breakpoint | Bootstrap grid có hỗ trợ layout; chưa có browser test tự động — `CANNOT VERIFY` |
+| Response dưới 500 ms | Không có benchmark trong source/test — `CANNOT VERIFY` |
+| HTTPS production | Có HTTPS launch profile; cấu hình production certificate/deployment — `CANNOT VERIFY` |
+
+### 14.2. Code có nhưng SRS không yêu cầu bắt buộc
+
+- Provider SQL Server và cấu hình database `IT38` cho local.
+- `GET /Account/AntiForgeryToken` để Fetch lấy token.
+- CORS policy cụ thể.
+- `GuestCartCleanupService` chạy nền theo chu kỳ.
+- JSON alias action trong `AccountController` cho request `application/json`.
+
+Đây là các bổ sung kỹ thuật hỗ trợ yêu cầu hiện có, không làm thay đổi phạm vi
+nghiệp vụ sản phẩm/giỏ hàng của SRS.
+
+---
+
+## 15. Các lỗi mô tả cũ đã được sửa trong báo cáo
+
+Các nội dung sau của bản báo cáo cũ không phản ánh source và đã được thay:
+
+- `AuthController`/`AuthService` → thực tế là `AccountController` dùng trực
+  tiếp `UserManager`, `RoleManager`, `SignInManager`.
+- BCrypt → thực tế là Identity PasswordHasher.
+- `81/81` test → thực tế 46 test và đã kiểm tra `46/46 PASS`.
+- `/api/...`, `apiClient.js` → thực tế là MVC route và JSON action không có
+  prefix `/api`, dùng `cart-ajax.js`/`admin-ajax.js`.
+- Admin Area và `_AdminLayout` → project không có `Areas/`, Admin dùng namespace
+  controller và layout chung.
+- User/Role custom tables → thực tế dùng Identity tables `AspNetUsers`,
+  `AspNetRoles` và các bảng liên quan.
+- Mô tả database chỉ có SQL Server → thực tế code hỗ trợ SQL Server local và
+  PostgreSQL Docker.
+- Entity `CartItem.UnitPrice`, `AuditLog.IpAddress` → các property này không
+  tồn tại trong entity hiện tại.
+
+---
+
+## 16. Đánh giá
+
+### 16.1. Điểm đạt được
+
+- Đúng kiến trúc một project ASP.NET Core MVC.
+- Controller, Service, Data, Model và View được tách rõ.
+- Identity Cookie và role Admin được tích hợp ở backend.
+- Business rule cart, merge cart, tồn kho, soft delete và category restriction
+  được đặt trong Service và có constraint database tương ứng.
+- Có cache với invalidation cho category/product.
+- Có exception middleware, JSON error contract, antiforgery và rate limit login.
+- Có unit/service test và integration test thực tế.
+- Đã khởi chạy thành công với SQL Server database `IT38`.
+
+### 16.2. Hạn chế được xác nhận
+
+- Password hashing chưa dùng BCrypt như câu NFR-SEC-01 của SRS.
+- Dashboard trả dữ liệu theo category nhưng View hiện hiển thị bảng, chưa có
+  biểu đồ Chart.js.
+- Quản lý ảnh hỗ trợ danh sách URL và tự chọn ảnh đầu tiên, chưa có thao tác
+  chọn lại ảnh đại diện độc lập.
+- Naming convention column PostgreSQL chưa được mapping snake_case đầy đủ.
+- Chưa có benchmark performance, browser automation hoặc kiểm thử Docker
+  PostgreSQL trong bộ test hiện tại.
+- Chưa có order/payment/shipping; các phần này nằm ngoài phạm vi SRS.
+
+---
+
+## 17. Hướng phát triển phù hợp SRS
+
+Các hạng mục dưới đây chỉ là hướng phát triển, không được xem là chức năng đã
+triển khai:
+
+1. Thống nhất mapping column snake_case cho PostgreSQL và tạo migration tương
+   ứng, đồng thời kiểm tra tương thích với SQL Server local.
+2. Nếu phải đáp ứng đúng NFR-SEC-01, đánh giá thay đổi password hasher theo
+   yêu cầu BCrypt và migration password hash an toàn.
+3. Thêm UI chart cho `ProductsByCategory`.
+4. Thêm action quản lý/chọn ảnh đại diện rõ ràng.
+5. Bổ sung integration test cho Admin authorization, error contract và
+   PostgreSQL Docker.
+6. Bổ sung benchmark và kiểm thử responsive thủ công theo ba breakpoint.
+
+Các chức năng thanh toán, vận chuyển, order lifecycle, microservices, AI,
+loyalty và đa ngôn ngữ vẫn nằm ngoài phạm vi SRS.
+
+---
+
+## 18. Kết luận
+
+Code hiện tại đã triển khai phần lớn nhóm Must-have trong SRS: MVC/Razor,
+Identity, role Admin, CRUD sản phẩm/danh mục, browsing, cart Guest/User và
+merge cart, dashboard, report, cache, validation, antiforgery và error
+handling. Bản báo cáo này giữ nguyên các điểm chưa hoàn thiện thay vì ghi
+nhận quá mức.
+
+Các điểm cần chú ý khi nghiệm thu là password hasher BCrypt, chart dashboard,
+quản lý ảnh đại diện và naming convention column PostgreSQL. Những yêu cầu
+này đã được đánh dấu đúng trạng thái trong ma trận đối chiếu ở trên.

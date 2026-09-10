@@ -1,73 +1,114 @@
 @model ProductDetailViewModel
 @{
     ViewData["Title"] = $"{Model.Product.Name} - Couppa";
+    bool outOfStock = Model.Product.StockQuantity <= 0;
 }
 
-<div class="container my-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a asp-action="Index">Sản phẩm</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@Model.Product.Name</li>
-        </ol>
-    </nav>
+<div class="container" style="padding-top: var(--space-4);">
+    <!-- BREADCRUMB -->
+    <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: var(--space-6);">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a> &nbsp;/&nbsp;
+        <a asp-action="Index">Sản phẩm</a> &nbsp;/&nbsp;
+        <span style="color: var(--color-text-main);">@Model.Product.Name</span>
+    </div>
 
-    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
-        <div class="row g-4 align-items-center">
-            <div class="col-lg-6 text-center">
-                <img src="@Model.Product.PrimaryImageUrl" class="img-fluid rounded-4 shadow-sm" style="max-height: 400px; object-fit: contain;" alt="@Model.Product.Name">
+    <!-- PRODUCT DETAIL CARD LAYOUT -->
+    <div class="card" style="padding: var(--space-8); background: white; margin-bottom: var(--space-12);">
+        <div style="display: grid; grid-template-columns: 460px 1fr; gap: var(--space-12); align-items: start;">
+            
+            <!-- LEFT: IMAGE GALLERY -->
+            <div>
+                <div style="border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--color-border); margin-bottom: var(--space-4);">
+                    <img id="detail-main-img" src="@Model.Product.PrimaryImageUrl" alt="@Model.Product.Name" style="width: 100%; height: 380px; object-fit: cover;">
+                </div>
             </div>
-            <div class="col-lg-6">
-                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold mb-2">@Model.Product.CategoryName</span>
-                <h2 class="fw-bold mb-3">@Model.Product.Name</h2>
-                <div class="display-6 fw-bold text-primary mb-3">@Model.Product.Price.ToString("N0") VNĐ</div>
 
-                <div class="mb-4">
-                    <span class="badge @(Model.Product.StockQuantity > 0 ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger") fs-6 px-3 py-2 rounded-pill">
-                        <i class="bi @(Model.Product.StockQuantity > 0 ? "bi-check-circle" : "bi-x-circle") me-1"></i>
-                        @(Model.Product.StockQuantity > 0 ? $"Còn hàng ({Model.Product.StockQuantity} sản phẩm)" : "Hết hàng")
+            <!-- RIGHT: PRODUCT INFO & ACTION -->
+            <div>
+                <span class="product-category" style="font-size: 0.875rem;">@Model.Product.CategoryName</span>
+                <h1 style="margin-top: 4px; margin-bottom: var(--space-2);">@Model.Product.Name</h1>
+                
+                <div class="flex items-center gap-4" style="margin-bottom: var(--space-4);">
+                    <span class="caption">Mã SKU: <strong style="color: var(--color-text-main);">@Model.Product.Sku</strong></span>
+                    <span class="caption">|</span>
+                    <span class="badge @(outOfStock ? "badge-danger" : "badge-success")">
+                        @(outOfStock ? "Hết hàng" : $"Còn hàng ({Model.Product.StockQuantity})")
                     </span>
                 </div>
 
-                <p class="text-secondary leading-relaxed mb-4">@Model.Product.Description</p>
-
-                <div class="d-flex gap-3 align-items-center">
-                    <div style="width: 100px;">
-                        <input type="number" id="quantityInput" value="1" min="1" max="@Model.Product.StockQuantity" class="form-control form-control-lg text-center rounded-pill" @(Model.Product.StockQuantity <= 0 ? "disabled" : "") />
-                    </div>
-                    <button type="button" class="btn btn-warning btn-lg rounded-pill px-4 fw-bold text-dark flex-grow-1 js-add-to-cart" data-product-id="@Model.Product.Id" data-quantity-input="#quantityInput" @(Model.Product.StockQuantity <= 0 ? "disabled" : "")>
-                        <i class="bi bi-cart-plus-fill me-2"></i> Thêm vào giỏ hàng
-                    </button>
+                <div style="font-size: 2rem; font-weight: 800; color: var(--color-primary); margin-bottom: var(--space-6);">
+                    @Model.Product.Price.ToString("N0") VNĐ
                 </div>
+
+                <div style="border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: var(--space-4) 0; margin-bottom: var(--space-6);">
+                    <h4 style="margin-bottom: 8px;">Mô tả sản phẩm:</h4>
+                    <p style="color: var(--color-text-muted);">@Model.Product.Description</p>
+                </div>
+
+                <!-- QUANTITY & ADD TO CART -->
+                <div class="flex items-center gap-6" style="margin-bottom: var(--space-6);">
+                    <div>
+                        <label class="form-label" style="margin-bottom: 6px; display: block;">Số lượng mua:</label>
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-btn" onclick="let input=document.getElementById('quantityInput'); if(parseInt(input.value)>1) input.value=parseInt(input.value)-1;">-</button>
+                            <input type="number" id="quantityInput" class="quantity-input" value="1" min="1" max="@Model.Product.StockQuantity" readonly>
+                            <button type="button" class="quantity-btn" onclick="let input=document.getElementById('quantityInput'); if(parseInt(input.value)<@Model.Product.StockQuantity) input.value=parseInt(input.value)+1;">+</button>
+                        </div>
+                    </div>
+
+                    <div style="flex: 1; margin-top: 24px;">
+                        <button type="button" class="btn btn-primary btn-lg btn-block js-add-to-cart" data-product-id="@Model.Product.Id" data-quantity-input="#quantityInput" @(outOfStock ? "disabled" : "")>
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"></path></svg>
+                            @(outOfStock ? "Sản Phẩm Đã Hết Hàng" : "Thêm Vào Giỏ Hàng")
+                        </button>
+                    </div>
+                </div>
+
+                <div style="background-color: var(--color-primary-light); padding: var(--space-4); border-radius: var(--radius-md); color: var(--color-primary); font-size: 0.85rem;">
+                    ✓ Cam kết chính hãng 100% &nbsp;|&nbsp; ✓ Giao hàng nhanh toàn quốc &nbsp;|&nbsp; ✓ Đổi trả trong 7 ngày
+                </div>
+
             </div>
+
         </div>
     </div>
 
-    <!-- Related Products -->
+    <!-- RELATED PRODUCTS -->
     @if (Model.RelatedProducts.Any())
     {
-        <h4 class="fw-bold mb-3">Sản phẩm liên quan</h4>
-        <div class="row g-4">
-            @foreach (var p in Model.RelatedProducts)
-            {
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card card-product h-100 shadow-sm">
-                        <img src="@p.PrimaryImageUrl" class="card-img-top" alt="@p.Name">
-                        <div class="card-body d-flex flex-column">
-                            <h6 class="card-title fw-bold text-truncate">
-                                <a asp-action="Detail" asp-route-id="@p.Id" class="text-dark text-decoration-none">@p.Name</a>
-                            </h6>
-                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
-                                <span class="fw-bold text-primary">@p.Price.ToString("N0") đ</span>
-                                <a asp-action="Detail" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm rounded-circle">
-                                    <i class="bi bi-arrow-right"></i>
-                                </a>
+        <section style="margin-bottom: var(--space-12);">
+            <h3 style="margin-bottom: var(--space-6);">Sản Phẩm Cùng Danh Mục</h3>
+            <div class="grid grid-cols-4">
+                @foreach (var p in Model.RelatedProducts)
+                {
+                    bool relOutOfStock = p.StockQuantity <= 0;
+                    <div class="card product-card">
+                        <div class="product-card-img-wrapper">
+                            <img src="@p.PrimaryImageUrl" alt="@p.Name" class="product-card-img">
+                            @if (relOutOfStock)
+                            {
+                                <span class="product-card-badge out-of-stock">Hết hàng</span>
+                            }
+                        </div>
+                        <div class="product-card-content">
+                            <span class="product-category">@p.CategoryName</span>
+                            <a asp-action="Detail" asp-route-id="@p.Id" class="product-title">@p.Name</a>
+                            <div class="product-price-row">
+                                <div>
+                                    <div class="product-price">@p.Price.ToString("N0") đ</div>
+                                    <div class="stock-status @(p.StockQuantity > 0 ? "in-stock" : "out-of-stock")">
+                                        @(p.StockQuantity > 0 ? "Còn hàng" : "Hết hàng")
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm js-add-to-cart" data-product-id="@p.Id" @(relOutOfStock ? "disabled" : "")>
+                                    + Giỏ
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        </section>
     }
 </div>
 

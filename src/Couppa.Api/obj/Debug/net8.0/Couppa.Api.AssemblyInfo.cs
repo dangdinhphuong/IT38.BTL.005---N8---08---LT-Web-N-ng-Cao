@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Couppa.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1056c2c7a7d2d20eb9c3c9f61b87c513c6a17c0e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3dd0f74e7ca2a71729f53921c704af05da146ed9")]
 [assembly: System.Reflection.AssemblyProductAttribute("Couppa.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Couppa.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

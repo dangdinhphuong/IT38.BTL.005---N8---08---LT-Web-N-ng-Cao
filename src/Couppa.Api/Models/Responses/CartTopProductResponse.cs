@@ -1,6 +1,6 @@
 namespace Couppa.Api.Models.Responses;
 
-/// <summary>Response item cho GET /api/admin/reports/cart-top-products (task 11, FR-REPORT-004).</summary>
+/// <summary>Response item cho GET /Admin/Report/CartTopProducts (FR-REPORT-004).</summary>
 public class CartTopProductResponse
 {
     public long ProductId { get; init; }

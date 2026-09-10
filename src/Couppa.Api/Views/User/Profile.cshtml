@@ -3,90 +3,88 @@
     ViewData["Title"] = "Hồ sơ cá nhân - Couppa";
 }
 
-<div class="container my-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân</li>
-        </ol>
-    </nav>
+<div class="container" style="max-width: 900px; padding-top: var(--space-4);">
+    
+    <h1 style="margin-bottom: var(--space-6);">Hồ Sơ Cá Nhân</h1>
 
-    <div class="row g-4">
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 text-center p-4">
-                <div class="mx-auto mb-3 d-flex align-items-center justify-content-center bg-primary text-white rounded-circle shadow-sm" style="width: 80px; height: 80px;">
-                    <i class="bi bi-person-fill display-5"></i>
-                </div>
-                <h4 class="fw-bold mb-1">@Model.User.FullName</h4>
-                <p class="text-muted small mb-3">@Model.User.Email</p>
-
-                <div class="d-flex justify-content-center gap-2 mb-3">
-                    <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-semibold">
-                        <i class="bi bi-shield-check me-1"></i> @Model.User.RoleName
-                    </span>
-                    <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-semibold">
-                        Hoạt động
-                    </span>
-                </div>
-
-                <div class="border-top pt-3 text-start small text-muted">
-                    <div class="mb-2"><i class="bi bi-calendar3 me-2"></i> Ngày tham gia: @Model.User.CreatedAt.ToString("dd/MM/yyyy")</div>
-                    <div><i class="bi bi-telephone me-2"></i> Số điện thoại: @(Model.User.PhoneNumber ?? "Chưa cập nhật")</div>
-                </div>
+    <div class="grid grid-cols-3" style="gap: var(--space-8); align-items: start;">
+        
+        <!-- PROFILE SUMMARY CARD -->
+        <div class="card" style="padding: var(--space-6); background: white; text-align: center;">
+            <div style="width: 80px; height: 80px; border-radius: var(--radius-full); background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4); font-size: 2rem; font-weight: 700;">
+                @(string.IsNullOrEmpty(Model.User.FullName) ? "U" : Model.User.FullName.Substring(0, 1).ToUpper())
             </div>
-        </div>
+            <h3>@Model.User.FullName</h3>
+            <p class="caption" style="margin-bottom: var(--space-3);">@Model.User.Email</p>
+            
+            <span class="badge badge-info">Role: @Model.User.Role</span>
 
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4 p-4">
-                <h4 class="fw-bold mb-4"><i class="bi bi-gear-fill me-2 text-primary"></i>Cập nhật thông tin cá nhân</h4>
+            <div style="border-top: 1px solid var(--color-border); margin-top: var(--space-6); padding-top: var(--space-4); text-align: left; font-size: 0.85rem; color: var(--color-text-muted);">
+                <div class="mb-2"><i class="bi bi-calendar3 me-2"></i> Ngày tham gia: @Model.User.CreatedAt.ToString("dd/MM/yyyy")</div>
+                <div><i class="bi bi-telephone me-2"></i> SĐT: @(Model.User.Phone ?? "Chưa cập nhật")</div>
+            </div>
 
-                <form asp-controller="User" asp-action="Profile" method="post">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Địa chỉ Email</label>
-                        <input type="text" class="form-control bg-light" value="@Model.User.Email" readonly disabled />
-                        <small class="text-muted">Email không thể thay đổi.</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="FullName" class="form-label fw-semibold">Họ và tên</label>
-                        <input asp-for="FullName" class="form-control" />
-                        <span asp-validation-for="FullName" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="PhoneNumber" class="form-label fw-semibold">Số điện thoại</label>
-                        <input asp-for="PhoneNumber" class="form-control" />
-                    </div>
-
-                    <div class="mb-4">
-                        <label asp-for="Address" class="form-label fw-semibold">Địa chỉ giao hàng</label>
-                        <textarea asp-for="Address" class="form-control" rows="2"></textarea>
-                    </div>
-
-                    <hr class="my-4">
-                    <h5 class="fw-bold mb-3"><i class="bi bi-shield-lock me-2 text-warning"></i>Đổi mật khẩu (tùy chọn)</h5>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label asp-for="CurrentPassword" class="form-label fw-semibold">Mật khẩu hiện tại</label>
-                            <input asp-for="CurrentPassword" type="password" class="form-control" placeholder="Chỉ nhập khi muốn đổi..." />
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="NewPassword" class="form-label fw-semibold">Mật khẩu mới</label>
-                            <input asp-for="NewPassword" type="password" class="form-control" placeholder="Mới (tối thiểu 8 ký tự)" />
-                            <span asp-validation-for="NewPassword" class="text-danger small"></span>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
-                        <i class="bi bi-save me-2"></i> Lưu thay đổi
+            <div style="border-top: 1px solid var(--color-border); margin-top: var(--space-4); padding-top: var(--space-4);">
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="btn btn-outline btn-block btn-sm" style="color: var(--color-error); border-color: var(--color-error-light);">
+                        Đăng Xuất Tài Khoản
                     </button>
                 </form>
             </div>
         </div>
+
+        <!-- PROFILE EDIT & CHANGE PASSWORD FORMS -->
+        <div style="grid-column: span 2; display: flex; flex-direction: column; gap: var(--space-8);">
+            
+            <div class="card" style="padding: var(--space-6); background: white;">
+                <h3 style="margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2);">Cập Nhật Thông Tin Cá Nhân</h3>
+                
+                <form asp-controller="User" asp-action="Profile" method="post">
+                    <div asp-validation-summary="ModelOnly" class="form-error mb-3" role="alert"></div>
+
+                    <div class="form-group">
+                        <label class="form-label">Địa chỉ Email (Không thể thay đổi)</label>
+                        <input type="email" class="form-input" value="@Model.User.Email" disabled style="background: var(--color-bg);" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" asp-for="FullName">Họ và Tên <span class="required">*</span></label>
+                        <input asp-for="FullName" class="form-input" required />
+                        <span asp-validation-for="FullName" class="form-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" asp-for="Phone">Số điện thoại</label>
+                        <input asp-for="Phone" class="form-input" placeholder="0901234567" />
+                        <span asp-validation-for="Phone" class="form-error"></span>
+                    </div>
+
+                    <div style="border-top: 1px solid var(--color-border); margin-top: var(--space-6); padding-top: var(--space-4);">
+                        <h4 style="margin-bottom: var(--space-4);">Đổi Mật Khẩu (Tùy chọn)</h4>
+
+                        <div class="form-group">
+                            <label class="form-label" asp-for="OldPassword">Mật khẩu hiện tại</label>
+                            <input asp-for="OldPassword" type="password" class="form-input" placeholder="Chỉ nhập khi muốn đổi..." />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" asp-for="NewPassword">Mật khẩu mới</label>
+                            <input asp-for="NewPassword" type="password" class="form-input" placeholder="Mới (tối thiểu 8 ký tự)" />
+                            <span class="form-hint">Yêu cầu tối thiểu 8 ký tự, ít nhất 1 chữ hoa và 1 chữ số.</span>
+                            <span asp-validation-for="NewPassword" class="form-error"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="margin-top: var(--space-4);">
+                        Lưu Thay Đổi
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
     </div>
+
 </div>
 
 @section Scripts {

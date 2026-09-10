@@ -3,94 +3,168 @@
     ViewData["Title"] = "Admin Dashboard - Couppa";
 }
 
-<div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 text-danger me-2"></i>Admin Dashboard</h2>
-            <p class="text-muted mb-0">Tổng quan chỉ số hoạt động hệ thống Couppa Store</p>
+<div class="admin-wrapper" style="margin-top: -var(--space-6);">
+    <!-- ADMIN SIDEBAR -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 8px;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            Couppa Admin
         </div>
-        <div class="btn-group">
-            <a href="/Admin/Product/Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">Quản lý Sản phẩm</a>
-            <a href="/Admin/Category/Index" class="btn btn-outline-primary btn-sm rounded-pill px-3 ms-2">Quản lý Danh mục</a>
-            <a href="/Admin/User/Index" class="btn btn-outline-primary btn-sm rounded-pill px-3 ms-2">Quản lý Người dùng</a>
-            <a href="/Admin/Report/CartTopProducts" class="btn btn-outline-primary btn-sm rounded-pill px-3 ms-2">Xem Báo cáo</a>
-        </div>
-    </div>
 
-    <!-- Stat Cards -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-primary text-white">
-                <div class="d-flex justify-content-between align-items-center">
+        <nav class="admin-menu">
+            <a href="/Admin/Dashboard/Index" class="admin-menu-item active">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </a>
+            <a href="/Admin/Product/Index" class="admin-menu-item">
+                <i class="bi bi-box-seam me-2"></i> Quản Lý Sản Phẩm
+            </a>
+            <a href="/Admin/Category/Index" class="admin-menu-item">
+                <i class="bi bi-tags me-2"></i> Quản Lý Danh Mục
+            </a>
+            <a href="/Admin/User/Index" class="admin-menu-item">
+                <i class="bi bi-people me-2"></i> Quản Lý Người Dùng
+            </a>
+            <a href="/Admin/Report/CartTopProducts" class="admin-menu-item">
+                <i class="bi bi-bar-chart me-2"></i> Báo Cáo Thống Kê
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding: var(--space-4); border-top: 1px solid #1E293B;">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline btn-block btn-sm" style="color: #94A3B8; border-color: #334155;">
+                &larr; Xem Website Public
+            </a>
+        </div>
+    </aside>
+
+    <!-- ADMIN MAIN SECTION -->
+    <div class="admin-main">
+        <header class="admin-topbar">
+            <h3 style="margin: 0;">Tổng Quan System Dashboard</h3>
+            <div class="flex items-center gap-4">
+                <span class="badge badge-info" style="padding: 6px 12px;">Role: Admin</span>
+                <a asp-controller="User" asp-action="Profile" class="btn btn-outline btn-sm">Admin Account</a>
+            </div>
+        </header>
+
+        <main class="admin-content">
+            <!-- KPI STAT CARDS -->
+            <div class="stat-grid">
+                <div class="stat-card">
                     <div>
-                        <div class="small text-white-50 uppercase fw-semibold">Tổng Người Dùng</div>
-                        <div class="display-6 fw-bold">@Model.Summary.TotalUsers</div>
+                        <div class="stat-title">Tổng Số Sản Phẩm</div>
+                        <div class="stat-val">@Model.Summary.TotalProducts</div>
                     </div>
-                    <i class="bi bi-people fs-1 opacity-50"></i>
+                    <div class="stat-icon">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-title">Danh Mục Đang Active</div>
+                        <div class="stat-val">@Model.Summary.TotalCategories</div>
+                    </div>
+                    <div class="stat-icon" style="background-color: var(--color-secondary-light); color: var(--color-secondary);">
+                        <i class="bi bi-tags"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-title">Tổng Người Dùng</div>
+                        <div class="stat-val">@Model.Summary.TotalUsers</div>
+                    </div>
+                    <div class="stat-icon" style="background-color: #DBEAFE; color: #2563EB;">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div>
+                        <div class="stat-title">Sản Phẩm Hết Hàng</div>
+                        <div class="stat-val" style="color: var(--color-error);">@Model.Summary.OutOfStockProducts</div>
+                    </div>
+                    <div class="stat-icon" style="background-color: var(--color-error-light); color: var(--color-error);">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-success text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="small text-white-50 uppercase fw-semibold">Tổng Sản Phẩm</div>
-                        <div class="display-6 fw-bold">@Model.Summary.TotalProducts</div>
+            <!-- CHARTS & RECENT PRODUCTS -->
+            <div class="grid grid-cols-2" style="gap: var(--space-8); margin-bottom: var(--space-8);">
+                <div class="card" style="padding: var(--space-6); background: white;">
+                    <h4 style="margin-bottom: var(--space-4);">Sản Phẩm Theo Danh Mục</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                        @if (Model.Summary.ProductsByCategory != null && Model.Summary.ProductsByCategory.Any())
+                        {
+                            int maxCount = Model.Summary.ProductsByCategory.Max(c => c.Count);
+                            if (maxCount == 0) maxCount = 1;
+                            foreach (var c in Model.Summary.ProductsByCategory)
+                            {
+                                int percent = (int)Math.Round((double)c.Count / maxCount * 100);
+                                <div>
+                                    <div class="flex justify-between" style="font-size: 0.8125rem; font-weight: 500; margin-bottom: 4px;">
+                                        <span>@c.CategoryName</span>
+                                        <strong>@c.Count sản phẩm</strong>
+                                    </div>
+                                    <div style="height: 10px; background: #E2E8F0; border-radius: var(--radius-full); overflow: hidden;">
+                                        <div style="width: @(percent)%; height: 100%; background: var(--color-primary); border-radius: var(--radius-full);"></div>
+                                    </div>
+                                </div>
+                            }
+                        }
                     </div>
-                    <i class="bi bi-box-seam fs-1 opacity-50"></i>
+                </div>
+
+                <div class="card" style="padding: var(--space-6); background: white;">
+                    <h4 style="margin-bottom: var(--space-4);">Trạng Thái Caching (IMemoryCache)</h4>
+                    <ul style="display: flex; flex-direction: column; gap: var(--space-3); font-size: 0.875rem;">
+                        <li class="flex justify-between items-center" style="border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">
+                            <span>Cache Key: <code>categories:active</code></span>
+                            <span class="badge badge-success">Hit (TTL 15 phút)</span>
+                        </li>
+                        <li class="flex justify-between items-center" style="border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">
+                            <span>Cache Key: <code>products:featured</code></span>
+                            <span class="badge badge-success">Hit (TTL 10 phút)</span>
+                        </li>
+                        <li class="flex justify-between items-center" style="border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">
+                            <span>Cache Key: <code>admin:dashboard:summary</code></span>
+                            <span class="badge badge-success">Hit (TTL 5 phút)</span>
+                        </li>
+                    </ul>
+                    <p class="caption" style="margin-top: var(--space-4);">
+                        Dữ liệu Dashboard được tính toán và lưu cache server-side theo chuẩn <code>IMemoryCache</code> trong SRS (NFR-CACHE-01).
+                    </p>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-warning text-dark">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="small text-dark-50 uppercase fw-semibold">Tổng Danh Mục</div>
-                        <div class="display-6 fw-bold">@Model.Summary.TotalCategories</div>
-                    </div>
-                    <i class="bi bi-tags fs-1 opacity-50"></i>
+            <!-- RECENT PRODUCTS TABLE -->
+            <div class="data-table-container">
+                <div class="table-toolbar">
+                    <h4>Sản Phẩm Mới Thêm Gần Đây</h4>
+                    <a href="/Admin/Product/Index" class="btn btn-outline btn-sm">Xem tất cả sản phẩm &rarr;</a>
                 </div>
-            </div>
-        </div>
 
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-danger text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="small text-white-50 uppercase fw-semibold">SP Đang Kinh Doanh</div>
-                        <div class="display-6 fw-bold">@Model.Summary.ActiveProducts</div>
-                    </div>
-                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Products Grid -->
-    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-        <h4 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Sản phẩm vừa mới thêm gần đây</h4>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Ngày tạo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.Summary.RecentProducts)
-                    {
+                <table class="data-table">
+                    <thead>
                         <tr>
-                            <td class="fw-bold">#@item.Id</td>
-                            <td>@item.Name</td>
-                            <td class="small text-muted">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <th>Mã ID</th>
+                            <th>Tên Sản Phẩm</th>
+                            <th>Ngày Tạo</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Summary.RecentProducts)
+                        {
+                            <tr>
+                                <td style="font-weight: 700;">#@item.Id</td>
+                                <td style="font-weight: 600;">@item.Name</td>
+                                <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </main>
     </div>
 </div>

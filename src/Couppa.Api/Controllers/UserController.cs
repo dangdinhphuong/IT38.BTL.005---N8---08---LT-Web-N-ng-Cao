@@ -61,4 +61,20 @@ public class UserController : Controller
             return View(model);
         }
     }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        var profile = await _userService.UpdateMyProfileAsync(request);
+        return Ok(new { success = true, data = profile });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        await _userService.ChangePasswordAsync(request);
+        return Ok(new { success = true });
+    }
 }

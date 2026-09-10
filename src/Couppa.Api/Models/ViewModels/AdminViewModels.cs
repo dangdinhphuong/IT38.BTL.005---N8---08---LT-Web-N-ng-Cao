@@ -25,5 +25,6 @@ public class AdminUsersViewModel
 
 public class AdminReportsViewModel
 {
+    public ReportSummaryResponse Summary { get; set; } = null!;
     public IReadOnlyList<CartTopProductResponse> TopProducts { get; set; } = new List<CartTopProductResponse>();
 }

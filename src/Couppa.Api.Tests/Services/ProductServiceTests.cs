@@ -159,7 +159,12 @@ public class ProductServiceTests
             .Setup(c => c.GetByIdAsync(It.IsAny<long>()))
             .ThrowsAsync(AppException.NotFound("CATEGORY_NOT_FOUND", "Không tìm thấy danh mục."));
 
-        var service = new ProductService(db, auditLogMock.Object, categoryServiceMock.Object);
+        var service = new ProductService(
+            db,
+            auditLogMock.Object,
+            categoryServiceMock.Object,
+            new MemoryCacheService(new MemoryCache(new MemoryCacheOptions())),
+            CreateTestConfiguration());
 
         var request = NewCreateRequest(categoryId: 999);
 

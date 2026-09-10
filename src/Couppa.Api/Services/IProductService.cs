@@ -5,22 +5,22 @@ namespace Couppa.Api.Services;
 
 public interface IProductService
 {
-    /// <summary>GET /api/products (FR-BROWSE-002..006) — chỉ trả IsActive=true (IsDeleted đã bị Global Query Filter loại).</summary>
+    /// <summary>GET /Product/Index (FR-BROWSE-002..006) — chỉ trả IsActive=true (IsDeleted đã bị Global Query Filter loại).</summary>
     Task<PagedResult<ProductSummaryResponse>> GetPublicListAsync(ProductListQuery query);
 
-    /// <summary>GET /api/products/featured — IsFeatured=true, IsActive=true. Phase 8 (Caching) sẽ wrap method này.</summary>
+    /// <summary>GET /Product/Featured — IsFeatured=true, IsActive=true.</summary>
     Task<IReadOnlyList<ProductSummaryResponse>> GetFeaturedAsync();
 
-    /// <summary>GET /api/products/latest — 10 sản phẩm mới nhất, IsActive=true. Phase 8 (Caching) sẽ wrap method này.</summary>
+    /// <summary>GET /Product/Latest — 10 sản phẩm mới nhất, IsActive=true.</summary>
     Task<IReadOnlyList<ProductSummaryResponse>> GetLatestAsync();
 
-    /// <summary>GET /api/products/{id} — ném NotFound nếu không tồn tại, đã xóa, hoặc Inactive (Guest/User).</summary>
+    /// <summary>GET /Product/Detail/{id} — ném NotFound nếu không tồn tại, đã xóa, hoặc Inactive (Guest/User).</summary>
     Task<ProductResponse> GetPublicDetailAsync(long id);
 
-    /// <summary>GET /api/admin/products — trả cả Inactive, không trả đã xóa.</summary>
+    /// <summary>GET /Admin/Product/Index — trả cả Inactive, không trả đã xóa.</summary>
     Task<PagedResult<ProductSummaryResponse>> GetAdminListAsync(AdminProductListQuery query);
 
-    /// <summary>GET /api/admin/products/{id} — trả cả khi Inactive (Admin xem riêng).</summary>
+    /// <summary>GET /Admin/Product/Detail/{id} — trả cả khi Inactive (Admin xem riêng).</summary>
     Task<ProductResponse> GetAdminDetailAsync(long id);
 
     /// <summary>Dùng chung cho Cart Service (Phase 7) để lấy Product theo Id kiểm tra IsAvailableForCart/StockQuantity.</summary>

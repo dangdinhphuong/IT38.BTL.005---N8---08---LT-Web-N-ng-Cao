@@ -1,57 +1,55 @@
 @model LoginViewModel
 @{
-    ViewData["Title"] = "Đăng nhập - Couppa";
+    ViewData["Title"] = "Đăng Nhập Tài Khoản - Couppa";
 }
 
-<div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card border-0 shadow-sm rounded-4 p-4">
-                <div class="text-center mb-4">
-                    <div class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle mb-3" style="width: 64px; height: 64px;">
-                        <i class="bi bi-box-arrow-in-right fs-2"></i>
-                    </div>
-                    <h3 class="fw-bold">Đăng nhập tài khoản</h3>
-                    <p class="text-muted small">Chào mừng bạn quay trở lại với Couppa Store</p>
+<div class="container flex items-center justify-center" style="padding-top: var(--space-8); padding-bottom: var(--space-8);">
+    <div style="max-width: 440px; width: 100%;">
+        <div class="card" style="padding: var(--space-8); background: white;">
+            <div style="text-align: center; margin-bottom: var(--space-6);">
+                <h2>Đăng Nhập</h2>
+                <p class="caption" style="margin-top: 4px;">Nhập email và mật khẩu của bạn để truy cập hệ thống</p>
+            </div>
+
+            <!-- QUICK DEMO LOGINS -->
+            <div style="background: var(--color-primary-light); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-6); font-size: 0.8125rem;">
+                <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 4px;">Đăng Nhập Nhanh (Demo Accounts):</div>
+                <div class="flex gap-2" style="margin-top: 6px;">
+                    <button type="button" onclick="fillCredentials('user@couppa.com', 'User123@')" class="btn btn-outline btn-sm" style="flex: 1; background: white;">User Demo</button>
+                    <button type="button" onclick="fillCredentials('admin@couppa.com', 'Admin123@')" class="btn btn-primary btn-sm" style="flex: 1;">Admin Demo</button>
+                </div>
+            </div>
+
+            <form asp-controller="Account" asp-action="Login" method="post">
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div asp-validation-summary="ModelOnly" class="form-error mb-3" role="alert"></div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="Email">Địa chỉ Email <span class="required">*</span></label>
+                    <input asp-for="Email" id="login-email" class="form-input" placeholder="user@couppa.com" required />
+                    <span asp-validation-for="Email" class="form-error"></span>
                 </div>
 
-                <form asp-controller="Account" asp-action="Login" method="post">
-                    <input type="hidden" asp-for="ReturnUrl" />
-                    
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="Password">Mật khẩu <span class="required">*</span></label>
+                    <input asp-for="Password" id="login-password" type="password" class="form-input" placeholder="••••••••" required />
+                    <span asp-validation-for="Password" class="form-error"></span>
+                </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label fw-semibold"></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope"></i></span>
-                            <input asp-for="Email" class="form-control border-start-0 ps-0" placeholder="vd: user@couppa.com" />
-                        </div>
-                        <span asp-validation-for="Email" class="text-danger small"></span>
-                    </div>
+                <div class="form-group" style="flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: var(--space-6);">
+                    <label class="checkbox-label">
+                        <input asp-for="RememberMe" class="form-check-input" /> Ghi nhớ đăng nhập
+                    </label>
+                </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label fw-semibold">Mật khẩu</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock"></i></span>
-                            <input asp-for="Password" type="password" class="form-control border-start-0 ps-0" placeholder="Nhập mật khẩu..." />
-                        </div>
-                        <span asp-validation-for="Password" class="text-danger small"></span>
-                    </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    Đăng Nhập
+                </button>
+            </form>
 
-                    <div class="form-check mb-4">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label small text-muted">Ghi nhớ đăng nhập</label>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-lg rounded-pill w-100 fw-bold shadow-sm mb-3">
-                        Đăng nhập
-                    </button>
-
-                    <div class="text-center">
-                        <span class="small text-muted">Chưa có tài khoản?</span>
-                        <a asp-action="Register" class="small fw-bold text-primary text-decoration-none ms-1">Đăng ký ngay</a>
-                    </div>
-                </form>
+            <div style="text-align: center; margin-top: var(--space-6); font-size: 0.875rem; color: var(--color-text-muted);">
+                Chưa có tài khoản? <a asp-action="Register" style="color: var(--color-primary); font-weight: 600;">Đăng ký tài khoản mới</a>
             </div>
         </div>
     </div>
@@ -59,4 +57,10 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function fillCredentials(email, pass) {
+            document.getElementById('login-email').value = email;
+            document.getElementById('login-password').value = pass;
+        }
+    </script>
 }

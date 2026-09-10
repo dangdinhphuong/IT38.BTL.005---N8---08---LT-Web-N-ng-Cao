@@ -30,7 +30,7 @@ public class AdminCategoryController : Controller
     public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request)
     {
         var category = await _categoryService.CreateAsync(request);
-        return Json(new { success = true, data = category });
+        return StatusCode(StatusCodes.Status201Created, new { success = true, data = category });
     }
 
     [HttpPost]

@@ -1,33 +1,41 @@
 {
   "format": 1,
   "restore": {
-    "/home/phuongdd/data/couppa/test/src/Couppa.Api.Tests/Couppa.Api.Tests.csproj": {}
+    "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api.Tests\\Couppa.Api.Tests.csproj": {}
   },
   "projects": {
-    "/home/phuongdd/data/couppa/test/src/Couppa.Api.Tests/Couppa.Api.Tests.csproj": {
+    "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api.Tests\\Couppa.Api.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/phuongdd/data/couppa/test/src/Couppa.Api.Tests/Couppa.Api.Tests.csproj",
+        "projectUniqueName": "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api.Tests\\Couppa.Api.Tests.csproj",
         "projectName": "Couppa.Api.Tests",
-        "projectPath": "/home/phuongdd/data/couppa/test/src/Couppa.Api.Tests/Couppa.Api.Tests.csproj",
-        "packagesPath": "/home/phuongdd/.nuget/packages/",
-        "outputPath": "/home/phuongdd/data/couppa/test/src/Couppa.Api.Tests/obj/",
+        "projectPath": "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api.Tests\\Couppa.Api.Tests.csproj",
+        "packagesPath": "C:\\Users\\phuon\\.nuget\\packages\\",
+        "outputPath": "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api.Tests\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/home/phuongdd/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\phuon\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
+            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {
-              "/home/phuongdd/data/couppa/test/src/Couppa.Api/Couppa.Api.csproj": {
-                "projectPath": "/home/phuongdd/data/couppa/test/src/Couppa.Api/Couppa.Api.csproj"
+              "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api\\Couppa.Api.csproj": {
+                "projectPath": "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api\\Couppa.Api.csproj"
               }
             }
           }
@@ -41,10 +49,12 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.400"
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.AspNetCore.Mvc.Testing": {
@@ -88,30 +98,38 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/phuongdd/.dotnet/sdk/8.0.425/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "/home/phuongdd/data/couppa/test/src/Couppa.Api/Couppa.Api.csproj": {
+    "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api\\Couppa.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/phuongdd/data/couppa/test/src/Couppa.Api/Couppa.Api.csproj",
+        "projectUniqueName": "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api\\Couppa.Api.csproj",
         "projectName": "Couppa.Api",
-        "projectPath": "/home/phuongdd/data/couppa/test/src/Couppa.Api/Couppa.Api.csproj",
-        "packagesPath": "/home/phuongdd/.nuget/packages/",
-        "outputPath": "/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/",
+        "projectPath": "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api\\Couppa.Api.csproj",
+        "packagesPath": "C:\\Users\\phuon\\.nuget\\packages\\",
+        "outputPath": "D:\\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\\src\\Couppa.Api\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/home/phuongdd/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\phuon\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
+            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -125,29 +143,35 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.400"
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
-            "BCrypt.Net-Next": {
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[4.0.3, )"
+              "version": "[8.0.10, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.8, )"
+              "version": "[8.0.10, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.8, )"
+              "version": "[8.0.10, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[8.0.8, )"
+              "version": "[8.0.10, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.10, )"
             }
           },
           "imports": [
@@ -169,7 +193,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/phuongdd/.dotnet/sdk/8.0.425/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -1,6 +1,6 @@
 namespace Couppa.Api.Models.Requests;
 
-/// <summary>Query cho GET /api/products (public) — FR-BROWSE-002..006.</summary>
+/// <summary>Query cho GET /Product/Index và các action AJAX public — FR-BROWSE-002..006.</summary>
 public class ProductListQuery
 {
     public string? Search { get; set; }
@@ -15,7 +15,7 @@ public class ProductListQuery
     public int PageSize { get; set; } = 20;
 }
 
-/// <summary>Query cho GET /api/admin/products — task 05 API spec.</summary>
+/// <summary>Query cho GET /Admin/Product/Index.</summary>
 public class AdminProductListQuery
 {
     public string? Search { get; set; }

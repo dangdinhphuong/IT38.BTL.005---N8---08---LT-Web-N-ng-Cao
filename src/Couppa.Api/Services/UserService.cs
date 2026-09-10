@@ -42,6 +42,11 @@ public class UserService : IUserService
     {
         var user = await FindOrThrowAsync(CurrentUserId);
 
+        if (string.IsNullOrWhiteSpace(request.FullName))
+        {
+            throw AppException.Unprocessable("USER_FULL_NAME_REQUIRED", "Họ tên là bắt buộc.");
+        }
+
         user.FullName = request.FullName.Trim();
         user.Phone = request.Phone?.Trim();
 
@@ -82,9 +87,9 @@ public class UserService : IUserService
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var keyword = search.Trim();
-            query = query.Where(u => EF.Functions.ILike(u.Email!, $"%{keyword}%")
-                || EF.Functions.ILike(u.FullName, $"%{keyword}%"));
+            var keyword = search.Trim().ToLower();
+            query = query.Where(u => (u.Email ?? "").ToLower().Contains(keyword)
+                || u.FullName.ToLower().Contains(keyword));
         }
 
         if (status.HasValue)
@@ -99,6 +104,8 @@ public class UserService : IUserService
             query = query.Where(u => ids.Contains(u.Id));
         }
 
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
         var totalItems = await query.CountAsync();
 
         var users = await query
@@ -142,7 +149,13 @@ public class UserService : IUserService
         }
 
         user.IsLocked = isLocked;
-        await _userManager.UpdateAsync(user);
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            throw AppException.Unprocessable(
+                "USER_UPDATE_FAILED",
+                string.Join("; ", updateResult.Errors.Select(error => error.Description)));
+        }
 
         await _auditLog.LogAsync(
             isLocked ? AuditAction.UserLock : AuditAction.UserUnlock,
