@@ -29,5 +29,5 @@ public interface ICartService
     /// FR-CART-007 / BR-13: merge giỏ hàng Guest (sessionId) vào giỏ hàng User (userId) khi đăng nhập.
     /// Được AuthController gọi ngay sau khi xác thực thành công, TRƯỚC khi session Guest bị Clear.
     /// </summary>
-    Task<CartResponse> MergeGuestCartAsync(Guid guestSessionId, long userId);
+    Task<CartResponse> MergeGuestCartAsync(Guid guestSessionId, string userId);
 }

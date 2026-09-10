@@ -9,4 +9,7 @@ public class CategoryResponse
     public required bool IsActive { get; init; }
     public required DateTimeOffset CreatedAt { get; init; }
     public required DateTimeOffset UpdatedAt { get; init; }
+
+    /// <summary>Số sản phẩm (chưa xóa) thuộc danh mục — dùng hiển thị badge ở menu/sidebar filter.</summary>
+    public int ProductCount { get; init; }
 }

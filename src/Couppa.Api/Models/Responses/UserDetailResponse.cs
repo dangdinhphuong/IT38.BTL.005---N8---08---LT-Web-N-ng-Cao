@@ -6,7 +6,7 @@ namespace Couppa.Api.Models.Responses;
 /// </summary>
 public class UserDetailResponse
 {
-    public required long Id { get; init; }
+    public required string Id { get; init; }
     public required string Email { get; init; }
     public required string FullName { get; init; }
     public string? Phone { get; init; }

@@ -1,16 +1,15 @@
 using Couppa.Api.Models.Requests;
-using Couppa.Api.Models.Responses;
+using Couppa.Api.Models.ViewModels;
 using Couppa.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Couppa.Api.Controllers.Admin;
 
-/// <summary>Admin quản lý người dùng: FR-USER-001..005/009.</summary>
-[ApiController]
-[Route("api/admin/users")]
+/// <summary>SRS 15.5 — /Admin/User/Index, /Detail render View; Lock/ChangeRole trả JsonResult.</summary>
+[Route("Admin/User/[action]")]
 [Authorize(Policy = "RequireAdmin")]
-public class AdminUserController : ControllerBase
+public class AdminUserController : Controller
 {
     private readonly IUserService _userService;
 
@@ -20,35 +19,32 @@ public class AdminUserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<PagedResult<UserDetailResponse>>>> GetAll(
-        [FromQuery] string? search,
-        [FromQuery] short? role,
-        [FromQuery] bool? status,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20)
+    public async Task<IActionResult> Index(string? search, string? role, bool? status, int page = 1)
     {
-        var result = await _userService.GetAdminListAsync(search, role, status, page, pageSize);
-        return Ok(ApiResponse<PagedResult<UserDetailResponse>>.Ok(result));
+        var pagedResult = await _userService.GetAdminListAsync(search, role, status, page, 50);
+        return View(new AdminUsersViewModel { Users = pagedResult.Items.ToList() });
     }
 
-    [HttpGet("{id:long}")]
-    public async Task<ActionResult<ApiResponse<UserDetailResponse>>> GetById(long id)
+    [HttpGet]
+    public async Task<IActionResult> Detail(string id)
     {
         var user = await _userService.GetAdminDetailAsync(id);
-        return Ok(ApiResponse<UserDetailResponse>.Ok(user));
+        return View(user);
     }
 
-    [HttpPatch("{id:long}/lock")]
-    public async Task<ActionResult<ApiResponse<UserDetailResponse>>> Lock(long id, [FromBody] LockUserRequest request)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Lock(string id, [FromBody] LockUserRequest request)
     {
         var user = await _userService.LockUserAsync(id, request.IsLocked);
-        return Ok(ApiResponse<UserDetailResponse>.Ok(user));
+        return Json(new { success = true, data = user });
     }
 
-    [HttpPatch("{id:long}/role")]
-    public async Task<ActionResult<ApiResponse<UserDetailResponse>>> ChangeRole(long id, [FromBody] ChangeUserRoleRequest request)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangeRole(string id, [FromBody] ChangeUserRoleRequest request)
     {
-        var user = await _userService.ChangeRoleAsync(id, request.RoleId);
-        return Ok(ApiResponse<UserDetailResponse>.Ok(user));
+        var user = await _userService.ChangeRoleAsync(id, request.RoleName);
+        return Json(new { success = true, data = user });
     }
 }

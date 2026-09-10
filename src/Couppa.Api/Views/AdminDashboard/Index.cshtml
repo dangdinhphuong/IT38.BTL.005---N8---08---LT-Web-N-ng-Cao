@@ -1,0 +1,96 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard - Couppa";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 text-danger me-2"></i>Admin Dashboard</h2>
+            <p class="text-muted mb-0">Tổng quan chỉ số hoạt động hệ thống Couppa Store</p>
+        </div>
+        <div class="btn-group">
+            <a href="/Admin/Product/Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">Quản lý Sản phẩm</a>
+            <a href="/Admin/Category/Index" class="btn btn-outline-primary btn-sm rounded-pill px-3 ms-2">Quản lý Danh mục</a>
+            <a href="/Admin/User/Index" class="btn btn-outline-primary btn-sm rounded-pill px-3 ms-2">Quản lý Người dùng</a>
+            <a href="/Admin/Report/CartTopProducts" class="btn btn-outline-primary btn-sm rounded-pill px-3 ms-2">Xem Báo cáo</a>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-white-50 uppercase fw-semibold">Tổng Người Dùng</div>
+                        <div class="display-6 fw-bold">@Model.Summary.TotalUsers</div>
+                    </div>
+                    <i class="bi bi-people fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-white-50 uppercase fw-semibold">Tổng Sản Phẩm</div>
+                        <div class="display-6 fw-bold">@Model.Summary.TotalProducts</div>
+                    </div>
+                    <i class="bi bi-box-seam fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-warning text-dark">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-dark-50 uppercase fw-semibold">Tổng Danh Mục</div>
+                        <div class="display-6 fw-bold">@Model.Summary.TotalCategories</div>
+                    </div>
+                    <i class="bi bi-tags fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-danger text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-white-50 uppercase fw-semibold">SP Đang Kinh Doanh</div>
+                        <div class="display-6 fw-bold">@Model.Summary.ActiveProducts</div>
+                    </div>
+                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Products Grid -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+        <h4 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Sản phẩm vừa mới thêm gần đây</h4>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Ngày tạo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Summary.RecentProducts)
+                    {
+                        <tr>
+                            <td class="fw-bold">#@item.Id</td>
+                            <td>@item.Name</td>
+                            <td class="small text-muted">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

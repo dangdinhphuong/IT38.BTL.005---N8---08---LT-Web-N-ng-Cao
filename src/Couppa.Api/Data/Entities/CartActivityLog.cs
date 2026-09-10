@@ -14,7 +14,7 @@ public class CartActivityLog
 {
     public long Id { get; set; }
     public long ProductId { get; set; }
-    public long? UserId { get; set; }
+    public string? UserId { get; set; }
     public Guid? SessionId { get; set; }
     public required string Action { get; set; }
     public int Quantity { get; set; }

@@ -1,0 +1,9 @@
+/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/Debug/net8.0/Couppa.Api.csproj.AssemblyReference.cache
+/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/Debug/net8.0/Couppa.Api.GeneratedMSBuildEditorConfig.editorconfig
+/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/Debug/net8.0/Couppa.Api.AssemblyInfoInputs.cache
+/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/Debug/net8.0/Couppa.Api.AssemblyInfo.cs
+/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/Debug/net8.0/Couppa.Api.csproj.CoreCompileInputs.cache
+/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/Debug/net8.0/Couppa.Api.MvcApplicationPartsAssemblyInfo.cache
+/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/Debug/net8.0/Couppa.Api.RazorAssemblyInfo.cache
+/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/Debug/net8.0/Couppa.Api.RazorAssemblyInfo.cs
+/home/phuongdd/data/couppa/test/src/Couppa.Api/obj/Debug/net8.0/Couppa.Api.sourcelink.json

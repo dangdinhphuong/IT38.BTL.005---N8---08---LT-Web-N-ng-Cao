@@ -1,0 +1,51 @@
+@model AdminReportsViewModel
+@{
+    ViewData["Title"] = "Báo cáo Thống kê - Admin Couppa";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow text-warning me-2"></i>Báo cáo Thống kê</h2>
+            <p class="text-muted mb-0">Thống kê các sản phẩm được đưa vào giỏ hàng nhiều nhất</p>
+        </div>
+    </div>
+
+    <!-- Top Products in Carts -->
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <h4 class="fw-bold mb-3"><i class="bi bi-star me-2 text-warning"></i>Top 10 Sản phẩm được quan tâm nhiều nhất (thêm vào giỏ)</h4>
+        @if (!Model.TopProducts.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                Chưa có dữ liệu thống kê giỏ hàng trong 30 ngày qua.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Mã SP</th>
+                            <th>Tên sản phẩm</th>
+                            <th class="text-center">Số lượt được thêm vào giỏ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TopProducts)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">#@item.ProductId</td>
+                                <td class="fw-semibold">@item.ProductName</td>
+                                <td class="text-center">
+                                    <span class="badge bg-warning text-dark rounded-pill fs-6 px-3">@item.AddCount</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

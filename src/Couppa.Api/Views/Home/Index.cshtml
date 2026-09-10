@@ -1,0 +1,147 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ - Cửa hàng Công nghệ Couppa";
+}
+
+<!-- Hero Section -->
+<section class="bg-couppa-primary text-white py-5 mb-5 shadow-sm rounded-bottom-4">
+    <div class="container py-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3">Công Nghệ Mới 2026</span>
+                <h1 class="display-4 fw-extrabold mb-3">Khám Phá Công Nghệ Đỉnh Cao Cùng Couppa</h1>
+                <p class="lead text-light opacity-90 mb-4">Trải nghiệm các dòng sản phẩm laptop, điện thoại, phụ kiện cao cấp với mức giá ưu đãi và dịch vụ bảo hành tận tâm.</p>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-warning btn-lg rounded-pill px-4 fw-bold text-dark shadow-sm">
+                        <i class="bi bi-bag-fill me-2"></i> Xem Sản Phẩm
+                    </a>
+                    <a href="#featured-section" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        Sản Phẩm Nổi Bật
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 text-center">
+                <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=700&auto=format&fit=crop&q=80" alt="Hero Product" class="img-fluid rounded-4 shadow-lg border border-2 border-white-50">
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Categories Grid -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Danh Mục Nổi Bật</h2>
+                <p class="text-muted mb-0">Các nhóm sản phẩm công nghệ hot nhất</p>
+            </div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-link text-primary fw-semibold text-decoration-none">
+                Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-3">
+            @foreach (var cat in Model.Categories)
+            {
+                <div class="col-md-3 col-6">
+                    <a asp-controller="Product" asp-action="Index" asp-route-category="@cat.Id" class="card text-decoration-none h-100 shadow-sm border-0 rounded-4 text-center p-3 transition-all hover-shadow">
+                        <div class="mx-auto mb-3 d-flex align-items-center justify-content-center bg-light text-primary rounded-circle" style="width: 60px; height: 60px;">
+                            <i class="bi bi-box-seam fs-3"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">@cat.Name</h6>
+                        <small class="text-muted">@cat.ProductCount sản phẩm</small>
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section id="featured-section" class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Sản Phẩm Nổi Bật</h2>
+                <p class="text-muted mb-0">Tuyển chọn những sản phẩm bán chạy nhất</p>
+            </div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                Khám phá thêm
+            </a>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var p in Model.FeaturedProducts)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card card-product h-100 shadow-sm">
+                        <div class="position-relative">
+                            <img src="@p.PrimaryImageUrl" class="card-img-top" alt="@p.Name">
+                            <span class="position-absolute top-0 start-0 m-2 badge bg-danger rounded-pill">Nổi bật</span>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <span class="badge-category align-self-start mb-2">@p.CategoryName</span>
+                            <h6 class="card-title fw-bold text-truncate mb-2">
+                                <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="text-dark text-decoration-none">@p.Name</a>
+                            </h6>
+                            <div class="mt-auto d-flex align-items-center justify-content-between pt-2 border-top">
+                                <div>
+                                    <div class="fw-bold text-primary fs-5">@p.Price.ToString("N0") đ</div>
+                                    <small class="@(p.StockQuantity > 0 ? "text-success" : "text-danger")">
+                                        @(p.StockQuantity > 0 ? $"Còn hàng ({p.StockQuantity})" : "Hết hàng")
+                                    </small>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm rounded-circle p-2 js-add-to-cart" data-product-id="@p.Id" @(p.StockQuantity <= 0 ? "disabled" : "") title="Thêm vào giỏ">
+                                    <i class="bi bi-cart-plus-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Latest Products -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Sản Phẩm Mới Nhất</h2>
+                <p class="text-muted mb-0">Cập nhật thiết bị công nghệ mới ra mắt</p>
+            </div>
+            <a asp-controller="Product" asp-action="Index" asp-route-sort="newest" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                Xem tất cả
+            </a>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var p in Model.LatestProducts)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card card-product h-100 shadow-sm">
+                        <img src="@p.PrimaryImageUrl" class="card-img-top" alt="@p.Name">
+                        <div class="card-body d-flex flex-column">
+                            <span class="badge-category align-self-start mb-2">@p.CategoryName</span>
+                            <h6 class="card-title fw-bold text-truncate mb-2">
+                                <a asp-controller="Product" asp-action="Detail" asp-route-id="@p.Id" class="text-dark text-decoration-none">@p.Name</a>
+                            </h6>
+                            <div class="mt-auto d-flex align-items-center justify-content-between pt-2 border-top">
+                                <div>
+                                    <div class="fw-bold text-primary fs-5">@p.Price.ToString("N0") đ</div>
+                                    <small class="@(p.StockQuantity > 0 ? "text-success" : "text-danger")">
+                                        @(p.StockQuantity > 0 ? "Còn hàng" : "Hết hàng")
+                                    </small>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm rounded-circle p-2 js-add-to-cart" data-product-id="@p.Id" @(p.StockQuantity <= 0 ? "disabled" : "") title="Thêm vào giỏ">
+                                    <i class="bi bi-cart-plus-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script src="~/js/cart-ajax.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,116 @@
+@model AdminCategoriesViewModel
+@{
+    ViewData["Title"] = "Quản lý Danh mục - Admin Couppa";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-tags text-primary me-2"></i>Quản lý Danh mục</h2>
+            <p class="text-muted mb-0">Thêm, sửa, xóa các danh mục sản phẩm</p>
+        </div>
+        <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+            <i class="bi bi-plus-circle me-1"></i> Thêm danh mục mới
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Tên danh mục</th>
+                        <th>Slug</th>
+                        <th>Mô tả</th>
+                        <th>Số sản phẩm</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold">#@cat.Id</td>
+                            <td class="fw-semibold">@cat.Name</td>
+                            <td><code>@cat.Slug</code></td>
+                            <td class="small text-muted">@cat.Description</td>
+                            <td><span class="badge bg-info text-dark rounded-pill">@cat.ProductCount</span></td>
+                            <td class="text-end pe-4">
+                                <button type="button" class="btn btn-outline-danger btn-sm rounded-circle js-delete-category" data-id="@cat.Id" title="Xóa">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Create Category -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Thêm Danh Mục Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createCategoryForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên danh mục</label>
+                        <input type="text" name="name" class="form-control" required placeholder="vd: Đồng hồ thông minh" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Slug</label>
+                        <input type="text" name="slug" class="form-control" required placeholder="vd: dong-ho-thong-minh" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mô tả</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Lưu danh mục</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-ajax.js" asp-append-version="true"></script>
+    <script>
+        document.getElementById('createCategoryForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const form = e.target;
+            const payload = {
+                name: form.name.value,
+                slug: form.slug.value,
+                description: form.description.value
+            };
+            const result = await window.couppaAdminAjax.postJson('/Admin/Category/Create', payload);
+            if (result.success) {
+                location.reload();
+            } else {
+                alert(result.error?.message || 'Không thể tạo danh mục.');
+            }
+        });
+
+        document.addEventListener('click', async function (e) {
+            const btn = e.target.closest('.js-delete-category');
+            if (!btn) return;
+            if (!confirm('Bạn có chắc chắn muốn xóa danh mục này?')) return;
+
+            const result = await window.couppaAdminAjax.postJson(`/Admin/Category/Delete/${btn.dataset.id}`, null);
+            if (result.success) {
+                location.reload();
+            } else {
+                alert(result.error?.message || 'Không thể xóa danh mục.');
+            }
+        });
+    </script>
+}

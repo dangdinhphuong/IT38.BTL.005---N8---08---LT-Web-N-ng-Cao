@@ -1,16 +1,13 @@
 using Couppa.Api.Models.Requests;
-using Couppa.Api.Models.Responses;
+using Couppa.Api.Models.ViewModels;
 using Couppa.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Couppa.Api.Controllers;
 
-/// <summary>Self-service profile: FR-USER-006/007/008. Cần đăng nhập nhưng không cần role Admin.</summary>
-[ApiController]
-[Route("api/users/me")]
 [Authorize]
-public class UserController : ControllerBase
+public class UserController : Controller
 {
     private readonly IUserService _userService;
 
@@ -20,23 +17,48 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<UserDetailResponse>>> GetMyProfile()
+    public async Task<IActionResult> Profile()
     {
         var profile = await _userService.GetMyProfileAsync();
-        return Ok(ApiResponse<UserDetailResponse>.Ok(profile));
+        var viewModel = new UserProfileViewModel
+        {
+            User = profile,
+            FullName = profile.FullName,
+            Phone = profile.Phone
+        };
+        return View(viewModel);
     }
 
-    [HttpPut]
-    public async Task<ActionResult<ApiResponse<UserDetailResponse>>> UpdateMyProfile([FromBody] UpdateProfileRequest request)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Profile(UserProfileViewModel model)
     {
-        var profile = await _userService.UpdateMyProfileAsync(request);
-        return Ok(ApiResponse<UserDetailResponse>.Ok(profile));
-    }
+        try
+        {
+            await _userService.UpdateMyProfileAsync(new UpdateProfileRequest
+            {
+                FullName = model.FullName,
+                Phone = model.Phone
+            });
 
-    [HttpPost("change-password")]
-    public async Task<ActionResult<ApiResponse<object>>> ChangePassword([FromBody] ChangePasswordRequest request)
-    {
-        await _userService.ChangePasswordAsync(request);
-        return Ok(ApiResponse<object>.Ok(new { success = true }));
+            if (!string.IsNullOrEmpty(model.OldPassword) && !string.IsNullOrEmpty(model.NewPassword))
+            {
+                await _userService.ChangePasswordAsync(new ChangePasswordRequest
+                {
+                    OldPassword = model.OldPassword,
+                    NewPassword = model.NewPassword
+                });
+            }
+
+            TempData["SuccessMessage"] = "Cập nhật thông tin cá nhân thành công!";
+            return RedirectToAction(nameof(Profile));
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var currentProfile = await _userService.GetMyProfileAsync();
+            model.User = currentProfile;
+            return View(model);
+        }
     }
 }

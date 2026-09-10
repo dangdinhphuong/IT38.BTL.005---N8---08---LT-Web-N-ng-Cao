@@ -1,0 +1,167 @@
+@model AdminProductsViewModel
+@{
+    ViewData["Title"] = "Quản lý Sản phẩm - Admin Couppa";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-box-seam text-success me-2"></i>Quản lý Sản phẩm</h2>
+            <p class="text-muted mb-0">Danh sách và tạo mới sản phẩm công nghệ</p>
+        </div>
+        <button class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createProductModal">
+            <i class="bi bi-plus-circle me-1"></i> Thêm sản phẩm mới
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Đơn giá</th>
+                        <th>Tồn kho</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Products)
+                    {
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@p.PrimaryImageUrl" class="rounded-3 shadow-sm" style="width: 50px; height: 50px; object-fit: cover;" alt="@p.Name">
+                                    <div>
+                                        <div class="fw-bold">@p.Name</div>
+                                        <small class="text-muted">SKU: @p.Sku</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">@p.CategoryName</span></td>
+                            <td class="fw-bold text-primary">@p.Price.ToString("N0") đ</td>
+                            <td>
+                                <span class="badge @(p.StockQuantity > 0 ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger") rounded-pill">
+                                    @p.StockQuantity
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @(p.IsActive ? "bg-success" : "bg-secondary")">
+                                    @(p.IsActive ? "Đang bán" : "Ngừng bán")
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <button type="button" class="btn btn-outline-danger btn-sm rounded-circle js-delete-product" data-id="@p.Id" title="Xóa">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Create Product -->
+<div class="modal fade" id="createProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Thêm Sản Phẩm Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createProductForm">
+                <div class="modal-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Mã sản phẩm (SKU)</label>
+                            <input type="text" name="sku" class="form-control" required placeholder="vd: SKU00099" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Tên sản phẩm</label>
+                            <input type="text" name="name" class="form-control" required placeholder="vd: iPhone 16 Pro Max" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Danh mục</label>
+                            <select name="categoryId" class="form-select" required>
+                                @foreach (var cat in Model.Categories)
+                                {
+                                    <option value="@cat.Id">@cat.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">URL Hình ảnh</label>
+                            <input type="url" name="imageUrl" class="form-control" placeholder="https://..." />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Giá bán (VNĐ)</label>
+                            <input type="number" name="price" class="form-control" required step="1000" min="0" placeholder="34990000" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Số lượng tồn kho</label>
+                            <input type="number" name="stockQuantity" class="form-control" required min="0" value="10" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mô tả sản phẩm</label>
+                        <textarea name="description" class="form-control" rows="4" placeholder="Nhập thông số kỹ thuật, đặc điểm nổi bật..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">Lưu sản phẩm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-ajax.js" asp-append-version="true"></script>
+    <script>
+        document.getElementById('createProductForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const form = e.target;
+            const payload = {
+                sku: form.sku.value,
+                name: form.name.value,
+                categoryId: Number(form.categoryId.value),
+                description: form.description.value,
+                price: Number(form.price.value),
+                stockQuantity: Number(form.stockQuantity.value),
+                isFeatured: false,
+                imageUrls: form.imageUrl.value ? [form.imageUrl.value] : []
+            };
+            const result = await window.couppaAdminAjax.postJson('/Admin/Product/Create', payload);
+            if (result.success) {
+                location.reload();
+            } else {
+                alert(result.error?.message || 'Không thể tạo sản phẩm.');
+            }
+        });
+
+        document.addEventListener('click', async function (e) {
+            const btn = e.target.closest('.js-delete-product');
+            if (!btn) return;
+            if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
+
+            const result = await window.couppaAdminAjax.postJson(`/Admin/Product/Delete/${btn.dataset.id}`, null);
+            if (result.success) {
+                location.reload();
+            } else {
+                alert(result.error?.message || 'Không thể xóa sản phẩm.');
+            }
+        });
+    </script>
+}

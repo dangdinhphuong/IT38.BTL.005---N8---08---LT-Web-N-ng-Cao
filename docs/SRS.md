@@ -8,7 +8,7 @@
 | **Phiên bản** | 1.0 |
 | **Ngày** | 2026-09-07 |
 | **Loại tài liệu** | SRS phục vụ đồ án tốt nghiệp |
-| **Stack đề xuất** | ASP.NET Core Web API (C#) + PostgreSQL + IMemoryCache |
+| **Stack đề xuất** | ASP.NET Core MVC (C#) + EF Core + ASP.NET Core Identity + PostgreSQL + IMemoryCache + Bootstrap |
 
 ---
 
@@ -51,11 +51,13 @@
 
 ## Ghi chú về Design Decisions quan trọng
 
-Tài liệu này giải quyết 2 điểm mâu thuẫn trong yêu cầu gốc, đã được xác nhận với chủ đầu tư đồ án:
+Tài liệu này giải quyết các điểm mâu thuẫn/chưa rõ trong yêu cầu gốc, đã được xác nhận với chủ đầu tư đồ án:
 
-> **DD-01 (Authentication):** Đề bài yêu cầu thể hiện Session + Cookie, trong khi stack đề xuất là Web API (thường đi với JWT stateless). Quyết định: dùng **ASP.NET Core Cookie Authentication + Distributed Session**. Backend vẫn là Web API thuần (trả JSON), frontend gọi Fetch API với `credentials: 'include'`. Cách này vừa đúng kiến trúc Web API, vừa thể hiện đầy đủ Session/Cookie như đề bài yêu cầu.
+> **DD-01 (Kiến trúc trình bày):** Đề bài yêu cầu "kiến trúc MVC rõ ràng" và "giao diện trình bày bằng Razor View + Bootstrap". Quyết định: hệ thống là **1 project ASP.NET Core MVC duy nhất** (không tách Backend API riêng/Frontend SPA riêng). Controller xử lý request theo đúng vòng đời MVC: action trả `View()` (Razor + Bootstrap) cho các trang điều hướng chính (trang chủ, danh sách/chi tiết sản phẩm, giỏ hàng, khu vực quản trị); action trả `JsonResult` cho các thao tác gọi qua AJAX/Fetch (thêm giỏ hàng, tìm kiếm/lọc/sắp xếp không reload, CRUD trong modal ở Admin Panel) — xem Chương 12.
 
-> **DD-02 (Giỏ hàng Guest):** Đề bài liệt kê bảng `carts`/`cart_items` (ngụ ý lưu DB) nhưng đồng thời yêu cầu Guest dùng Session/Cookie. Quyết định: **giỏ hàng luôn lưu ở DB** (kể cả của Guest), Session/Cookie chỉ dùng để **định danh** giỏ hàng của Guest (giữ `session_id`). Khi Guest đăng nhập, giỏ hàng Session được **merge** vào giỏ hàng của User. Cách này vừa cho phép thống kê "sản phẩm được thêm giỏ nhiều nhất" (mục 2.9), vừa thể hiện đúng kỹ thuật Session/Cookie.
+> **DD-02 (Authentication & Authorization):** Đề bài yêu cầu "áp dụng Identity để quản lý người dùng và phân quyền" đồng thời "thực hiện xác thực đăng nhập/đăng xuất" và kỹ thuật bảo mật "Cookie/Session". Quyết định: dùng **ASP.NET Core Identity** (`IdentityUser`, `IdentityRole`, `UserManager`, `SignInManager`) làm cơ chế quản lý người dùng/phân quyền chuẩn của framework. Identity mặc định xác thực bằng **Cookie Authentication**, nên vừa đáp ứng đúng tên gọi "Identity", vừa thể hiện đầy đủ Session/Cookie như đề bài yêu cầu — không cần tự dựng cơ chế Cookie/Session thủ công.
+
+> **DD-03 (Giỏ hàng Guest):** Đề bài liệt kê bảng `carts`/`cart_items` (ngụ ý lưu DB) nhưng đồng thời yêu cầu Guest dùng Session/Cookie. Quyết định: **giỏ hàng luôn lưu ở DB** (kể cả của Guest), Session (`ISession` của ASP.NET Core, độc lập với Cookie Authentication của Identity) chỉ dùng để **định danh** giỏ hàng của Guest (giữ `session_id`). Khi Guest đăng nhập, giỏ hàng Session được **merge** vào giỏ hàng của User. Cách này vừa cho phép thống kê "sản phẩm được thêm giỏ nhiều nhất" (mục 2.9), vừa thể hiện đúng kỹ thuật Session/Cookie.
 
 Toàn bộ các điểm chưa được đặc tả rõ trong yêu cầu gốc được đánh dấu **[Assumption]** hoặc **[Recommendation]** xuyên suốt tài liệu — đây là đề xuất hợp lý của SA, không phải yêu cầu bắt buộc.
 
@@ -105,9 +107,10 @@ Xem chi tiết tại [Chương 28 — Scope / Out of Scope](#28-scope--out-of-sc
 
 ### 2.1 Product Perspective
 
-Đây là hệ thống web độc lập (standalone), kiến trúc client-server, không phụ thuộc hệ thống ngoài nào. Gồm 2 phần:
-- **Backend**: ASP.NET Core Web API, cung cấp REST API + phục vụ trang public/admin qua Razor hoặc SPA (tùy chọn triển khai của sinh viên — SRS không ràng buộc).
-- **Frontend**: HTML/CSS/JavaScript thuần hoặc framework nhẹ, giao tiếp Backend qua Fetch API.
+Đây là hệ thống web độc lập (standalone), kiến trúc **MVC (Model-View-Controller)**, 1 project ASP.NET Core MVC duy nhất, không phụ thuộc hệ thống ngoài nào:
+- **Model**: các entity EF Core (`Product`, `Category`, `Cart`, `CartItem`, `ApplicationUser`...) + ViewModel/DTO cho từng View/action.
+- **View**: Razor View (`.cshtml`) + Bootstrap, dùng chung `_Layout.cshtml` cho Public Site và layout riêng cho Admin Panel.
+- **Controller**: nhận request, gọi Service xử lý business logic, trả `View()` (điều hướng trang) hoặc `JsonResult` (cho AJAX/Fetch — xem Chương 12).
 
 ### 2.2 Product Functions
 
@@ -160,22 +163,22 @@ Hệ thống gồm 3 nhóm giao diện chính:
 ```mermaid
 flowchart TB
     subgraph Client["Client (Browser)"]
-        Public["Public Site<br/>(Guest/User)"]
-        AdminUI["Admin Panel<br/>(Admin)"]
+        Public["Public Site<br/>(Guest/User)<br/>Razor View + Bootstrap"]
+        AdminUI["Admin Panel<br/>(Admin)<br/>Razor View + Bootstrap"]
     end
 
-    subgraph Server["ASP.NET Core Web API"]
-        AuthM["Authentication<br/>Middleware<br/>(Cookie + Session)"]
-        Controllers["Controllers<br/>(Product/Category/Cart/User/Auth)"]
+    subgraph Server["ASP.NET Core MVC"]
+        AuthM["Identity Middleware<br/>(Cookie Authentication)"]
+        Controllers["Controllers (MVC)<br/>(Product/Category/Cart/User/Account/Admin)<br/>trả View() hoặc JsonResult"]
         Services["Services<br/>(Business Logic)"]
         Cache["IMemoryCache"]
-        EF["EF Core"]
+        EF["EF Core<br/>(AppDbContext : IdentityDbContext)"]
     end
 
     DB[("PostgreSQL")]
 
-    Public -- "Fetch API (JSON)" --> AuthM
-    AdminUI -- "Fetch API (JSON)" --> AuthM
+    Public -- "HTTP (View) + Fetch/AJAX (JSON)" --> AuthM
+    AdminUI -- "HTTP (View) + Fetch/AJAX (JSON)" --> AuthM
     AuthM --> Controllers
     Controllers --> Services
     Services --> Cache
@@ -183,7 +186,7 @@ flowchart TB
     EF --> DB
 ```
 
-Luồng xử lý chuẩn: **Client → Controller → Service (business logic + cache check) → EF Core → PostgreSQL**. Không dùng Repository pattern riêng vì EF Core `DbContext` đã đóng vai trò abstraction layer đủ dùng cho quy mô đồ án.
+Luồng xử lý chuẩn: **Client → Controller (MVC) → Service (business logic + cache check) → EF Core → PostgreSQL → View/JsonResult**. Không dùng Repository pattern riêng vì EF Core `DbContext` đã đóng vai trò abstraction layer đủ dùng cho quy mô đồ án.
 
 ---
 
@@ -208,19 +211,19 @@ Luồng xử lý chuẩn: **Client → Controller → Service (business logic + 
 | ID | Mô tả | Actor | Priority |
 |---|---|---|---|
 | FR-AUTH-001 | Đăng ký tài khoản mới bằng email + password + tên hiển thị | Guest | M |
-| FR-AUTH-002 | Đăng nhập bằng email/password, tạo Cookie + Session | Guest | M |
-| FR-AUTH-003 | Đăng xuất, hủy Session hiện tại | User, Admin | M |
-| FR-AUTH-004 | Mật khẩu phải được hash (BCrypt/PBKDF2) trước khi lưu DB | System | M |
-| FR-AUTH-005 | Hệ thống từ chối đăng nhập nếu tài khoản bị khóa (`is_locked = true`) | System | M |
-| FR-AUTH-006 | Hệ thống khóa tạm thời sau N lần đăng nhập sai liên tiếp (rate limit) | System | S |
+| FR-AUTH-002 | Đăng nhập bằng email/password qua ASP.NET Core Identity, tạo Cookie Authentication | Guest | M |
+| FR-AUTH-003 | Đăng xuất, hủy Cookie Authentication hiện tại (`SignInManager.SignOutAsync`) | User, Admin | M |
+| FR-AUTH-004 | Mật khẩu phải được hash (Identity `PasswordHasher`) trước khi lưu DB | System | M |
+| FR-AUTH-005 | Hệ thống từ chối đăng nhập nếu tài khoản bị khóa (`IsLocked = true`) | System | M |
+| FR-AUTH-006 | Hệ thống khóa tạm thời sau N lần đăng nhập sai liên tiếp (Identity Lockout) | System | S |
 
 ### 5.2 Authorization (FR-AUTHZ)
 
 | ID | Mô tả | Actor | Priority |
 |---|---|---|---|
-| FR-AUTHZ-001 | Mọi endpoint `/api/admin/**` yêu cầu role = Admin, kiểm tra ở backend | System | M |
-| FR-AUTHZ-002 | User không có quyền Admin bị từ chối với HTTP 403 khi gọi API quản trị | System | M |
-| FR-AUTHZ-003 | Guest bị từ chối với HTTP 401 khi gọi API yêu cầu đăng nhập | System | M |
+| FR-AUTHZ-001 | Mọi action dưới `/Admin/**` yêu cầu role = Admin, kiểm tra ở backend (`[Authorize(Roles="Admin")]`) | System | M |
+| FR-AUTHZ-002 | User không có quyền Admin bị từ chối với HTTP 403 khi gọi action quản trị | System | M |
+| FR-AUTHZ-003 | Guest bị từ chối với HTTP 401 khi gọi action yêu cầu đăng nhập | System | M |
 
 ### 5.3 Product Management (FR-PRODUCT)
 
@@ -311,7 +314,7 @@ Luồng xử lý chuẩn: **Client → Controller → Service (business logic + 
 | ID | Mô tả | Actor | Priority |
 |---|---|---|---|
 | FR-ADMIN-001 | Đăng nhập khu vực quản trị dùng chung cơ chế Cookie Auth, kiểm tra role = Admin | Admin | M |
-| FR-ADMIN-002 | Truy cập trực tiếp URL/API admin khi chưa đủ quyền → 401/403, không lộ dữ liệu | System | M |
+| FR-ADMIN-002 | Truy cập trực tiếp URL `/Admin/**` khi chưa đủ quyền → 401/403, không lộ dữ liệu | System | M |
 
 ---
 
@@ -326,7 +329,7 @@ Luồng xử lý chuẩn: **Client → Controller → Service (business logic + 
 | BR-05 | Mã sản phẩm (SKU) phải là duy nhất trong hệ thống |
 | BR-06 | Password tối thiểu 8 ký tự, có ít nhất 1 chữ hoa, 1 chữ số |
 | BR-07 | User bị khóa (`is_locked = true`) không thể đăng nhập, kể cả khi biết đúng password |
-| BR-08 | Chỉ role Admin được truy cập các API dưới `/api/admin/**` |
+| BR-08 | Chỉ role Admin được truy cập các Controller/action dưới `/Admin/**` |
 | BR-09 | Giá sản phẩm phải >= 0 |
 | BR-10 | Số lượng tồn kho phải >= 0 |
 | BR-11 | Khi sản phẩm bị xóa (soft delete) hoặc chuyển Inactive, các `cart_items` tham chiếu tới sản phẩm đó vẫn giữ nguyên trong DB nhưng bị đánh dấu "không khả dụng" khi hiển thị giỏ hàng; User phải tự xóa item đó, hệ thống không tự xóa (tránh mất dữ liệu ngoài ý muốn) — **[Recommendation]** |
@@ -379,8 +382,8 @@ flowchart LR
 | **Actor** | Guest |
 | **Goal** | Xem danh sách sản phẩm phù hợp với nhu cầu |
 | **Preconditions** | Không cần đăng nhập |
-| **Main Flow** | 1. Guest truy cập trang danh sách sản phẩm<br>2. Hệ thống gọi `GET /api/products` trả về danh sách phân trang<br>3. Guest nhập từ khóa tìm kiếm hoặc chọn bộ lọc (danh mục, giá)<br>4. Frontend gọi Fetch API `GET /api/products?search=...&category=...` (không reload trang)<br>5. Hệ thống trả kết quả phù hợp |
-| **Alternative Flow** | 3a. Guest chọn sắp xếp theo giá/mới nhất → gọi lại API với `sort=` tương ứng |
+| **Main Flow** | 1. Guest truy cập trang danh sách sản phẩm<br>2. Hệ thống render View `GET /Product/Index` (Razor) trả về danh sách phân trang<br>3. Guest nhập từ khóa tìm kiếm hoặc chọn bộ lọc (danh mục, giá)<br>4. Frontend gọi AJAX `GET /Product/Search?keyword=...` hoặc `/Product/Filter?category=...` (không reload trang)<br>5. Hệ thống trả kết quả phù hợp |
+| **Alternative Flow** | 3a. Guest chọn sắp xếp theo giá/mới nhất → gọi AJAX `/Product/Sort?sort=` tương ứng |
 | **Exception Flow** | Không tìm thấy kết quả → hiển thị danh sách rỗng kèm thông báo "Không tìm thấy sản phẩm" |
 | **Postconditions** | Danh sách sản phẩm được hiển thị đúng bộ lọc |
 
@@ -391,7 +394,7 @@ flowchart LR
 | **Actor** | Guest, User |
 | **Goal** | Thêm 1 sản phẩm vào giỏ hàng |
 | **Preconditions** | Sản phẩm đang Active và còn tồn kho > 0 |
-| **Main Flow** | 1. Actor chọn sản phẩm, nhấn "Thêm vào giỏ"<br>2. Frontend gọi `POST /api/cart/items`<br>3. Nếu Guest chưa có Session/cart, backend tạo mới `session_id` + `cart` record<br>4. Backend kiểm tra tồn kho, thêm/cập nhật `cart_items`<br>5. Backend ghi 1 dòng vào `cart_activity_logs`<br>6. Trả về giỏ hàng đã cập nhật |
+| **Main Flow** | 1. Actor chọn sản phẩm, nhấn "Thêm vào giỏ"<br>2. Frontend gọi AJAX `POST /Cart/AddItem`<br>3. Nếu Guest chưa có Session/cart, backend tạo mới `session_id` + `cart` record<br>4. Backend kiểm tra tồn kho, thêm/cập nhật `cart_items`<br>5. Backend ghi 1 dòng vào `cart_activity_logs`<br>6. Trả về giỏ hàng đã cập nhật |
 | **Alternative Flow** | Sản phẩm đã có trong giỏ → cộng dồn số lượng (không vượt tồn kho) |
 | **Exception Flow** | Sản phẩm Inactive/hết hàng → HTTP 409, thông báo "Sản phẩm hiện không khả dụng" |
 | **Postconditions** | `cart_items` được cập nhật, tổng số lượng giỏ hàng hiển thị mới |
@@ -403,7 +406,7 @@ flowchart LR
 | **Actor** | Guest |
 | **Goal** | Tạo tài khoản mới |
 | **Preconditions** | Email chưa tồn tại trong hệ thống |
-| **Main Flow** | 1. Guest nhập email, password, tên hiển thị<br>2. Frontend validate cơ bản (định dạng email, độ dài password)<br>3. Gọi `POST /api/auth/register`<br>4. Backend validate lại (server-side là quyết định cuối cùng), hash password<br>5. Tạo record `users` với role User<br>6. Trả về thành công, chuyển hướng trang đăng nhập |
+| **Main Flow** | 1. Guest nhập email, password, tên hiển thị trên Form `GET /Account/Register`<br>2. Frontend validate cơ bản (định dạng email, độ dài password)<br>3. Submit `POST /Account/Register`<br>4. Backend validate lại (server-side là quyết định cuối cùng), Identity hash password (`UserManager.CreateAsync`), gán role User<br>5. Tạo record `AspNetUsers`<br>6. Trả về thành công, chuyển hướng trang đăng nhập |
 | **Alternative Flow** | Không có |
 | **Exception Flow** | Email đã tồn tại → HTTP 409 Conflict; password không đạt policy → HTTP 422 |
 | **Postconditions** | Tài khoản User mới được tạo, chưa tự động đăng nhập — **[Recommendation]** yêu cầu đăng nhập thủ công lần đầu |
@@ -415,10 +418,10 @@ flowchart LR
 | **Actor** | User, Admin |
 | **Goal** | Đăng nhập vào hệ thống |
 | **Preconditions** | Tài khoản tồn tại và không bị khóa |
-| **Main Flow** | 1. Actor nhập email/password<br>2. Gọi `POST /api/auth/login`<br>3. Backend kiểm tra email tồn tại, so khớp password hash<br>4. Backend kiểm tra `is_locked = false`<br>5. Tạo Session, set Cookie (HttpOnly, Secure, SameSite=Lax)<br>6. Nếu có giỏ hàng Guest (session cũ) → merge vào giỏ hàng User (BR-13)<br>7. Trả về thông tin user (không gồm password) |
+| **Main Flow** | 1. Actor nhập email/password trên Form `GET /Account/Login`<br>2. Submit `POST /Account/Login`<br>3. Backend gọi `SignInManager.PasswordSignInAsync` — kiểm tra email tồn tại, so khớp password hash<br>4. Identity kiểm tra `IsLocked = false` (và Lockout built-in)<br>5. Identity tạo Cookie Authentication (HttpOnly, Secure, SameSite=Lax)<br>6. Nếu có giỏ hàng Guest (session cũ) → merge vào giỏ hàng User (BR-13)<br>7. Trả về thông tin user (không gồm password) |
 | **Alternative Flow** | Không có |
 | **Exception Flow** | Sai email/password → HTTP 401, thông báo chung "Email hoặc mật khẩu không đúng" (không tiết lộ email tồn tại hay không); tài khoản bị khóa → HTTP 403 "Tài khoản đã bị khóa" |
-| **Postconditions** | Session được tạo, Cookie set trên trình duyệt |
+| **Postconditions** | Cookie Authentication của Identity được set trên trình duyệt |
 
 ### 7.6 UC-05: Quản lý sản phẩm (Admin — CRUD)
 
@@ -427,8 +430,8 @@ flowchart LR
 | **Actor** | Admin |
 | **Goal** | Thêm/sửa/xóa/xem sản phẩm |
 | **Preconditions** | Đã đăng nhập với role Admin |
-| **Main Flow** | 1. Admin mở trang quản lý sản phẩm<br>2. Gọi `GET /api/admin/products` (phân trang)<br>3. Admin thêm mới → `POST /api/admin/products`; sửa → `PUT /api/admin/products/{id}`; xóa → `DELETE /api/admin/products/{id}` (soft delete)<br>4. Backend validate (SKU unique, giá >= 0, tồn kho >= 0)<br>5. Backend invalidate cache liên quan (danh sách sản phẩm, sản phẩm nổi bật) |
-| **Alternative Flow** | Đổi trạng thái nhanh (Active/Inactive) qua `PATCH /api/admin/products/{id}/status` |
+| **Main Flow** | 1. Admin mở trang quản lý sản phẩm `GET /Admin/Product/Index` (phân trang, Razor View)<br>2. Admin thêm mới → `POST /Admin/Product/Create` (AJAX, modal); sửa → `POST /Admin/Product/Edit/{id}`; xóa → `POST /Admin/Product/Delete/{id}` (soft delete)<br>3. Backend validate (SKU unique, giá >= 0, tồn kho >= 0)<br>4. Backend invalidate cache liên quan (danh sách sản phẩm, sản phẩm nổi bật) |
+| **Alternative Flow** | Đổi trạng thái nhanh (Active/Inactive) qua AJAX `POST /Admin/Product/ToggleStatus/{id}` |
 | **Exception Flow** | SKU trùng → HTTP 409; thiếu trường bắt buộc → HTTP 422; không tìm thấy sản phẩm → HTTP 404 |
 | **Postconditions** | Dữ liệu sản phẩm được cập nhật, cache liên quan bị invalidate |
 
@@ -439,7 +442,7 @@ flowchart LR
 | **Actor** | Admin |
 | **Goal** | Xem tổng quan hệ thống |
 | **Preconditions** | Đã đăng nhập với role Admin |
-| **Main Flow** | 1. Admin mở trang Dashboard<br>2. Gọi `GET /api/admin/dashboard/summary`<br>3. Backend đọc cache (nếu có) hoặc tính toán và cache lại (TTL 5 phút)<br>4. Trả về các số liệu tổng hợp |
+| **Main Flow** | 1. Admin mở trang Dashboard `GET /Admin/Dashboard/Index`<br>2. Số liệu ban đầu render kèm View; refresh qua AJAX `GET /Admin/Dashboard/Summary`<br>3. Backend đọc cache (nếu có) hoặc tính toán và cache lại (TTL 5 phút)<br>4. Trả về các số liệu tổng hợp |
 | **Alternative Flow** | Không có |
 | **Exception Flow** | Không có dữ liệu (hệ thống mới) → trả về giá trị 0, không lỗi |
 | **Postconditions** | Không thay đổi dữ liệu |
@@ -468,50 +471,50 @@ flowchart LR
 
 ## 9. Authentication & Authorization
 
-### 9.1 Authentication Mechanism (theo DD-01)
+### 9.1 Authentication Mechanism (theo DD-02)
 
-- Cơ chế: **ASP.NET Core Cookie Authentication** kết hợp **Session** (`AddSession` + `AddDistributedMemoryCache` hoặc tương đương)
-- Khi đăng nhập thành công: server tạo Session, ghi `user_id`, `role` vào Session store; set Cookie `couppa.auth` (HttpOnly, Secure trên production, SameSite=Lax)
-- Mỗi request tiếp theo: middleware đọc Cookie → xác thực Session còn hiệu lực → gắn `ClaimsPrincipal` cho request
-- Session timeout: **[Recommendation]** 30 phút idle timeout
-- Đăng xuất: xóa Session server-side + xóa Cookie client-side (`Set-Cookie` với `Max-Age=0`)
+- Cơ chế: **ASP.NET Core Identity** (`AddIdentity<ApplicationUser, IdentityRole>`), xác thực bằng **Cookie Authentication** (Identity tự cấu hình `IdentityConstants.ApplicationScheme` dưới nền)
+- `ApplicationUser : IdentityUser` mở rộng thêm các trường nghiệp vụ: `FullName`, `Phone`, `IsLocked` (xem Chương 13.2)
+- Đăng nhập: dùng `SignInManager<ApplicationUser>.PasswordSignInAsync(email, password, isPersistent, lockoutOnFailure: true)` — Identity tự tạo Cookie xác thực (`HttpOnly`, `Secure` trên production, `SameSite=Lax`) và `ClaimsPrincipal` chứa `user_id`, `role`
+- Mỗi request tiếp theo: Identity Middleware đọc Cookie → xác thực → gắn `ClaimsPrincipal` cho `HttpContext.User`
+- Cookie timeout: **[Recommendation]** cấu hình `CookieAuthenticationOptions.ExpireTimeSpan = 30 phút`, `SlidingExpiration = true`
+- Đăng xuất: `SignInManager.SignOutAsync()` — Identity tự xóa Cookie xác thực
 
-### 9.2 Guest Session (theo DD-02)
+### 9.2 Guest Session (theo DD-03)
 
-- Guest chưa đăng nhập vẫn được cấp 1 Session (không cần đăng nhập) chỉ để giữ `session_id` định danh giỏ hàng
-- Cookie tương ứng: `couppa.session` (HttpOnly, không chứa thông tin nhạy cảm, chỉ là GUID ngẫu nhiên)
-- Khi Guest đăng nhập, `session_id` cũ được dùng 1 lần để merge giỏ hàng (BR-13), sau đó Cookie session được thay bằng Cookie auth
+- Guest chưa đăng nhập không dùng Cookie Authentication của Identity, mà dùng **ASP.NET Core Session** (`ISession`, `AddSession` + `AddDistributedMemoryCache`) chỉ để giữ `session_id` định danh giỏ hàng
+- Cookie tương ứng: `couppa.session` (HttpOnly, không chứa thông tin nhạy cảm, chỉ là GUID ngẫu nhiên) — độc lập với Cookie Authentication của Identity
+- Khi Guest đăng nhập, `session_id` cũ được dùng 1 lần để merge giỏ hàng (BR-13), sau đó Session Guest không còn cần thiết (đã có Cookie Authentication của Identity)
 
 ### 9.3 Authorization Model
 
-- Role-based, 2 role cố định: `User`, `Admin` (lưu ở bảng `roles`, tham chiếu qua `users.role_id`)
+- Role-based dùng **ASP.NET Core Identity Role** (`IdentityRole`), 2 role cố định: `User`, `Admin`, seed sẵn qua `RoleManager<IdentityRole>` (lưu ở bảng `AspNetRoles`, gán cho user qua `AspNetUserRoles`)
 - Kiểm tra quyền bằng `[Authorize]` / `[Authorize(Roles = "Admin")]` ở tầng Controller — **backend luôn là điểm quyết định cuối cùng**, frontend chỉ ẩn/hiện UI để trải nghiệm tốt hơn, không được xem là lớp bảo mật
-- Toàn bộ endpoint dưới `/api/admin/**` bắt buộc `Roles = "Admin"`
-- Endpoint thao tác giỏ hàng/profile cho phép cả Guest (session) và User (đăng nhập) tùy loại — xem chi tiết Chương 15
+- Toàn bộ Controller/action dưới khu vực `Admin/**` (route `/Admin/**`) bắt buộc `[Authorize(Roles = "Admin")]`
+- Action thao tác giỏ hàng/profile cho phép cả Guest (session) và User (đăng nhập) tùy loại — xem chi tiết Chương 15
 
 ### 9.4 Sequence Diagram — Login + Cart Merge
 
 ```mermaid
 sequenceDiagram
     actor G as Guest (có session cart)
-    participant API as AuthController
-    participant SVC as AuthService
+    participant Ctrl as AccountController
+    participant SIM as SignInManager (Identity)
     participant CartSVC as CartService
     participant DB as PostgreSQL
 
-    G->>API: POST /api/auth/login {email, password}
-    API->>SVC: Validate(email, password)
-    SVC->>DB: SELECT users WHERE email=?
-    DB-->>SVC: user row (password_hash)
-    SVC->>SVC: Verify hash + check is_locked
-    SVC-->>API: OK (user)
-    API->>API: Create Session, Set-Cookie
-    API->>CartSVC: MergeGuestCart(session_id, user_id)
+    G->>Ctrl: POST /Account/Login {email, password}
+    Ctrl->>SIM: PasswordSignInAsync(email, password)
+    SIM->>DB: SELECT AspNetUsers WHERE email=?
+    DB-->>SIM: user row (PasswordHash)
+    SIM->>SIM: Verify hash + check IsLocked/Lockout
+    SIM-->>Ctrl: SignInResult.Success (Set-Cookie tự động)
+    Ctrl->>CartSVC: MergeGuestCart(session_id, user_id)
     CartSVC->>DB: SELECT cart WHERE session_id=?
     CartSVC->>DB: SELECT/UPSERT cart WHERE user_id=?
     CartSVC->>DB: Merge cart_items (cộng dồn, giới hạn tồn kho)
-    CartSVC-->>API: merged cart
-    API-->>G: 200 OK {user, cart}
+    CartSVC-->>Ctrl: merged cart
+    Ctrl-->>G: Redirect to Home (View) hoặc 200 OK JSON nếu gọi qua AJAX
 ```
 
 ---
@@ -520,18 +523,18 @@ sequenceDiagram
 
 | ID | Kỹ thuật | Mô tả áp dụng |
 |---|---|---|
-| SEC-01 | Password Hashing | BCrypt (hoặc ASP.NET Core `PasswordHasher<T>`), không tự implement thuật toán hash |
-| SEC-02 | Authentication | Cookie Authentication, không truyền credentials qua query string |
-| SEC-03 | Authorization | Kiểm tra role ở Controller/Middleware backend cho mọi endpoint nhạy cảm |
-| SEC-04 | Session Security | Cookie `HttpOnly=true`, `Secure=true` (production, HTTPS), `SameSite=Lax`; Session ID được regenerate sau khi đăng nhập (chống Session Fixation) |
-| SEC-05 | Cookie Security | Không lưu thông tin nhạy cảm (password, token) trực tiếp trong cookie; chỉ lưu Session ID |
+| SEC-01 | Password Hashing | ASP.NET Core Identity `PasswordHasher<ApplicationUser>` (mặc định khi dùng Identity), không tự implement thuật toán hash |
+| SEC-02 | Authentication | Identity Cookie Authentication, không truyền credentials qua query string |
+| SEC-03 | Authorization | Kiểm tra role ở Controller/Middleware backend (`[Authorize(Roles=...)]`) cho mọi action nhạy cảm |
+| SEC-04 | Session Security | Cookie xác thực của Identity `HttpOnly=true`, `Secure=true` (production, HTTPS), `SameSite=Lax`; Identity tự regenerate Cookie sau khi đăng nhập (chống Session Fixation) |
+| SEC-05 | Cookie Security | Không lưu thông tin nhạy cảm (password, token) trực tiếp trong cookie; Cookie Authentication của Identity chỉ chứa `ClaimsPrincipal` đã mã hóa, Cookie Session Guest chỉ chứa Session ID |
 | SEC-06 | Input Validation | Validate cả frontend (UX) lẫn backend (Data Annotations / FluentValidation) — backend là bắt buộc |
-| SEC-07 | CSRF Protection | Dùng Anti-forgery token (`[ValidateAntiForgeryToken]` hoặc `X-CSRF-TOKEN` header) cho các request thay đổi trạng thái (POST/PUT/DELETE) khi dùng Cookie Auth |
-| SEC-08 | XSS Protection | Output encoding mặc định của Razor/React; sanitize mọi input hiển thị lại (tên sản phẩm, mô tả); áp dụng CSP header cơ bản |
+| SEC-07 | CSRF Protection | Dùng Anti-forgery token của ASP.NET Core MVC (`[ValidateAntiForgeryToken]` + `@Html.AntiForgeryToken()` trong Razor Form; với request AJAX gửi kèm header `RequestVerificationToken`) cho mọi request thay đổi trạng thái (POST/PUT/PATCH/DELETE) |
+| SEC-08 | XSS Protection | Output encoding mặc định của Razor (`@` tự HTML-encode); sanitize mọi input hiển thị lại (tên sản phẩm, mô tả); áp dụng CSP header cơ bản |
 | SEC-09 | SQL Injection Prevention | Dùng EF Core với parameterized query, không nối chuỗi SQL thủ công |
-| SEC-10 | Backend Authorization Check | Không tin bất kỳ `role`/`user_id` nào gửi từ client; luôn lấy từ Session/Claims đã xác thực |
-| SEC-11 | Rate Limiting | Giới hạn số lần gọi `/api/auth/login` (ví dụ 5 lần/phút/IP) chống brute-force — **[Recommendation]** dùng `Microsoft.AspNetCore.RateLimiting` |
-| SEC-12 | Sensitive Data Exposure | Response API không bao giờ trả `password_hash`; lỗi 500 không trả stack trace cho client |
+| SEC-10 | Backend Authorization Check | Không tin bất kỳ `role`/`user_id` nào gửi từ client; luôn lấy từ `ClaimsPrincipal` (`User.Identity`) đã xác thực bởi Identity |
+| SEC-11 | Rate Limiting | Giới hạn số lần đăng nhập sai (ví dụ 5 lần/phút/IP) chống brute-force — dùng `Lockout` built-in của Identity (`lockoutOnFailure: true`) kết hợp `Microsoft.AspNetCore.RateLimiting` — **[Recommendation]** |
+| SEC-12 | Sensitive Data Exposure | View/JsonResult không bao giờ trả `PasswordHash`; lỗi 500 không trả stack trace cho client |
 | SEC-13 | Safe Error Handling | Middleware bắt exception toàn cục, trả về format lỗi chuẩn hóa (Chương 19), log chi tiết ở server |
 
 **Phân biệt Frontend vs Backend Validation:**
@@ -550,40 +553,40 @@ Cơ chế: **ASP.NET Core `IMemoryCache`** (in-process). Redis được ghi nh�
 
 | Dữ liệu cache | Cache Key | TTL | Tạo khi | Đọc khi | Invalidate khi |
 |---|---|---|---|---|---|
-| Danh sách danh mục active | `categories:active` | 15 phút | Lần đầu có request lấy danh mục sau khi cache miss/hết hạn | Mọi request `GET /api/categories`, dropdown lọc sản phẩm | Admin thêm/sửa/xóa/đổi trạng thái danh mục |
-| Sản phẩm nổi bật | `products:featured` | 10 phút | Request đầu tiên tới trang chủ sau khi cache miss | `GET /api/products/featured` | Admin thêm/sửa/xóa sản phẩm có cờ `is_featured`, hoặc đổi trạng thái |
-| Sản phẩm mới nhất | `products:latest` | 5 phút | Request đầu tiên tới trang chủ sau khi cache miss | `GET /api/products/latest` | Admin tạo sản phẩm mới |
-| Dashboard summary | `admin:dashboard:summary` | 5 phút | Admin mở Dashboard lần đầu sau khi cache miss | `GET /api/admin/dashboard/summary` | Không invalidate chủ động — để tự hết hạn theo TTL (số liệu tổng hợp không cần realtime tuyệt đối) — **[Recommendation]** |
+| Danh sách danh mục active | `categories:active` | 15 phút | Lần đầu có request lấy danh mục sau khi cache miss/hết hạn | Mọi request tải danh mục (Layout menu, `GET /Category/GetActive` cho dropdown lọc sản phẩm) | Admin thêm/sửa/xóa/đổi trạng thái danh mục |
+| Sản phẩm nổi bật | `products:featured` | 10 phút | Request đầu tiên tới trang chủ sau khi cache miss | `GET /Home/Index`, `GET /Product/Featured` (AJAX) | Admin thêm/sửa/xóa sản phẩm có cờ `is_featured`, hoặc đổi trạng thái |
+| Sản phẩm mới nhất | `products:latest` | 5 phút | Request đầu tiên tới trang chủ sau khi cache miss | `GET /Home/Index`, `GET /Product/Latest` (AJAX) | Admin tạo sản phẩm mới |
+| Dashboard summary | `admin:dashboard:summary` | 5 phút | Admin mở Dashboard lần đầu sau khi cache miss | `GET /Admin/Dashboard/Index` | Không invalidate chủ động — để tự hết hạn theo TTL (số liệu tổng hợp không cần realtime tuyệt đối) — **[Recommendation]** |
 
 **Quy tắc invalidation cụ thể:**
 - **Thêm/Sửa/Xóa sản phẩm** → xóa key `products:featured`, `products:latest` (nếu sản phẩm liên quan cờ đó); không cần xóa cache danh mục
 - **Thêm/Sửa/Xóa/Đổi trạng thái danh mục** → xóa key `categories:active`
-- Danh sách sản phẩm có **filter/search/sort** (`GET /api/products?...`) **không cache** — vì tổ hợp tham số quá nhiều, chi phí cache > lợi ích (đúng tinh thần "không thiết kế caching quá phức tạp")
+- Danh sách sản phẩm có **filter/search/sort** (`GET /Product/Index?...`) **không cache** — vì tổ hợp tham số quá nhiều, chi phí cache > lợi ích (đúng tinh thần "không thiết kế caching quá phức tạp")
 - Giỏ hàng và thông tin cá nhân **không bao giờ cache** — dữ liệu riêng tư theo từng người dùng
 
 ---
 
 ## 12. AJAX / Fetch API Requirements
 
-Các chức năng bắt buộc dùng Fetch API (không reload trang):
+Hệ thống là ASP.NET Core MVC: các trang điều hướng chính (trang chủ, danh sách/chi tiết sản phẩm, giỏ hàng, các trang trong Admin Panel) render bằng **Razor View** (full page load lần đầu). Trên các View đó, các thao tác tương tác sau **bắt buộc dùng Fetch API gọi vào action MVC trả `JsonResult`** (không reload trang):
 
-| Chức năng | Endpoint | Trigger |
+| Chức năng | Action (MVC) | Trigger |
 |---|---|---|
-| Tìm kiếm sản phẩm | `GET /api/products?search=` | Debounce 300ms khi gõ, hoặc submit form search |
-| Lọc theo danh mục/giá | `GET /api/products?category=&minPrice=&maxPrice=` | Khi chọn filter |
-| Sắp xếp | `GET /api/products?sort=` | Khi đổi dropdown sort |
-| Phân trang | `GET /api/products?page=&pageSize=` | Khi bấm nút trang / infinite scroll |
-| Thêm vào giỏ hàng | `POST /api/cart/items` | Khi bấm "Thêm vào giỏ" |
-| Cập nhật số lượng giỏ hàng | `PUT /api/cart/items/{id}` | Khi bấm +/- trong giỏ hàng |
-| Xóa sản phẩm khỏi giỏ | `DELETE /api/cart/items/{id}` | Khi bấm icon xóa |
-| CRUD sản phẩm (Admin) | `POST/PUT/DELETE /api/admin/products` | Submit form trong modal, không reload trang danh sách |
-| CRUD danh mục (Admin) | `POST/PUT/DELETE /api/admin/categories` | Tương tự |
-| Đổi trạng thái sản phẩm/danh mục | `PATCH /api/admin/products/{id}/status` | Toggle switch trong bảng |
-| Dashboard statistics | `GET /api/admin/dashboard/summary` | Khi mở trang Dashboard |
+| Tìm kiếm sản phẩm | `GET /Product/Search?keyword=` | Debounce 300ms khi gõ, hoặc submit form search |
+| Lọc theo danh mục/giá | `GET /Product/Filter?category=&minPrice=&maxPrice=` | Khi chọn filter |
+| Sắp xếp | `GET /Product/Sort?sort=` | Khi đổi dropdown sort |
+| Phân trang | `GET /Product/Page?page=&pageSize=` | Khi bấm nút trang / infinite scroll |
+| Thêm vào giỏ hàng | `POST /Cart/AddItem` | Khi bấm "Thêm vào giỏ" |
+| Cập nhật số lượng giỏ hàng | `POST /Cart/UpdateItem/{id}` | Khi bấm +/- trong giỏ hàng |
+| Xóa sản phẩm khỏi giỏ | `POST /Cart/RemoveItem/{id}` | Khi bấm icon xóa |
+| CRUD sản phẩm (Admin) | `POST /Admin/Product/Create`, `POST /Admin/Product/Edit/{id}`, `POST /Admin/Product/Delete/{id}` | Submit form trong modal, không reload trang danh sách |
+| CRUD danh mục (Admin) | `POST /Admin/Category/Create`, `POST /Admin/Category/Edit/{id}`, `POST /Admin/Category/Delete/{id}` | Tương tự |
+| Đổi trạng thái sản phẩm/danh mục | `POST /Admin/Product/ToggleStatus/{id}` | Toggle switch trong bảng |
+| Dashboard statistics | `GET /Admin/Dashboard/Summary` | Khi mở trang Dashboard (refresh số liệu không reload) |
 
 **Quy ước Request/Response chung:**
-- Mọi request: `Content-Type: application/json`, `credentials: 'include'` (để gửi Cookie)
-- Request POST/PUT/PATCH/DELETE bắt buộc kèm header CSRF token: `X-CSRF-TOKEN`
+- Mọi request AJAX: `Content-Type: application/json`, `credentials: 'include'` (để gửi Cookie Authentication của Identity)
+- Request POST/PUT/PATCH/DELETE bắt buộc kèm Anti-forgery token (`RequestVerificationToken` header, lấy từ `@Html.AntiForgeryToken()` — xem SEC-07 Chương 10)
 - Response thành công: `{ "success": true, "data": { ... } }`
 - Response lỗi: theo format thống nhất ở Chương 19
 - Danh sách có phân trang trả kèm metadata:
@@ -604,30 +607,39 @@ Các chức năng bắt buộc dùng Fetch API (không reload trang):
 
 ## 13. Database Requirements
 
-Database: **PostgreSQL**. Naming convention: `snake_case`, khóa chính `id` (UUID hoặc BIGSERIAL — **[Recommendation]** dùng `BIGSERIAL` cho đơn giản, đủ dùng cho đồ án).
+Database: **PostgreSQL**. Naming convention cho bảng nghiệp vụ tự định nghĩa: `snake_case`, khóa chính `id` kiểu `BIGSERIAL` — **[Recommendation]** đủ dùng cho đồ án. Riêng các bảng do **ASP.NET Core Identity** tự sinh qua migration (13.1, 13.2) giữ nguyên naming convention mặc định của Identity (`PascalCase`, khóa chính `Id` kiểu `TEXT`/`VARCHAR(450)` chứa GUID dạng chuỗi) — không đổi tên để tương thích với `UserManager`/`SignInManager`/`RoleManager` sẵn có của framework.
 
-### 13.1 Bảng `roles`
-
-| Column | Type | PK | FK | Nullable | Default | Unique | Ghi chú |
-|---|---|---|---|---|---|---|---|
-| id | SMALLINT | ✓ | | ✗ | | | 1=User, 2=Admin |
-| name | VARCHAR(20) | | | ✗ | | ✓ | 'User' / 'Admin' |
-
-### 13.2 Bảng `users`
+### 13.1 Bảng `AspNetRoles` (Identity — tự sinh)
 
 | Column | Type | PK | FK | Nullable | Default | Unique | Ghi chú |
 |---|---|---|---|---|---|---|---|
-| id | BIGSERIAL | ✓ | | ✗ | | | |
-| email | VARCHAR(255) | | | ✗ | | ✓ | |
-| password_hash | VARCHAR(255) | | | ✗ | | | BCrypt hash |
-| full_name | VARCHAR(150) | | | ✗ | | | |
-| phone | VARCHAR(20) | | | ✓ | NULL | | |
-| role_id | SMALLINT | | → roles.id | ✗ | 1 | | |
-| is_locked | BOOLEAN | | | ✗ | false | | |
-| created_at | TIMESTAMPTZ | | | ✗ | now() | | |
-| updated_at | TIMESTAMPTZ | | | ✗ | now() | | |
+| Id | VARCHAR(450) | ✓ | | ✗ | | | GUID dạng chuỗi |
+| Name | VARCHAR(256) | | | ✓ | | ✓ | 'User' / 'Admin' |
+| NormalizedName | VARCHAR(256) | | | ✓ | | ✓ | Identity tự chuẩn hóa (UPPER) |
+| ConcurrencyStamp | TEXT | | | ✓ | | | |
 
-Index: `idx_users_email` (unique, đã có qua constraint), `idx_users_role_id`.
+Seed sẵn 2 role `User`, `Admin` qua `RoleManager<IdentityRole>` khi khởi tạo DB.
+
+### 13.2 Bảng `AspNetUsers` (Identity — tự sinh, mở rộng qua `ApplicationUser : IdentityUser`)
+
+| Column | Type | PK | FK | Nullable | Default | Unique | Ghi chú |
+|---|---|---|---|---|---|---|---|
+| Id | VARCHAR(450) | ✓ | | ✗ | | | GUID dạng chuỗi |
+| Email | VARCHAR(256) | | | ✓ | | ✓ | (BR-04) |
+| NormalizedEmail | VARCHAR(256) | | | ✓ | | ✓ | Identity tự chuẩn hóa |
+| UserName | VARCHAR(256) | | | ✓ | | ✓ | **[Recommendation]** đồng bộ = Email |
+| PasswordHash | TEXT | | | ✓ | | | Identity `PasswordHasher` sinh ra |
+| LockoutEnabled | BOOLEAN | | | ✗ | true | | dùng cơ chế Lockout built-in của Identity |
+| LockoutEnd | TIMESTAMPTZ | | | ✓ | NULL | | Identity tự set khi đăng nhập sai nhiều lần |
+| SecurityStamp, ConcurrencyStamp, PhoneNumber, ... | — | | | | | | Các cột chuẩn khác của `IdentityUser`, không liệt kê chi tiết |
+| **FullName** | VARCHAR(150) | | | ✗ | | | Cột mở rộng trong `ApplicationUser` |
+| **Phone** | VARCHAR(20) | | | ✓ | NULL | | Cột mở rộng — tách riêng `PhoneNumber` chuẩn Identity nếu cần validate khác |
+| **IsLocked** | BOOLEAN | | | ✗ | false | | Cột mở rộng — khóa thủ công bởi Admin (khác với `LockoutEnd` tự động của Identity), dùng cho FR-USER-004/BR-07 |
+| **CreatedAt** | TIMESTAMPTZ | | | ✗ | now() | | Cột mở rộng |
+
+Bảng liên kết `AspNetUserRoles` (`UserId`, `RoleId`) do Identity tự sinh, thể hiện quan hệ N-N User–Role (đồ án chỉ dùng đúng 1 role/user).
+
+Index: các index mặc định của Identity (`EmailIndex`, `UserNameIndex`).
 
 ### 13.3 Bảng `categories`
 
@@ -680,7 +692,7 @@ Index: `idx_product_images_product_id`.
 | Column | Type | PK | FK | Nullable | Default | Unique | Ghi chú |
 |---|---|---|---|---|---|---|---|
 | id | BIGSERIAL | ✓ | | ✗ | | | |
-| user_id | BIGINT | | → users.id | ✓ | NULL | ✓ | duy nhất 1 cart/user khi không NULL |
+| user_id | VARCHAR(450) | | → AspNetUsers.Id | ✓ | NULL | ✓ | duy nhất 1 cart/user khi không NULL |
 | session_id | UUID | | | ✓ | NULL | ✓ | duy nhất 1 cart/session khi không NULL |
 | created_at | TIMESTAMPTZ | | | ✗ | now() | | |
 | updated_at | TIMESTAMPTZ | | | ✗ | now() | | dùng cho job dọn dẹp 7 ngày |
@@ -709,7 +721,7 @@ Phục vụ FR-REPORT-004 (thống kê sản phẩm được thêm giỏ nhiều
 |---|---|---|---|---|---|---|---|
 | id | BIGSERIAL | ✓ | | ✗ | | | |
 | product_id | BIGINT | | → products.id | ✗ | | | |
-| user_id | BIGINT | | → users.id | ✓ | NULL | | NULL nếu Guest |
+| user_id | VARCHAR(450) | | → AspNetUsers.Id | ✓ | NULL | | NULL nếu Guest |
 | session_id | UUID | | | ✓ | NULL | | NULL nếu User |
 | action | VARCHAR(20) | | | ✗ | | | 'add' / 'remove' |
 | quantity | INTEGER | | | ✗ | | | |
@@ -722,7 +734,7 @@ Index: `idx_cart_activity_logs_product_id`, `idx_cart_activity_logs_created_at`.
 | Column | Type | PK | FK | Nullable | Default | Unique | Ghi chú |
 |---|---|---|---|---|---|---|---|
 | id | BIGSERIAL | ✓ | | ✗ | | | |
-| actor_user_id | BIGINT | | → users.id | ✓ | NULL | | NULL nếu hệ thống tự động |
+| actor_user_id | VARCHAR(450) | | → AspNetUsers.Id | ✓ | NULL | | NULL nếu hệ thống tự động |
 | action | VARCHAR(50) | | | ✗ | | | vd 'PRODUCT_CREATE', 'USER_LOCK' |
 | entity_type | VARCHAR(50) | | | ✗ | | | 'Product' / 'Category' / 'User' |
 | entity_id | BIGINT | | | ✓ | NULL | | |
@@ -733,7 +745,7 @@ Index: `idx_audit_logs_entity`, `idx_audit_logs_created_at`.
 
 ### 13.10 Quan hệ trọng tâm
 
-- **User – Role**: N-1. Mỗi User thuộc đúng 1 Role. Role không bị xóa (dữ liệu tĩnh, seed sẵn 2 dòng).
+- **User – Role**: N-1 (thể hiện qua `AspNetUserRoles` do Identity quản lý). Mỗi User thuộc đúng 1 Role trong đồ án này. Role không bị xóa (dữ liệu tĩnh, seed sẵn 2 dòng).
 - **Category – Product**: 1-N. Mỗi Product thuộc đúng 1 Category (`ON DELETE RESTRICT` — không cho xóa Category còn Product, khớp BR-03).
 - **Cart – Cart Item**: 1-N. Xóa Cart → xóa toàn bộ Cart Item (`ON DELETE CASCADE`).
 - **Product – Cart Item**: 1-N. Xóa Product là soft delete nên không kích hoạt cascade; `cart_items` giữ nguyên `product_id`, tầng Service tự lọc sản phẩm không khả dụng khi hiển thị (BR-11).
@@ -744,29 +756,35 @@ Index: `idx_audit_logs_entity`, `idx_audit_logs_created_at`.
 
 ```mermaid
 erDiagram
-    ROLES ||--o{ USERS : "has"
-    USERS ||--o| CARTS : "owns"
+    ASPNETROLES ||--o{ ASPNETUSERROLES : "assigned via"
+    ASPNETUSERS ||--o{ ASPNETUSERROLES : "assigned via"
+    ASPNETUSERS ||--o| CARTS : "owns"
     CATEGORIES ||--o{ PRODUCTS : "contains"
     PRODUCTS ||--o{ PRODUCT_IMAGES : "has"
     CARTS ||--o{ CART_ITEMS : "contains"
     PRODUCTS ||--o{ CART_ITEMS : "referenced by"
     PRODUCTS ||--o{ CART_ACTIVITY_LOGS : "tracked in"
-    USERS ||--o{ CART_ACTIVITY_LOGS : "performs"
-    USERS ||--o{ AUDIT_LOGS : "performs"
+    ASPNETUSERS ||--o{ CART_ACTIVITY_LOGS : "performs"
+    ASPNETUSERS ||--o{ AUDIT_LOGS : "performs"
 
-    ROLES {
-        smallint id PK
-        varchar name UK
+    ASPNETROLES {
+        varchar Id PK
+        varchar Name UK
     }
-    USERS {
-        bigint id PK
-        varchar email UK
-        varchar password_hash
-        varchar full_name
-        varchar phone
-        smallint role_id FK
-        boolean is_locked
-        timestamptz created_at
+    ASPNETUSERS {
+        varchar Id PK
+        varchar Email UK
+        text PasswordHash
+        varchar FullName
+        varchar Phone
+        boolean IsLocked
+        boolean LockoutEnabled
+        timestamptz LockoutEnd
+        timestamptz CreatedAt
+    }
+    ASPNETUSERROLES {
+        varchar UserId PK_FK
+        varchar RoleId PK_FK
     }
     CATEGORIES {
         bigint id PK
@@ -793,7 +811,7 @@ erDiagram
     }
     CARTS {
         bigint id PK
-        bigint user_id FK "nullable"
+        varchar user_id FK "nullable"
         uuid session_id "nullable"
     }
     CART_ITEMS {
@@ -805,14 +823,14 @@ erDiagram
     CART_ACTIVITY_LOGS {
         bigint id PK
         bigint product_id FK
-        bigint user_id FK "nullable"
+        varchar user_id FK "nullable"
         uuid session_id "nullable"
         varchar action
         integer quantity
     }
     AUDIT_LOGS {
         bigint id PK
-        bigint actor_user_id FK "nullable"
+        varchar actor_user_id FK "nullable"
         varchar action
         varchar entity_type
         bigint entity_id
@@ -822,179 +840,197 @@ erDiagram
 
 ---
 
-## 15. API Specification
+## 15. API Specification (Controller / Action)
 
-Base path: `/api`. Định dạng chung: xem Chương 12 & 19.
+Theo kiến trúc MVC (DD-01): mỗi mục dưới đây ghi rõ action trả **View** (Razor, full page) hay **JSON** (gọi qua AJAX/Fetch — Chương 12). Định dạng response JSON & mã lỗi: xem Chương 19.
 
-### 15.1 Authentication
+### 15.1 AccountController (Authentication — dùng Identity)
 
-#### POST /api/auth/register
-- **Auth required**: Không | **Role**: — 
-- **Request**: `{ "email": "a@b.com", "password": "Abc12345", "fullName": "Nguyễn Văn A" }`
-- **Response 201**: `{ "success": true, "data": { "id": 1, "email": "a@b.com", "fullName": "Nguyễn Văn A" } }`
-- **Validation**: email đúng định dạng; password ≥ 8 ký tự, có hoa + số (BR-06); fullName bắt buộc
-- **Error cases**: 409 (email đã tồn tại — BR-04), 422 (sai định dạng/thiếu trường)
+#### GET /Account/Register — **View**
+- Hiển thị form đăng ký (Razor + Bootstrap)
 
-#### POST /api/auth/login
+#### POST /Account/Register — **View** (redirect) hoặc **JSON** nếu gọi qua AJAX
+- **Auth required**: Không | **Role**: —
+- **Request (form/JSON)**: `{ "email": "a@b.com", "password": "Abc12345", "fullName": "Nguyễn Văn A" }`
+- Xử lý: `UserManager<ApplicationUser>.CreateAsync(user, password)`, gán role `User` qua `UserManager.AddToRoleAsync`
+- **Thành công**: redirect `/Account/Login` kèm thông báo (hoặc `{ "success": true }` nếu AJAX)
+- **Validation**: email đúng định dạng; password ≥ 8 ký tự, có hoa + số (BR-06, khớp `IdentityOptions.Password`); fullName bắt buộc
+- **Error cases**: email đã tồn tại — BR-04 (hiển thị lỗi trên View hoặc trả 409 JSON), 422 (sai định dạng/thiếu trường)
+
+#### GET /Account/Login — **View**
+- Hiển thị form đăng nhập
+
+#### POST /Account/Login — **View** (redirect) hoặc **JSON** nếu gọi qua AJAX
 - **Auth required**: Không | **Role**: —
 - **Request**: `{ "email": "a@b.com", "password": "Abc12345" }`
-- **Response 200**: `{ "success": true, "data": { "id": 1, "email": "a@b.com", "fullName": "...", "role": "User" } }` + `Set-Cookie`
-- **Validation**: 2 trường bắt buộc
-- **Error cases**: 401 (sai email/password), 403 (tài khoản bị khóa — BR-07)
+- Xử lý: `SignInManager<ApplicationUser>.PasswordSignInAsync(...)` — Identity tự set Cookie xác thực; sau đó gọi `CartService.MergeGuestCart` (FR-CART-007)
+- **Thành công**: redirect trang chủ / trang trước đó (hoặc `{ "success": true, "data": { user, cart } }` nếu AJAX)
+- **Error cases**: sai email/password → hiển thị lỗi chung "Email hoặc mật khẩu không đúng" (401 nếu AJAX); tài khoản bị khóa (`IsLocked=true` hoặc Identity Lockout) → 403 "Tài khoản đã bị khóa" (BR-07)
 
-#### POST /api/auth/logout
+#### POST /Account/Logout
 - **Auth required**: Có | **Role**: User, Admin
-- **Request**: (không body)
-- **Response 200**: `{ "success": true }` + hủy Cookie/Session
-- **Error cases**: 401 (chưa đăng nhập)
+- Xử lý: `SignInManager.SignOutAsync()`
+- **Thành công**: redirect trang chủ
 
-### 15.2 Products
+### 15.1b HomeController
 
-#### GET /api/products
+#### GET /Home/Index — **View**
+- **Auth required**: Không | **Role**: — (public)
+- Render trang chủ: sản phẩm nổi bật (đọc cache `products:featured`) + sản phẩm mới nhất (đọc cache `products:latest`) — khớp FR-BROWSE-001
+
+### 15.2 ProductController (Public)
+
+#### GET /Product/Index — **View**
 - **Auth required**: Không | **Role**: — (public)
 - **Query**: `search`, `category`, `minPrice`, `maxPrice`, `sort` (`price_asc`\|`price_desc`\|`newest`), `page`, `pageSize`
-- **Response 200**: danh sách phân trang (chỉ sản phẩm `is_active=true, is_deleted=false`)
-- **Error cases**: 400 (tham số phân trang không hợp lệ, vd `page < 1`)
+- Render danh sách phân trang (chỉ sản phẩm `IsActive=true, IsDeleted=false`) — load lần đầu (full page)
+- **Error cases**: tham số phân trang không hợp lệ (vd `page < 1`) → dùng giá trị mặc định, không lỗi 400 cho View
 
-#### GET /api/products/featured
+#### GET /Product/Search, /Product/Filter, /Product/Sort, /Product/Page — **JSON** (AJAX, xem Chương 12)
+- Cùng tham số như `/Product/Index`, trả `JsonResult` danh sách phân trang để cập nhật lại grid sản phẩm không reload
+
+#### GET /Product/Featured — **JSON**
+- **Response**: danh sách sản phẩm `IsFeatured=true` (đọc từ cache `products:featured`)
+
+#### GET /Product/Latest — **JSON**
+- **Response**: 10 sản phẩm mới nhất (đọc từ cache `products:latest`)
+
+#### GET /Product/Detail/{id} — **View**
 - **Auth required**: Không | **Role**: —
-- **Response 200**: danh sách sản phẩm `is_featured=true` (đọc từ cache `products:featured`)
+- Render chi tiết sản phẩm kèm `Images[]`
+- **Error cases**: không tồn tại/đã xóa/Inactive với Guest,User → View 404 (Admin xem riêng qua `/Admin/Product/Detail/{id}`)
 
-#### GET /api/products/latest
-- **Auth required**: Không | **Role**: —
-- **Response 200**: 10 sản phẩm mới nhất (đọc từ cache `products:latest`)
+### 15.2b Admin\ProductController
 
-#### GET /api/products/{id}
-- **Auth required**: Không | **Role**: —
-- **Response 200**: chi tiết sản phẩm kèm `images[]`
-- **Error cases**: 404 (không tồn tại, đã xóa, hoặc Inactive với Guest/User — Admin xem riêng qua `/api/admin/products/{id}`)
+#### GET /Admin/Product/Index — **View**
+- **Auth required**: Có | **Role**: Admin
+- **Query**: `search`, `category`, `status`, `page`, `pageSize` (bao gồm cả Inactive, không gồm `IsDeleted=true`)
 
-#### POST /api/admin/products
+#### POST /Admin/Product/Create — **JSON** (submit form trong modal, AJAX)
 - **Auth required**: Có | **Role**: Admin
 - **Request**: `{ "sku", "name", "categoryId", "shortDescription", "description", "price", "stockQuantity", "isFeatured", "imageUrls": [] }`
-- **Response 201**: sản phẩm vừa tạo
+- **Response**: sản phẩm vừa tạo
 - **Validation**: sku unique (BR-05), price ≥ 0 (BR-09), stockQuantity ≥ 0 (BR-10), categoryId phải tồn tại và active
 - **Error cases**: 409 (sku trùng), 422 (thiếu/sai trường), 404 (categoryId không tồn tại)
 - **Side effect**: invalidate cache `products:featured`, `products:latest`; ghi `audit_logs`
 
-#### PUT /api/admin/products/{id}
+#### POST /Admin/Product/Edit/{id} — **JSON**
 - **Auth required**: Có | **Role**: Admin
-- **Request**: giống POST (full update)
-- **Response 200**: sản phẩm sau cập nhật
+- **Request**: giống Create (full update)
 - **Error cases**: 404 (không tồn tại), 409 (sku trùng với sản phẩm khác), 422
 - **Side effect**: invalidate cache liên quan; ghi `audit_logs`
 
-#### DELETE /api/admin/products/{id}
+#### POST /Admin/Product/Delete/{id} — **JSON**
 - **Auth required**: Có | **Role**: Admin
-- **Response 200**: `{ "success": true }` (soft delete: `is_deleted=true`)
+- **Response**: `{ "success": true }` (soft delete: `IsDeleted=true`)
 - **Error cases**: 404
 - **Side effect**: invalidate cache liên quan; ghi `audit_logs`
 
-#### PATCH /api/admin/products/{id}/status
+#### POST /Admin/Product/ToggleStatus/{id} — **JSON**
 - **Auth required**: Có | **Role**: Admin
 - **Request**: `{ "isActive": false }`
-- **Response 200**: sản phẩm sau cập nhật
 - **Error cases**: 404
 - **Side effect**: invalidate cache liên quan; ghi `audit_logs`
 
-#### GET /api/admin/products
-- **Auth required**: Có | **Role**: Admin
-- **Query**: `search`, `category`, `status`, `page`, `pageSize` (bao gồm cả Inactive, không gồm `is_deleted=true`)
-- **Response 200**: danh sách phân trang
+### 15.3 CategoryController
 
-### 15.3 Categories
+#### GET /Category/GetActive — **JSON**
+- **Auth required**: Không | **Role**: — (chỉ trả `IsActive=true`, đọc cache `categories:active`) — dùng cho menu/dropdown filter
 
-#### GET /api/categories
-- **Auth required**: Không | **Role**: — (chỉ trả `is_active=true`, đọc cache `categories:active`)
+### 15.3b Admin\CategoryController
 
-#### GET /api/admin/categories
+#### GET /Admin/Category/Index — **View**
 - **Auth required**: Có | **Role**: Admin (trả tất cả, kể cả Inactive)
 
-#### POST /api/admin/categories
+#### POST /Admin/Category/Create — **JSON**
 - **Request**: `{ "name", "slug", "description" }`
-- **Response 201** | **Validation**: name/slug unique | **Error**: 409 (trùng), 422
+- **Validation**: name/slug unique | **Error**: 409 (trùng), 422
 - **Side effect**: invalidate cache `categories:active`; ghi `audit_logs`
 
-#### PUT /api/admin/categories/{id}
-- **Response 200** | **Error**: 404, 409, 422
+#### POST /Admin/Category/Edit/{id} — **JSON**
+- **Error**: 404, 409, 422
 - **Side effect**: invalidate cache `categories:active`; ghi `audit_logs`
 
-#### DELETE /api/admin/categories/{id}
-- **Response 200**: `{ "success": true }`
+#### POST /Admin/Category/Delete/{id} — **JSON**
+- **Response**: `{ "success": true }`
 - **Error cases**: 404, **409 nếu còn sản phẩm liên kết (BR-03)** — response kèm `{ "code": "CATEGORY_HAS_PRODUCTS", "productCount": 12 }`
 - **Side effect**: invalidate cache `categories:active`; ghi `audit_logs`
 
-#### PATCH /api/admin/categories/{id}/status
-- **Request**: `{ "isActive": true }` | **Response 200** | **Error**: 404
+#### POST /Admin/Category/ToggleStatus/{id} — **JSON**
+- **Request**: `{ "isActive": true }` | **Error**: 404
 - **Side effect**: invalidate cache `categories:active`
 
-### 15.4 Cart
+### 15.4 CartController
 
-#### GET /api/cart
+#### GET /Cart/Index — **View**
 - **Auth required**: Không bắt buộc đăng nhập (Guest dùng Session cookie) | **Role**: Guest, User
-- **Response 200**: `{ "items": [...], "totalQuantity": 5, "subtotal": 1250000 }`
+- Render trang giỏ hàng: `{ "items": [...], "totalQuantity": 5, "subtotal": 1250000 }`
 
-#### POST /api/cart/items
+#### POST /Cart/AddItem — **JSON**
 - **Auth required**: Không bắt buộc | **Role**: Guest, User
 - **Request**: `{ "productId": 10, "quantity": 1 }`
-- **Response 201**: giỏ hàng sau cập nhật
+- **Response**: giỏ hàng sau cập nhật
 - **Validation**: quantity > 0; sản phẩm phải Active & còn tồn kho (BR-01, BR-02)
 - **Error cases**: 404 (sản phẩm không tồn tại), 409 (sản phẩm Inactive/hết hàng, hoặc quantity vượt tồn kho)
 - **Side effect**: ghi `cart_activity_logs` (action='add')
 
-#### PUT /api/cart/items/{id}
+#### POST /Cart/UpdateItem/{id} — **JSON**
 - **Request**: `{ "quantity": 3 }`
-- **Response 200**: giỏ hàng sau cập nhật
-- **Validation**: quantity ≥ 1 (giảm về 0 → dùng DELETE thay vì PUT); không vượt tồn kho
+- **Response**: giỏ hàng sau cập nhật
+- **Validation**: quantity ≥ 1 (giảm về 0 → dùng `RemoveItem`); không vượt tồn kho
 - **Error cases**: 404 (item không tồn tại hoặc không thuộc giỏ hiện tại), 409 (vượt tồn kho)
 
-#### DELETE /api/cart/items/{id}
-- **Response 200**: giỏ hàng sau cập nhật
+#### POST /Cart/RemoveItem/{id} — **JSON**
+- **Response**: giỏ hàng sau cập nhật
 - **Error cases**: 404
 - **Side effect**: ghi `cart_activity_logs` (action='remove')
 
-#### DELETE /api/cart
-- **Response 200**: `{ "success": true }` (xóa toàn bộ `cart_items` của giỏ hiện tại)
+#### POST /Cart/Clear — **JSON**
+- **Response**: `{ "success": true }` (xóa toàn bộ `cart_items` của giỏ hiện tại)
 
-### 15.5 Users
+### 15.5 UserController (Profile) & Admin\UserController
 
-#### GET /api/users/me
+#### GET /User/Profile — **View**
 - **Auth required**: Có | **Role**: User, Admin
-- **Response 200**: thông tin cá nhân (không gồm password_hash)
+- Hiển thị thông tin cá nhân (không gồm PasswordHash)
 
-#### PUT /api/users/me
-- **Request**: `{ "fullName", "phone" }` | **Response 200** | **Validation**: fullName bắt buộc
+#### POST /User/UpdateProfile — **JSON**
+- **Request**: `{ "fullName", "phone" }` | **Validation**: fullName bắt buộc
 - **Error cases**: 422
 
-#### POST /api/users/me/change-password
+#### POST /User/ChangePassword — **JSON**
 - **Request**: `{ "oldPassword", "newPassword" }`
-- **Response 200**: `{ "success": true }`
+- Xử lý: `UserManager.ChangePasswordAsync(user, oldPassword, newPassword)`
 - **Validation**: oldPassword đúng; newPassword đạt policy (BR-06)
 - **Error cases**: 401 (oldPassword sai), 422 (newPassword không đạt policy)
 
-#### GET /api/admin/users
+#### GET /Admin/User/Index — **View**
 - **Auth required**: Có | **Role**: Admin
 - **Query**: `search`, `role`, `status`, `page`, `pageSize`
-- **Response 200**: danh sách phân trang
 
-#### GET /api/admin/users/{id}
-- **Response 200**: chi tiết user | **Error**: 404
+#### GET /Admin/User/Detail/{id} — **View**
+- **Error**: 404
 
-#### PATCH /api/admin/users/{id}/lock
+#### POST /Admin/User/Lock/{id} — **JSON**
 - **Request**: `{ "isLocked": true }`
-- **Response 200** | **Error**: 404, **409 nếu Admin tự khóa chính mình (BR-14)**
+- **Error**: 404, **409 nếu Admin tự khóa chính mình (BR-14)**
 - **Side effect**: ghi `audit_logs`
 
-#### PATCH /api/admin/users/{id}/role
-- **Request**: `{ "roleId": 2 }`
-- **Response 200** | **Error**: 404, 422 (roleId không tồn tại)
+#### POST /Admin/User/ChangeRole/{id} — **JSON**
+- **Request**: `{ "roleName": "Admin" }`
+- Xử lý: `UserManager.RemoveFromRoleAsync` + `UserManager.AddToRoleAsync`
+- **Error**: 404, 422 (role không tồn tại)
 - **Side effect**: ghi `audit_logs`
 
-### 15.6 Dashboard & Reports
+### 15.6 Admin\DashboardController & Admin\ReportController
 
-#### GET /api/admin/dashboard/summary
+#### GET /Admin/Dashboard/Index — **View**
 - **Auth required**: Có | **Role**: Admin
-- **Response 200**:
+- Render trang dashboard, dữ liệu ban đầu đọc từ cache `admin:dashboard:summary` (TTL 5 phút)
+
+#### GET /Admin/Dashboard/Summary — **JSON**
+- **Auth required**: Có | **Role**: Admin
+- **Response**:
 ```json
 {
   "success": true,
@@ -1009,36 +1045,37 @@ Base path: `/api`. Định dạng chung: xem Chương 12 & 19.
   }
 }
 ```
-(Đọc từ cache `admin:dashboard:summary`, TTL 5 phút)
 
-#### GET /api/admin/reports/cart-top-products
+#### GET /Admin/Report/CartTopProducts — **View** (kèm dữ liệu ban đầu) + **JSON** khi đổi khoảng thời gian qua AJAX
 - **Auth required**: Có | **Role**: Admin
 - **Query**: `from`, `to` (khoảng thời gian, mặc định 30 ngày gần nhất)
-- **Response 200**: Top 10 sản phẩm theo số lần `action='add'` trong `cart_activity_logs`
+- **Response**: Top 10 sản phẩm theo số lần `action='add'` trong `cart_activity_logs`
 
 ---
 
 ## 16. UI/UX Requirements
 
+Toàn bộ giao diện dựng bằng **Razor View (.cshtml) + Bootstrap**, dùng chung `_Layout.cshtml` (Public) và layout riêng cho khu vực Admin (`Areas/Admin/Views/Shared/_AdminLayout.cshtml` — **[Recommendation]** tổ chức Admin thành 1 Area riêng của ASP.NET Core MVC). Partial View/`ViewComponent` dùng cho các khối lặp lại (Product Card, Cart Badge, Pagination).
+
 ### 16.1 Public Site
 
-- **Header**: Logo, thanh Search (Fetch API), icon Giỏ hàng (badge số lượng), menu Đăng nhập/Đăng ký hoặc tên User
-- **Navigation**: Danh sách danh mục (lấy từ cache `categories:active`)
-- **Product Listing**: Grid sản phẩm, filter sidebar (danh mục, khoảng giá), dropdown sort, phân trang
-- **Product Detail**: Ảnh (gallery nếu nhiều ảnh), tên, giá, mô tả, tồn kho, nút "Thêm vào giỏ" (disable nếu hết hàng/Inactive)
-- **Category Page**: Danh sách sản phẩm đã lọc theo danh mục
-- **Cart Page**: Bảng item (ảnh, tên, đơn giá, số lượng +/-, thành tiền, nút xóa), tổng tạm tính, nút "Xóa toàn bộ giỏ"
+- **Header** (`_Layout.cshtml`): Logo, thanh Search (submit form + AJAX gợi ý), icon Giỏ hàng (badge số lượng, cập nhật qua AJAX sau mỗi thao tác giỏ hàng), menu Đăng nhập/Đăng ký hoặc tên User (theo `User.Identity.IsAuthenticated`)
+- **Navigation**: Danh sách danh mục (lấy từ cache `categories:active`, render trong `_Layout.cshtml` hoặc qua `ViewComponent`)
+- **Product Listing** (`/Product/Index`): Grid sản phẩm (Bootstrap `row`/`col`), filter sidebar (danh mục, khoảng giá), dropdown sort, phân trang — filter/sort/phân trang cập nhật qua AJAX (Chương 12), không reload
+- **Product Detail** (`/Product/Detail/{id}`): Ảnh (gallery nếu nhiều ảnh), tên, giá, mô tả, tồn kho, nút "Thêm vào giỏ" (disable nếu hết hàng/Inactive, gọi AJAX `/Cart/AddItem`)
+- **Category Page**: Danh sách sản phẩm đã lọc theo danh mục (dùng lại View `/Product/Index` với query `category=`)
+- **Cart Page** (`/Cart/Index`): Bảng item (ảnh, tên, đơn giá, số lượng +/-, thành tiền, nút xóa — thao tác qua AJAX), tổng tạm tính, nút "Xóa toàn bộ giỏ"
 - **Footer**: Thông tin liên hệ, liên kết cơ bản
 
 ### 16.2 Admin Panel
 
-- **Login**: Form riêng `/admin/login`, dùng chung cơ chế Cookie Auth với kiểm tra role Admin
-- **Dashboard**: Các thẻ số liệu (KPI card) + biểu đồ (Chart.js hoặc tương đương) cho sản phẩm theo danh mục
-- **Product Management**: Bảng danh sách + modal thêm/sửa (dùng Fetch API, không reload trang), upload ảnh
-- **Category Management**: Bảng danh sách + modal thêm/sửa
-- **User Management**: Bảng danh sách, filter theo role/trạng thái, nút khóa/mở khóa
-- **Reports**: Biểu đồ + bảng số liệu (sản phẩm theo danh mục, top sản phẩm thêm giỏ)
-- **Profile**: Form xem/sửa thông tin cá nhân Admin, đổi mật khẩu
+- **Login**: Dùng chung View `/Account/Login` của Identity, sau khi đăng nhập kiểm tra role Admin để cho vào khu vực `/Admin/**`; truy cập `/Admin/**` khi chưa đủ quyền → chuyển hướng trang từ chối/403 (không lộ dữ liệu)
+- **Dashboard** (`/Admin/Dashboard/Index`): Các thẻ số liệu (KPI card, Bootstrap Card) + biểu đồ (Chart.js hoặc tương đương) cho sản phẩm theo danh mục, số liệu refresh qua AJAX (`/Admin/Dashboard/Summary`)
+- **Product Management** (`/Admin/Product/Index`): Bảng danh sách (Bootstrap Table) + modal thêm/sửa (Bootstrap Modal, submit qua AJAX, không reload trang danh sách), upload ảnh
+- **Category Management** (`/Admin/Category/Index`): Bảng danh sách + modal thêm/sửa
+- **User Management** (`/Admin/User/Index`): Bảng danh sách, filter theo role/trạng thái, nút khóa/mở khóa
+- **Reports** (`/Admin/Report/CartTopProducts`): Biểu đồ + bảng số liệu (sản phẩm theo danh mục, top sản phẩm thêm giỏ)
+- **Profile** (`/User/Profile`): Form xem/sửa thông tin cá nhân Admin, đổi mật khẩu
 
 ---
 
@@ -1085,9 +1122,9 @@ Base path: `/api`. Định dạng chung: xem Chương 12 & 19.
 | HTTP Status | Khi nào dùng | Ví dụ |
 |---|---|---|
 | 400 Bad Request | Request sai cú pháp, tham số không hợp lệ | `page=-1` |
-| 401 Unauthorized | Chưa đăng nhập nhưng endpoint yêu cầu | Gọi `/api/users/me` khi chưa login |
-| 403 Forbidden | Đã đăng nhập nhưng không đủ quyền, hoặc tài khoản bị khóa | User gọi `/api/admin/products` |
-| 404 Not Found | Resource không tồn tại | `GET /api/products/9999` |
+| 401 Unauthorized | Chưa đăng nhập nhưng action yêu cầu | Gọi AJAX `/User/Profile` khi chưa login |
+| 403 Forbidden | Đã đăng nhập nhưng không đủ quyền, hoặc tài khoản bị khóa | User gọi `/Admin/Product/Create` |
+| 404 Not Found | Resource không tồn tại | `GET /Product/Detail/9999` |
 | 409 Conflict | Vi phạm ràng buộc nghiệp vụ (trùng unique, xóa category còn sản phẩm) | SKU trùng |
 | 422 Unprocessable Entity | Validation lỗi (sai định dạng, thiếu trường bắt buộc) | password quá ngắn |
 | 429 Too Many Requests | Vượt rate limit | Đăng nhập sai quá 5 lần/phút |
@@ -1138,7 +1175,7 @@ Base path: `/api`. Định dạng chung: xem Chương 12 & 19.
 | Quản lý người dùng (xem/khóa/đổi role) | ✗ | ✗ | ✓ |
 | Xem Dashboard | ✗ | ✗ | ✓ |
 | Xem báo cáo thống kê | ✗ | ✗ | ✓ |
-| Truy cập `/api/admin/**` | ✗ | ✗ | ✓ |
+| Truy cập `/Admin/**` | ✗ | ✗ | ✓ |
 
 ---
 
@@ -1161,32 +1198,40 @@ Nguyên tắc: **Backend luôn validate lại toàn bộ**, kể cả khi Fronte
 
 ## 23. System Architecture
 
-Kiến trúc 3-layer đơn giản (đúng nguyên tắc "không tạo Repository/Service không cần thiết" — ở đây Service là cần thiết vì có business logic thực sự: merge cart, cache invalidation, validate tồn kho):
+Kiến trúc **MVC** kết hợp 3-layer phía sau Controller (đúng nguyên tắc "không tạo Repository/Service không cần thiết" — ở đây Service là cần thiết vì có business logic thực sự: merge cart, cache invalidation, validate tồn kho):
 
 ```mermaid
 flowchart LR
-    subgraph Presentation
-        Ctrl["Controllers<br/>(AuthController, ProductController,<br/>CategoryController, CartController,<br/>UserController, AdminDashboardController)"]
+    subgraph Presentation["Presentation (MVC)"]
+        View["Views (.cshtml)<br/>Razor + Bootstrap"]
+        Ctrl["Controllers<br/>(AccountController*, ProductController,<br/>CategoryController, CartController,<br/>UserController, Admin/*Controller)"]
+    end
+    subgraph Identity["ASP.NET Core Identity"]
+        SIM["SignInManager / UserManager /<br/>RoleManager"]
     end
     subgraph Business
-        Svc["Services<br/>(AuthService, ProductService,<br/>CategoryService, CartService,<br/>UserService, DashboardService)"]
+        Svc["Services<br/>(ProductService,<br/>CategoryService, CartService,<br/>UserService, DashboardService)"]
         Cache["IMemoryCache"]
     end
     subgraph Data
-        DbCtx["AppDbContext (EF Core)"]
+        DbCtx["AppDbContext<br/>(EF Core, kế thừa IdentityDbContext)"]
     end
     DB[("PostgreSQL")]
 
+    Ctrl --> View
+    Ctrl --> SIM
     Ctrl --> Svc
+    SIM --> DbCtx
     Svc --> Cache
     Svc --> DbCtx
     DbCtx --> DB
 ```
+*`AccountController` dùng trực tiếp `SignInManager`/`UserManager` của Identity thay vì 1 `AuthService` tự viết.
 
-- **Controllers**: nhận request, validate model binding (Data Annotations), gọi Service, map response
+- **Controllers**: nhận request, validate model binding (Data Annotations), gọi Service (hoặc `SignInManager`/`UserManager` cho Authentication), trả `View()` hoặc `JsonResult`
 - **Services**: chứa business logic (kiểm tra BR-01..BR-15), điều phối cache, gọi DbContext
-- **AppDbContext**: EF Core, không cần Repository pattern riêng vì DbContext + LINQ đã đủ trừu tượng cho quy mô đồ án
-- Cross-cutting: Middleware xử lý exception toàn cục (chương 19), Middleware Authentication/Authorization (chương 9)
+- **AppDbContext**: EF Core, kế thừa `IdentityDbContext<ApplicationUser>` để tích hợp bảng Identity cùng các bảng nghiệp vụ; không cần Repository pattern riêng vì DbContext + LINQ đã đủ trừu tượng cho quy mô đồ án
+- Cross-cutting: Middleware xử lý exception toàn cục (chương 19), Identity Middleware (Authentication/Authorization — chương 9)
 
 ---
 
@@ -1253,12 +1298,12 @@ flowchart TB
 **FR-AUTH-002 – Login**
 > Given tài khoản tồn tại, đúng password, không bị khóa
 > When User submit form đăng nhập
-> Then hệ thống tạo Session, set Cookie, trả về 200 kèm thông tin user.
+> Then Identity tạo Cookie Authentication, trả về 200 kèm thông tin user.
 
 **FR-AUTH-005 – Locked account**
-> Given tài khoản có is_locked = true
+> Given tài khoản có IsLocked = true
 > When User đăng nhập đúng email/password
-> Then hệ thống trả về 403 và không tạo Session.
+> Then hệ thống trả về 403 và không tạo Cookie Authentication.
 
 **FR-PRODUCT-001 – Create Product**
 > Given Admin đã đăng nhập, dữ liệu hợp lệ, SKU chưa tồn tại
@@ -1270,9 +1315,9 @@ flowchart TB
 > When Admin xóa category đó
 > Then hệ thống trả về 409 kèm số lượng sản phẩm liên quan, không xóa category.
 
-**FR-AUTHZ-002 – Unauthorized access to admin API**
+**FR-AUTHZ-002 – Unauthorized access to admin action**
 > Given User đã đăng nhập (role User, không phải Admin)
-> When User gọi trực tiếp `POST /api/admin/products`
+> When User gọi trực tiếp `POST /Admin/Product/Create`
 > Then hệ thống trả về 403, không thực hiện thao tác.
 
 **FR-DASH-001 – Dashboard summary cache**
@@ -1284,20 +1329,20 @@ flowchart TB
 
 ## 27. Traceability Matrix
 
-| Requirement ID | Feature | Use Case | API | Database | Test Case |
+| Requirement ID | Feature | Use Case | Controller / Action | Database | Test Case |
 |---|---|---|---|---|---|
-| FR-AUTH-001 | Đăng ký | UC-03 | POST /api/auth/register | users | TC-AUTH-01 |
-| FR-AUTH-002 | Đăng nhập | UC-04 | POST /api/auth/login | users | TC-AUTH-02 |
-| FR-AUTH-003 | Đăng xuất | UC-04 | POST /api/auth/logout | — (Session) | TC-AUTH-03 |
-| FR-AUTHZ-001 | Kiểm tra quyền Admin | — | Mọi `/api/admin/**` | users, roles | TC-AUTHZ-01 |
-| FR-PRODUCT-001..006 | Quản lý sản phẩm | UC-05 | `/api/admin/products/**` | products, product_images | TC-PRODUCT-01..06 |
-| FR-CATEGORY-001..005 | Quản lý danh mục | UC-05 (tương tự) | `/api/admin/categories/**` | categories | TC-CATEGORY-01..05 |
-| FR-BROWSE-001..006 | Xem/tìm/lọc/sắp xếp | UC-01 | GET /api/products, /featured, /latest | products, categories | TC-BROWSE-01..06 |
-| FR-CART-001..006 | Giỏ hàng | UC-02 | `/api/cart/**` | carts, cart_items | TC-CART-01..06 |
-| FR-CART-007 | Merge giỏ hàng khi login | UC-04 | POST /api/auth/login | carts, cart_items | TC-CART-07 |
-| FR-USER-001..008 | Quản lý người dùng / profile | — | `/api/admin/users/**`, `/api/users/me/**` | users | TC-USER-01..08 |
-| FR-DASH-001..004 | Dashboard | UC-06 | GET /api/admin/dashboard/summary | products, categories, users | TC-DASH-01..04 |
-| FR-REPORT-001..004 | Báo cáo | — | `/api/admin/reports/**` | products, cart_activity_logs | TC-REPORT-01..04 |
+| FR-AUTH-001 | Đăng ký | UC-03 | POST /Account/Register | AspNetUsers | TC-AUTH-01 |
+| FR-AUTH-002 | Đăng nhập | UC-04 | POST /Account/Login | AspNetUsers | TC-AUTH-02 |
+| FR-AUTH-003 | Đăng xuất | UC-04 | POST /Account/Logout | — (Cookie Identity) | TC-AUTH-03 |
+| FR-AUTHZ-001 | Kiểm tra quyền Admin | — | Mọi `/Admin/**` | AspNetUsers, AspNetRoles | TC-AUTHZ-01 |
+| FR-PRODUCT-001..006 | Quản lý sản phẩm | UC-05 | `/Admin/Product/**` | products, product_images | TC-PRODUCT-01..06 |
+| FR-CATEGORY-001..005 | Quản lý danh mục | UC-05 (tương tự) | `/Admin/Category/**` | categories | TC-CATEGORY-01..05 |
+| FR-BROWSE-001..006 | Xem/tìm/lọc/sắp xếp | UC-01 | GET /Home/Index, /Product/Index, /Featured, /Latest | products, categories | TC-BROWSE-01..06 |
+| FR-CART-001..006 | Giỏ hàng | UC-02 | `/Cart/**` | carts, cart_items | TC-CART-01..06 |
+| FR-CART-007 | Merge giỏ hàng khi login | UC-04 | POST /Account/Login | carts, cart_items | TC-CART-07 |
+| FR-USER-001..008 | Quản lý người dùng / profile | — | `/Admin/User/**`, `/User/**` | AspNetUsers | TC-USER-01..08 |
+| FR-DASH-001..004 | Dashboard | UC-06 | GET /Admin/Dashboard/Summary | products, categories, AspNetUsers | TC-DASH-01..04 |
+| FR-REPORT-001..004 | Báo cáo | — | `/Admin/Report/**` | products, cart_activity_logs | TC-REPORT-01..04 |
 
 ---
 
@@ -1305,8 +1350,8 @@ flowchart TB
 
 ### IN SCOPE
 
-- Product CRUD, Category CRUD
-- User authentication (Cookie + Session), Role authorization (User/Admin)
+- Kiến trúc ASP.NET Core MVC (Razor View + Bootstrap), Product CRUD, Category CRUD
+- User authentication/authorization qua ASP.NET Core Identity (Cookie Authentication), Role authorization (User/Admin)
 - Product browsing, Search, Filter, Sort
 - Cart (Guest qua Session-identified DB cart, User qua DB cart, merge khi login)
 - AJAX/Fetch cho các thao tác tương tác (Chương 12)
@@ -1380,20 +1425,20 @@ Các đề xuất **OPTIONAL**, không thuộc phạm vi bắt buộc của đ�
 
 Thứ tự triển khai đề xuất cho developer:
 
-1. **Database**: tạo schema PostgreSQL (9 bảng, Chương 13), seed dữ liệu roles + demo products/categories
-2. **Backend foundation**: khởi tạo ASP.NET Core Web API project, cấu hình EF Core + `AppDbContext`, cấu hình Middleware exception handling (Chương 19)
-3. **Authentication**: `AuthController`, `AuthService`, Cookie Authentication + Session, password hashing
-4. **Authorization**: Middleware/Policy kiểm tra Role, áp dụng `[Authorize(Roles=...)]` cho toàn bộ endpoint admin
-5. **Product**: `ProductController`, `ProductService`, `product_images`, validate SKU/price/stock
-6. **Category**: `CategoryController`, `CategoryService`, validate xóa khi còn sản phẩm (BR-03)
+1. **Database**: tạo schema PostgreSQL qua EF Core Migrations (bảng Identity tự sinh + 7 bảng nghiệp vụ, Chương 13), seed dữ liệu role User/Admin (qua `RoleManager`) + demo products/categories
+2. **Backend foundation**: khởi tạo ASP.NET Core **MVC** project, cấu hình EF Core + `AppDbContext : IdentityDbContext<ApplicationUser>`, cấu hình Middleware exception handling (Chương 19)
+3. **Identity/Authentication**: cấu hình `AddIdentity<ApplicationUser, IdentityRole>`, `ApplicationUser` mở rộng (FullName/Phone/IsLocked), `AccountController` (Register/Login/Logout) dùng `SignInManager`/`UserManager`
+4. **Authorization**: áp dụng `[Authorize(Roles=...)]` cho toàn bộ Controller/action dưới `/Admin/**`
+5. **Product**: `ProductController` + `Admin/ProductController`, `ProductService`, `product_images`, Razor View danh sách/chi tiết, validate SKU/price/stock
+6. **Category**: `CategoryController` + `Admin/CategoryController`, `CategoryService`, validate xóa khi còn sản phẩm (BR-03)
 7. **Cart**: `CartController`, `CartService` (bao gồm logic merge cart khi login — FR-CART-007), `cart_activity_logs`
-8. **AJAX/Fetch**: tích hợp Fetch API ở frontend cho search/filter/pagination/cart actions (Chương 12)
+8. **AJAX/Fetch**: tích hợp Fetch API trong các Razor View cho search/filter/pagination/cart actions/Admin CRUD modal (Chương 12)
 9. **Caching**: áp dụng `IMemoryCache` cho categories/featured/latest/dashboard, cơ chế invalidation (Chương 11)
-10. **Admin dashboard**: `DashboardController`, `DashboardService`, tính toán số liệu tổng hợp
-11. **Reports**: `ReportsController`, truy vấn `cart_activity_logs` cho top sản phẩm
-12. **Frontend**: xây dựng UI Public + Admin theo Chương 16, responsive theo Chương 17
-13. **Security**: rà soát CSRF token, input validation 2 lớp, rate limiting login (Chương 10)
-14. **Testing**: viết unit test (Services) + integration test (API flow chính) theo Chương 25
+10. **Admin dashboard**: `Admin/DashboardController`, `DashboardService`, tính toán số liệu tổng hợp
+11. **Reports**: `Admin/ReportController`, truy vấn `cart_activity_logs` cho top sản phẩm
+12. **Frontend**: xây dựng Razor View + Bootstrap cho Public + Admin theo Chương 16, responsive theo Chương 17
+13. **Security**: rà soát Anti-forgery token, input validation 2 lớp, Identity Lockout cho login (Chương 10)
+14. **Testing**: viết unit test (Services) + integration test (luồng chính) theo Chương 25
 15. **Deployment**: đóng gói, cấu hình HTTPS local, viết hướng dẫn chạy demo
 
 ---
@@ -1402,8 +1447,8 @@ Thứ tự triển khai đề xuất cho developer:
 
 ### Must-have (bắt buộc để bảo vệ đồ án)
 
-- Authentication: đăng ký, đăng nhập, đăng xuất (Cookie + Session)
-- Authorization: 2 role User/Admin, kiểm tra backend cho toàn bộ API admin
+- Kiến trúc ASP.NET Core MVC (Razor View + Bootstrap), Authentication/Authorization qua ASP.NET Core Identity: đăng ký, đăng nhập, đăng xuất (Cookie Authentication)
+- Authorization: 2 role User/Admin, kiểm tra backend cho toàn bộ action admin
 - Product CRUD đầy đủ (Admin)
 - Category CRUD đầy đủ (Admin)
 - Product browsing: danh sách, chi tiết, tìm kiếm, lọc theo danh mục
@@ -1411,7 +1456,7 @@ Thứ tự triển khai đề xuất cho developer:
 - Merge cart khi Guest đăng nhập
 - Dashboard: 5 số liệu tổng quan cơ bản (FR-DASH-001, 002)
 - Caching cho categories + products featured/latest (tối thiểu 2 loại cache có invalidation rõ ràng)
-- Bảo mật cơ bản: password hashing, backend validation, CSRF token, SQL injection prevention (qua EF Core)
+- Bảo mật cơ bản: Identity password hashing, backend validation, Anti-forgery token (CSRF), SQL injection prevention (qua EF Core)
 - Responsive tối thiểu 2 breakpoint (Desktop + Mobile)
 - Error handling format thống nhất
 

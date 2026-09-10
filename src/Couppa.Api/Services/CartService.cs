@@ -181,7 +181,7 @@ public class CartService : ICartService
     ///   d) Có cả 2                            -> merge từng CartItem theo ProductId, cộng dồn, CẮT theo tồn kho
     ///      hiện tại (không throw - merge phải "êm", không được làm fail cả luồng login), sau đó xóa cart Guest.
     /// </summary>
-    public async Task<CartResponse> MergeGuestCartAsync(Guid guestSessionId, long userId)
+    public async Task<CartResponse> MergeGuestCartAsync(Guid guestSessionId, string userId)
     {
         var guestCart = await _db.Carts
             .Include(c => c.Items)
@@ -284,7 +284,7 @@ public class CartService : ICartService
     {
         if (_currentUser.IsAuthenticated)
         {
-            var userId = _currentUser.UserId!.Value;
+            var userId = _currentUser.UserId!;
             return await _db.Carts.FirstOrDefaultAsync(c => c.UserId == userId);
         }
 
@@ -301,7 +301,7 @@ public class CartService : ICartService
         }
 
         cart = _currentUser.IsAuthenticated
-            ? new Cart { UserId = _currentUser.UserId!.Value, SessionId = null }
+            ? new Cart { UserId = _currentUser.UserId!, SessionId = null }
             : new Cart { UserId = null, SessionId = _currentUser.GetOrCreateGuestSessionId() };
 
         cart.CreatedAt = DateTimeOffset.UtcNow;

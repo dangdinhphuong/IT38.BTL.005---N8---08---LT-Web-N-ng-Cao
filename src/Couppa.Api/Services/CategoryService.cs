@@ -29,7 +29,7 @@ public class CategoryService : ICategoryService
             await _db.Categories
                 .Where(c => c.IsActive)
                 .OrderBy(c => c.Name)
-                .Select(c => ToResponse(c))
+                .Select(c => ToResponseWithCount(c))
                 .ToListAsync());
     }
 
@@ -49,7 +49,7 @@ public class CategoryService : ICategoryService
             .OrderBy(c => c.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(c => ToResponse(c))
+            .Select(c => ToResponseWithCount(c))
             .ToListAsync();
 
         return new PagedResult<CategoryResponse>
@@ -187,5 +187,18 @@ public class CategoryService : ICategoryService
         IsActive = c.IsActive,
         CreatedAt = c.CreatedAt,
         UpdatedAt = c.UpdatedAt
+    };
+
+    // Global Query Filter (IsDeleted) trên Product áp dụng cả khi đếm qua navigation Products.Count.
+    private static CategoryResponse ToResponseWithCount(Category c) => new()
+    {
+        Id = c.Id,
+        Name = c.Name,
+        Slug = c.Slug,
+        Description = c.Description,
+        IsActive = c.IsActive,
+        CreatedAt = c.CreatedAt,
+        UpdatedAt = c.UpdatedAt,
+        ProductCount = c.Products.Count(p => p.IsActive)
     };
 }

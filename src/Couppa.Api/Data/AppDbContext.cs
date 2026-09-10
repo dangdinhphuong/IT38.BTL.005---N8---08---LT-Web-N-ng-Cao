@@ -1,16 +1,16 @@
 using Couppa.Api.Data.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Couppa.Api.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
 
-    public DbSet<Role> Roles => Set<Role>();
-    public DbSet<User> Users => Set<User>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
@@ -23,37 +23,13 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // ---- roles ----
-        modelBuilder.Entity<Role>(e =>
+        // ---- ApplicationUser (mở rộng AspNetUsers) ----
+        modelBuilder.Entity<ApplicationUser>(e =>
         {
-            e.ToTable("roles");
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Id).ValueGeneratedNever();
-            e.Property(x => x.Name).HasMaxLength(20).IsRequired();
-            e.HasIndex(x => x.Name).IsUnique();
-        });
-
-        // ---- users ----
-        modelBuilder.Entity<User>(e =>
-        {
-            e.ToTable("users");
-            e.HasKey(x => x.Id);
-            e.Property(x => x.Email).HasMaxLength(255).IsRequired();
-            e.HasIndex(x => x.Email).IsUnique();
-            e.Property(x => x.PasswordHash).HasMaxLength(255).IsRequired();
             e.Property(x => x.FullName).HasMaxLength(150).IsRequired();
             e.Property(x => x.Phone).HasMaxLength(20);
-            e.Property(x => x.RoleId).HasDefaultValue(RoleIds.User);
             e.Property(x => x.IsLocked).HasDefaultValue(false);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
-
-            e.HasOne(x => x.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(x => x.RoleId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            e.HasIndex(x => x.RoleId).HasDatabaseName("idx_users_role_id");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
         // ---- categories ----
@@ -66,8 +42,8 @@ public class AppDbContext : DbContext
             e.Property(x => x.Slug).HasMaxLength(120).IsRequired();
             e.HasIndex(x => x.Slug).IsUnique();
             e.Property(x => x.IsActive).HasDefaultValue(true);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasIndex(x => x.IsActive).HasDatabaseName("idx_categories_is_active");
         });
@@ -91,8 +67,8 @@ public class AppDbContext : DbContext
             e.Property(x => x.IsActive).HasDefaultValue(true);
             e.Property(x => x.IsFeatured).HasDefaultValue(false);
             e.Property(x => x.IsDeleted).HasDefaultValue(false);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             // BR-03: không cho xóa Category còn Product -> RESTRICT (EF Core mặc định Cascade cho FK bắt buộc).
             e.HasOne(x => x.Category)
@@ -137,8 +113,9 @@ public class AppDbContext : DbContext
                     "(user_id IS NOT NULL AND session_id IS NULL) OR (user_id IS NULL AND session_id IS NOT NULL)");
             });
             e.HasKey(x => x.Id);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.UserId).HasMaxLength(450);
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasIndex(x => x.UserId).IsUnique().HasFilter("user_id IS NOT NULL");
             e.HasIndex(x => x.SessionId).IsUnique().HasFilter("session_id IS NOT NULL");
@@ -158,8 +135,8 @@ public class AppDbContext : DbContext
             });
             e.HasKey(x => x.Id);
             e.Property(x => x.Quantity).HasDefaultValue(1);
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-            e.Property(x => x.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            e.Property(x => x.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasOne(x => x.Cart)
                 .WithMany(c => c.Items)
@@ -183,8 +160,9 @@ public class AppDbContext : DbContext
         {
             e.ToTable("cart_activity_logs");
             e.HasKey(x => x.Id);
+            e.Property(x => x.UserId).HasMaxLength(450);
             e.Property(x => x.Action).HasMaxLength(20).IsRequired();
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasIndex(x => x.ProductId).HasDatabaseName("idx_cart_activity_logs_product_id");
             e.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_cart_activity_logs_created_at");
@@ -195,10 +173,11 @@ public class AppDbContext : DbContext
         {
             e.ToTable("audit_logs");
             e.HasKey(x => x.Id);
+            e.Property(x => x.ActorUserId).HasMaxLength(450);
             e.Property(x => x.Action).HasMaxLength(50).IsRequired();
             e.Property(x => x.EntityType).HasMaxLength(50).IsRequired();
-            e.Property(x => x.DetailJson).HasColumnType("nvarchar(max)").HasColumnName("detail");
-            e.Property(x => x.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            e.Property(x => x.DetailJson).HasColumnType("jsonb").HasColumnName("detail");
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             e.HasIndex(x => new { x.EntityType, x.EntityId }).HasDatabaseName("idx_audit_logs_entity");
             e.HasIndex(x => x.CreatedAt).HasDatabaseName("idx_audit_logs_created_at");

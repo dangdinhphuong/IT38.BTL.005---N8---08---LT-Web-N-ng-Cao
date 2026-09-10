@@ -1,15 +1,15 @@
 using Couppa.Api.Models.Requests;
-using Couppa.Api.Models.Responses;
+using Couppa.Api.Models.ViewModels;
 using Couppa.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Couppa.Api.Controllers.Admin;
 
-[ApiController]
-[Route("api/admin/categories")]
+/// <summary>SRS 15.3b — /Admin/Category/Index render View; Create/Edit/Delete/ToggleStatus trả JsonResult (modal AJAX).</summary>
+[Route("Admin/Category/[action]")]
 [Authorize(Policy = "RequireAdmin")]
-public class AdminCategoryController : ControllerBase
+public class AdminCategoryController : Controller
 {
     private readonly ICategoryService _categoryService;
 
@@ -19,45 +19,41 @@ public class AdminCategoryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<PagedResult<CategoryResponse>>>> GetAll(
-        [FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    public async Task<IActionResult> Index(string? search, int page = 1)
     {
-        var result = await _categoryService.GetAllForAdminAsync(search, page, pageSize);
-        return Ok(ApiResponse<PagedResult<CategoryResponse>>.Ok(result));
-    }
-
-    [HttpGet("{id:long}")]
-    public async Task<ActionResult<ApiResponse<CategoryResponse>>> GetById(long id)
-    {
-        var category = await _categoryService.GetByIdAsync(id);
-        return Ok(ApiResponse<CategoryResponse>.Ok(category));
+        var pagedResult = await _categoryService.GetAllForAdminAsync(search, page, 50);
+        return View(new AdminCategoriesViewModel { Categories = pagedResult.Items.ToList() });
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<CategoryResponse>>> Create([FromBody] CreateCategoryRequest request)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create([FromBody] CreateCategoryRequest request)
     {
         var category = await _categoryService.CreateAsync(request);
-        return StatusCode(StatusCodes.Status201Created, ApiResponse<CategoryResponse>.Ok(category));
+        return Json(new { success = true, data = category });
     }
 
-    [HttpPut("{id:long}")]
-    public async Task<ActionResult<ApiResponse<CategoryResponse>>> Update(long id, [FromBody] UpdateCategoryRequest request)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(long id, [FromBody] UpdateCategoryRequest request)
     {
         var category = await _categoryService.UpdateAsync(id, request);
-        return Ok(ApiResponse<CategoryResponse>.Ok(category));
+        return Json(new { success = true, data = category });
     }
 
-    [HttpDelete("{id:long}")]
-    public async Task<ActionResult<ApiResponse<object>>> Delete(long id)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(long id)
     {
         await _categoryService.DeleteAsync(id);
-        return Ok(ApiResponse<object>.Ok(new { success = true }));
+        return Json(new { success = true });
     }
 
-    [HttpPatch("{id:long}/status")]
-    public async Task<ActionResult<ApiResponse<CategoryResponse>>> ChangeStatus(long id, [FromBody] ChangeCategoryStatusRequest request)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleStatus(long id, [FromBody] ChangeCategoryStatusRequest request)
     {
         var category = await _categoryService.ChangeStatusAsync(id, request.IsActive);
-        return Ok(ApiResponse<CategoryResponse>.Ok(category));
+        return Json(new { success = true, data = category });
     }
 }
