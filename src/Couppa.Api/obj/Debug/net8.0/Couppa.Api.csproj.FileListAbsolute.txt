@@ -21,7 +21,6 @@ D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\apps
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\appsettings.json
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\Couppa.Api.staticwebassets.runtime.json
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\Couppa.Api.staticwebassets.endpoints.json
-D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\Couppa.Api.exe
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\Couppa.Api.deps.json
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\Couppa.Api.runtimeconfig.json
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\Couppa.Api.dll
@@ -289,4 +288,5 @@ D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\buil
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\buildtmp\Couppa.Api.runtimeconfig.json
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\buildtmp\Couppa.Api.staticwebassets.endpoints.json
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\buildtmp\Couppa.Api.staticwebassets.runtime.json
+D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\bin\Debug\net8.0\Couppa.Api.exe
 D:\IT38.BTL.005---N8---08---LT-Web-N-ng-Cao\src\Couppa.Api\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

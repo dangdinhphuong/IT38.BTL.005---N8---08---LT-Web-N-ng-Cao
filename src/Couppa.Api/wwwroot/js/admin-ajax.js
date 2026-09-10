@@ -25,5 +25,20 @@
         return res.json();
     }
 
-    window.couppaAdminAjax = { postJson };
+    async function postForm(url, formData) {
+        const token = await ensureToken();
+        const res = await fetch(url, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                // Do not set Content-Type here. The browser adds the multipart
+                // boundary required by FormData automatically.
+                'RequestVerificationToken': token
+            },
+            body: formData
+        });
+        return res.json();
+    }
+
+    window.couppaAdminAjax = { postJson, postForm };
 })();

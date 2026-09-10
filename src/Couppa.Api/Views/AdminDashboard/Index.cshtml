@@ -1,9 +1,10 @@
 @model AdminDashboardViewModel
 @{
+    Layout = "_AdminLayout";
     ViewData["Title"] = "Admin Dashboard - Couppa";
 }
 
-<div class="admin-wrapper" style="margin-top: -var(--space-6);">
+<div class="admin-wrapper">
     <!-- ADMIN SIDEBAR -->
     <aside class="admin-sidebar">
         <div class="admin-sidebar-header">
@@ -43,6 +44,9 @@
             <div class="flex items-center gap-4">
                 <span class="badge badge-info" style="padding: 6px 12px;">Role: Admin</span>
                 <a asp-controller="User" asp-action="Profile" class="btn btn-outline btn-sm">Admin Account</a>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline btn-sm" style="color: var(--color-error); border-color: var(--color-error-light);">Đăng Xuất</button>
+                </form>
             </div>
         </header>
 

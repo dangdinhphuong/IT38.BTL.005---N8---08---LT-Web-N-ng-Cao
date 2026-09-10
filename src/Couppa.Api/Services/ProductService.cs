@@ -14,19 +14,22 @@ public class ProductService : IProductService
     private readonly ICategoryService _categoryService;
     private readonly ICacheService _cache;
     private readonly IConfiguration _configuration;
+    private readonly IProductImageStorage? _imageStorage;
 
     public ProductService(
         AppDbContext db,
         IAuditLogService auditLog,
         ICategoryService categoryService,
         ICacheService cache,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IProductImageStorage? imageStorage = null)
     {
         _db = db;
         _auditLog = auditLog;
         _categoryService = categoryService;
         _cache = cache;
         _configuration = configuration;
+        _imageStorage = imageStorage;
     }
 
     public async Task<PagedResult<ProductSummaryResponse>> GetPublicListAsync(ProductListQuery query)
@@ -144,10 +147,23 @@ public class ProductService : IProductService
             UpdatedAt = now
         };
 
-        product.Images = BuildImages(request.ImageUrls, product);
+        var imageUrls = await SaveUploadedImagesAsync(request);
+        product.Images = BuildImages(imageUrls, product);
 
         _db.Products.Add(product);
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch
+        {
+            if (imageUrls.Length > 0 && _imageStorage is not null)
+            {
+                await _imageStorage.DeleteAsync(imageUrls);
+            }
+
+            throw;
+        }
         InvalidateProductCaches();
 
         await _auditLog.LogAsync(AuditAction.ProductCreate, EntityType.Product, product.Id,
@@ -323,6 +339,22 @@ public class ProductService : IProductService
         }
 
         return images;
+    }
+
+    private async Task<string[]> SaveUploadedImagesAsync(CreateProductRequest request)
+    {
+        if (request.ImageFiles.Count > 0)
+        {
+            var imageStorage = _imageStorage
+                ?? throw new InvalidOperationException("Product image storage chưa được đăng ký.");
+
+            var uploaded = await imageStorage.SaveAsync(request.ImageFiles);
+            return uploaded.ToArray();
+        }
+
+        // Compatibility path for existing service tests/internal callers. The
+        // Admin form no longer accepts image URLs from users.
+        return request.ImageUrls;
     }
 
     private static IQueryable<Product> ApplyCommonFilters(

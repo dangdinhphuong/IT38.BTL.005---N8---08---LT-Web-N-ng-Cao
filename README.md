@@ -134,6 +134,7 @@ Các nhóm chức năng hiện có gồm:
 
 - Xem, tìm kiếm, lọc và sắp xếp sản phẩm.
 - Quản lý sản phẩm và danh mục dành cho Admin.
+- Admin upload nhiều ảnh sản phẩm bằng file; ảnh được lưu tại `wwwroot/uploads/products` và URL được lưu trong `product_images`.
 - Đăng ký, đăng nhập, đăng xuất và phân quyền `User`/`Admin`.
 - Giỏ hàng cho Guest và User: thêm, cập nhật, xóa item, xóa toàn bộ.
 - Merge giỏ hàng Guest vào giỏ hàng User sau khi đăng nhập.

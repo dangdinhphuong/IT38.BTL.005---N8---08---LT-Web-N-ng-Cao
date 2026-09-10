@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddSingleton<ICacheService, MemoryCacheService>();
+        services.AddSingleton<IProductImageStorage, ProductImageStorage>();
 
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IProductService, ProductService>();

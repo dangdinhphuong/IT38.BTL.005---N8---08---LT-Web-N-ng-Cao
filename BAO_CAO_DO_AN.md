@@ -696,7 +696,7 @@ Trạng thái các mục này: `CANNOT VERIFY` nếu cần môi trường/manual
 | FR-AUTH-001..006 | `AccountController`, Identity | `AspNetUsers`, Account Views | `IMPLEMENTED` |
 | FR-AUTHZ-001..003 | Admin controllers, `RequireAdmin`, `UserController` | Identity roles/cookie | `IMPLEMENTED` |
 | FR-PRODUCT-001..006 | `AdminProductController`, `ProductService` | `products`, `product_images`, Admin Product View | `IMPLEMENTED` |
-| FR-PRODUCT-007 | Request image URLs, `ProductImage` | `product_images` | `PARTIALLY IMPLEMENTED` — ảnh đầu tiên tự primary, chưa có action chọn lại ảnh đại diện |
+| FR-PRODUCT-007 | Form Admin gửi `ImageFiles` qua `multipart/form-data`, `ProductImageStorage` lưu file và tạo URL | `product_images`, `wwwroot/uploads/products` | `PARTIALLY IMPLEMENTED` — hỗ trợ nhiều file và ảnh đầu tiên tự primary, chưa có action chọn lại ảnh đại diện |
 | FR-PRODUCT-008..010 | `ProductService`, AppDbContext | unique/check constraints | `IMPLEMENTED` |
 | FR-CATEGORY-001..007 | `AdminCategoryController`, `CategoryController`, `CategoryService` | `categories` | `IMPLEMENTED` |
 | FR-BROWSE-001..006 | `HomeController`, `ProductController`, `ProductService` | public Product/Home Views | `IMPLEMENTED` |

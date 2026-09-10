@@ -1,9 +1,10 @@
 @model AdminProductsViewModel
 @{
+    Layout = "_AdminLayout";
     ViewData["Title"] = "Quản lý Sản phẩm - Admin Couppa";
 }
 
-<div class="admin-wrapper" style="margin-top: -var(--space-6);">
+<div class="admin-wrapper">
     <!-- SIDEBAR -->
     <aside class="admin-sidebar">
         <div class="admin-sidebar-header">
@@ -104,12 +105,12 @@
 <div class="modal fade" id="createProductModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header">
-                <h3 class="modal-title">Thêm Sản Phẩm Mới</h3>
+            <div class="modal-header" style="border-bottom: 1px solid var(--color-border); padding: var(--space-4) var(--space-6);">
+                <h3 class="modal-title m-0">Thêm Sản Phẩm Mới</h3>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="createProductForm">
-                <div class="modal-body">
+            <form id="createProductForm" enctype="multipart/form-data">
+                <div class="modal-body" style="padding: var(--space-6);">
                     <div class="grid grid-cols-2" style="gap: var(--space-4);">
                         <div class="form-group">
                             <label class="form-label">Mã sản phẩm (SKU) <span class="required">*</span></label>
@@ -132,8 +133,9 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">URL Hình ảnh</label>
-                            <input type="url" name="imageUrl" class="form-input" placeholder="https://..." />
+                            <label class="form-label">Hình ảnh sản phẩm</label>
+                            <input type="file" name="ImageFiles" class="form-input" multiple accept="image/*" />
+                            <span class="caption">JPG, PNG, GIF hoặc WEBP; tối đa 5 MB/file.</span>
                         </div>
                     </div>
 
@@ -153,7 +155,7 @@
                         <textarea name="description" class="form-textarea" rows="4" placeholder="Nhập thông số kỹ thuật, đặc điểm nổi bật..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" style="border-top: 1px solid var(--color-border); padding: var(--space-4) var(--space-6);">
                     <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Hủy Bỏ</button>
                     <button type="submit" class="btn btn-primary">Lưu Sản Phẩm</button>
                 </div>
@@ -168,17 +170,8 @@
         document.getElementById('createProductForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const form = e.target;
-            const payload = {
-                sku: form.sku.value,
-                name: form.name.value,
-                categoryId: Number(form.categoryId.value),
-                description: form.description.value,
-                price: Number(form.price.value),
-                stockQuantity: Number(form.stockQuantity.value),
-                isFeatured: false,
-                imageUrls: form.imageUrl.value ? [form.imageUrl.value] : []
-            };
-            const result = await window.couppaAdminAjax.postJson('/Admin/Product/Create', payload);
+            const formData = new FormData(form);
+            const result = await window.couppaAdminAjax.postForm('/Admin/Product/Create', formData);
             if (result.success) {
                 location.reload();
             } else {

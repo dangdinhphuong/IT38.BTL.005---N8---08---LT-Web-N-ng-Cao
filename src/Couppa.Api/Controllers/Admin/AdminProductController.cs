@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Couppa.Api.Controllers.Admin;
 
-/// <summary>SRS 15.2b — /Admin/Product/Index render View; Create/Edit/Delete/ToggleStatus trả JsonResult (modal AJAX).</summary>
+/// <summary>SRS 15.2b — /Admin/Product/Index render View; Create nhận multipart/form-data
+/// để upload ảnh, các thao tác còn lại trả JSON cho AJAX.</summary>
 [Route("Admin/Product/[action]")]
 [Authorize(Policy = "RequireAdmin")]
 public class AdminProductController : Controller
@@ -54,7 +55,8 @@ public class AdminProductController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([FromBody] CreateProductRequest request)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Create([FromForm] CreateProductRequest request)
     {
         var product = await _productService.CreateAsync(request);
         return StatusCode(StatusCodes.Status201Created, new { success = true, data = product });

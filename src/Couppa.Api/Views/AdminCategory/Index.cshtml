@@ -1,9 +1,10 @@
 @model AdminCategoriesViewModel
 @{
+    Layout = "_AdminLayout";
     ViewData["Title"] = "Quản lý Danh mục - Admin Couppa";
 }
 
-<div class="admin-wrapper" style="margin-top: -var(--space-6);">
+<div class="admin-wrapper">
     <!-- SIDEBAR -->
     <aside class="admin-sidebar">
         <div class="admin-sidebar-header">
@@ -98,12 +99,12 @@
 <div class="modal fade" id="createCategoryModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header">
-                <h3 class="modal-title">Thêm Danh Mục Mới</h3>
+            <div class="modal-header" style="border-bottom: 1px solid var(--color-border); padding: var(--space-4) var(--space-6);">
+                <h3 class="modal-title m-0">Thêm Danh Mục Mới</h3>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="createCategoryForm">
-                <div class="modal-body">
+                <div class="modal-body" style="padding: var(--space-6);">
                     <div class="form-group">
                         <label class="form-label">Tên danh mục <span class="required">*</span></label>
                         <input type="text" name="name" class="form-input" required placeholder="vd: Đồng hồ thông minh" />
@@ -117,7 +118,7 @@
                         <textarea name="description" class="form-textarea" rows="3"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" style="border-top: 1px solid var(--color-border); padding: var(--space-4) var(--space-6);">
                     <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Hủy Bỏ</button>
                     <button type="submit" class="btn btn-primary">Lưu Danh Mục</button>
                 </div>
